@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { SiteHeader } from '@/components/SiteHeader';
+import { SiteFooter } from '@/components/SiteFooter';
 import { AuthGate } from '@/components/AuthGate';
 
 export const metadata: Metadata = {
@@ -22,14 +23,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen flex flex-col antialiased">
         <SiteHeader />
-        <main className="max-w-5xl mx-auto px-4 pb-16">
+        <main className="flex-1 max-w-5xl mx-auto w-full px-4 pb-16">
           <AuthGate>{children}</AuthGate>
         </main>
-        <footer className="text-center text-xs text-bourbon/70 py-8">
-          Sun God Derby. Built for Derby Day. Not affiliated with Churchill Downs.
-        </footer>
+        <SiteFooter />
       </body>
     </html>
   );

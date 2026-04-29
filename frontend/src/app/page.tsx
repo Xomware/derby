@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Countdown } from '@/components/Countdown';
@@ -13,25 +14,25 @@ export default function Home() {
   const { me } = useMe();
   const router = useRouter();
 
-  const earliest = picks?.races
-    .map((r) => r.race_post_time)
-    .sort()[0];
+  const earliest = picks?.races.map((r) => r.race_post_time).sort()[0];
 
   return (
     <>
-      <section className="pt-8 pb-6 text-center">
-        <p className="font-display italic text-mint-julep text-sm uppercase tracking-[0.3em]">
-          Sun God has spoken
-        </p>
-        <h1 className="font-display text-4xl sm:text-5xl text-bourbon mt-2">
-          {picks?.event.name ?? "Sun God Derby"}
-        </h1>
-        <p className="text-bourbon/80 mt-3 max-w-xl mx-auto">
-          Tail him, fade him, or pass. Picks lock at post time. Leaderboard
+      <section className="pt-8 pb-6 flex flex-col items-center text-center">
+        <Image
+          src="/banner.png"
+          alt="Sun God Derby"
+          width={520}
+          height={120}
+          priority
+          className="w-full max-w-lg h-auto"
+        />
+        <p className="mt-3 text-bourbon/80 max-w-xl">
+          Tail Grant, fade Grant, or pass. Picks lock at post time. Leaderboard
           updates as the results roll in.
         </p>
         {earliest && (
-          <div className="mt-4 inline-flex items-center gap-3 px-3 py-1.5 rounded-full border border-rose-red/20 bg-white">
+          <div className="mt-5 inline-flex items-center gap-3 px-3 py-1.5 rounded-full border border-rose-red/20 bg-white">
             <Countdown target={earliest} label="First lock" />
           </div>
         )}
@@ -46,7 +47,13 @@ export default function Home() {
         <div className="text-center text-bourbon/70 py-12">Loading picks…</div>
       )}
 
-      {picks && (
+      {picks && picks.races.length === 0 && !isLoading && (
+        <div className="text-center text-bourbon/70 py-12">
+          No picks posted yet — Grant&apos;s working on them. Check back soon.
+        </div>
+      )}
+
+      {picks && picks.races.length > 0 && (
         <div className="space-y-8">
           {picks.races.map((race) => (
             <section key={race.race_number}>
@@ -74,10 +81,7 @@ export default function Home() {
       <section className="mt-12">
         <header className="flex items-baseline justify-between mb-3">
           <h2 className="font-display text-2xl text-rose-dark">Leaderboard</h2>
-          <Link
-            href="/leaderboard"
-            className="text-xs text-rose-red hover:underline"
-          >
+          <Link href="/leaderboard" className="text-xs text-rose-red hover:underline">
             View full
           </Link>
         </header>

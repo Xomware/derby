@@ -75,11 +75,14 @@ function VerifyInner() {
 
       {status === 'username' && (
         <form onSubmit={chooseUsername} className="space-y-4">
+          <p className="text-center text-mint-julep text-xs uppercase tracking-[0.3em]">
+            Welcome to Sun God Derby
+          </p>
           <h1 className="font-display text-3xl text-rose-dark text-center">
             Pick a username
           </h1>
           <p className="text-center text-sm text-bourbon/80">
-            Shown next to your votes and on the leaderboard.
+            Shown next to your votes and on the leaderboard. You can change it later.
           </p>
           <label className="block">
             <span className="text-sm font-semibold text-bourbon">Username</span>

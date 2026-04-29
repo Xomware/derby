@@ -53,6 +53,10 @@ export const api = {
     request<Me>('/auth/complete-signup', { method: 'POST', body: JSON.stringify({ username }) }),
   logout: () => request<void>('/auth/logout', { method: 'POST' }),
   me: () => request<Me>('/auth/me'),
+  updateUsername: (username: string) =>
+    request<Me>('/auth/update-username', { method: 'POST', body: JSON.stringify({ username }) }),
+  trackVisit: (page: string) =>
+    request<void>('/track/visit', { method: 'POST', body: JSON.stringify({ page }) }),
 
   // picks
   picks: () => request<PicksGrouped>('/picks/list'),

@@ -5,6 +5,7 @@ locals {
     { name = "auth_complete_signup", description = "POST /auth/complete-signup", path_part = "complete-signup", http_method = "POST", authorization = "NONE" },
     { name = "auth_logout", description = "POST /auth/logout", path_part = "logout", http_method = "POST", authorization = "NONE" },
     { name = "auth_me", description = "GET /auth/me", path_part = "me", http_method = "GET", authorization = "CUSTOM" },
+    { name = "auth_update_username", description = "POST /auth/update-username", path_part = "update-username", http_method = "POST", authorization = "CUSTOM" },
   ]
 }
 
