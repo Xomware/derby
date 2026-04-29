@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMe, useTrackVisit } from '@/lib/hooks';
 
-const PUBLIC_ROUTES = ['/login', '/auth/verify'];
+const PUBLIC_ROUTES = ['/login', '/signup'];
 
 function isPublic(pathname: string): boolean {
   return PUBLIC_ROUTES.some((p) => pathname === p || pathname.startsWith(`${p}/`));

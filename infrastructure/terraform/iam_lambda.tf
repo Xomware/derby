@@ -72,8 +72,6 @@ data "aws_iam_policy_document" "lambda_role_policy" {
     resources = [
       aws_dynamodb_table.users.arn,
       "${aws_dynamodb_table.users.arn}/index/*",
-      aws_dynamodb_table.magic_link_tokens.arn,
-      "${aws_dynamodb_table.magic_link_tokens.arn}/index/*",
       aws_dynamodb_table.picks.arn,
       "${aws_dynamodb_table.picks.arn}/index/*",
       aws_dynamodb_table.votes.arn,
@@ -85,12 +83,6 @@ data "aws_iam_policy_document" "lambda_role_policy" {
       aws_dynamodb_table.visits.arn,
       "${aws_dynamodb_table.visits.arn}/index/*",
     ]
-  }
-
-  statement {
-    effect    = "Allow"
-    actions   = ["ses:SendEmail", "ses:SendRawEmail"]
-    resources = ["*"]
   }
 
   statement {

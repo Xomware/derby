@@ -14,11 +14,6 @@ export interface Me {
   is_admin: boolean;
 }
 
-export interface VerifyResponse {
-  needs_username: boolean;
-  user: Me | null;
-}
-
 export interface VoteCounts {
   tail: number;
   fade: number;

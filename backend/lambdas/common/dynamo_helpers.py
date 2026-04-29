@@ -6,7 +6,6 @@ import boto3
 
 from lambdas.common.constants import (
     AWS_DEFAULT_REGION,
-    MAGIC_LINK_TABLE,
     PICKS_TABLE,
     POLL_RUNS_TABLE,
     RACE_RESULTS_TABLE,
@@ -18,7 +17,6 @@ from lambdas.common.constants import (
 _dynamodb = boto3.resource("dynamodb", region_name=AWS_DEFAULT_REGION)
 
 users_table = _dynamodb.Table(USERS_TABLE)
-magic_link_table = _dynamodb.Table(MAGIC_LINK_TABLE)
 picks_table = _dynamodb.Table(PICKS_TABLE)
 votes_table = _dynamodb.Table(VOTES_TABLE)
 poll_runs_table = _dynamodb.Table(POLL_RUNS_TABLE)

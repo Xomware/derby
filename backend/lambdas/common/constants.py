@@ -14,7 +14,6 @@ EVENT_NAME = os.environ.get("EVENT_NAME", "2026 Kentucky Derby")
 APP_BASE_URL = os.environ.get("APP_BASE_URL", "https://derby.xomware.com")
 COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", ".xomware.com")
 SESSION_COOKIE = "derby_session"
-SIGNUP_COOKIE = "derby_signup"
 SESSION_DAYS = int(os.environ.get("SESSION_DAYS", "30"))
 
 # Voting closes this many seconds before each race's post time.
@@ -22,7 +21,6 @@ LOCK_BUFFER_SECONDS = int(os.environ.get("LOCK_BUFFER_SECONDS", "300"))
 
 # DynamoDB tables (set per-app via Terraform-injected env vars)
 USERS_TABLE = os.environ.get("USERS_TABLE", f"{APP_NAME}-users")
-MAGIC_LINK_TABLE = os.environ.get("MAGIC_LINK_TABLE", f"{APP_NAME}-magic-link-tokens")
 PICKS_TABLE = os.environ.get("PICKS_TABLE", f"{APP_NAME}-picks")
 VOTES_TABLE = os.environ.get("VOTES_TABLE", f"{APP_NAME}-votes")
 POLL_RUNS_TABLE = os.environ.get("POLL_RUNS_TABLE", f"{APP_NAME}-poll-runs")
@@ -32,7 +30,6 @@ VISITS_TABLE = os.environ.get("VISITS_TABLE", f"{APP_NAME}-visits")
 # GSI names
 USERS_USERNAME_INDEX = "username-index"
 USERS_ID_INDEX = "id-index"
-MAGIC_LINK_EMAIL_INDEX = "email-index"
 PICKS_EVENT_INDEX = "event-index"
 VOTES_USER_INDEX = "user-index"
 POLL_RUNS_TYPE_INDEX = "type-index"

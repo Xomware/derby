@@ -20,7 +20,6 @@ locals {
     FROM_EMAIL            = var.from_email
     ADMIN_EMAILS          = var.admin_emails
     USERS_TABLE           = aws_dynamodb_table.users.id
-    MAGIC_LINK_TABLE      = aws_dynamodb_table.magic_link_tokens.id
     PICKS_TABLE           = aws_dynamodb_table.picks.id
     VOTES_TABLE           = aws_dynamodb_table.votes.id
     POLL_RUNS_TABLE       = aws_dynamodb_table.poll_runs.id

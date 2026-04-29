@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import { useMe } from '@/lib/hooks';
 
-export default function LoginPage() {
-  const [identifier, setIdentifier] = useState('');
+export default function SignupPage() {
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -19,11 +20,15 @@ export default function LoginPage() {
     setError(null);
     setBusy(true);
     try {
-      await api.login({ identifier: identifier.trim(), password });
+      await api.signup({
+        email: email.trim().toLowerCase(),
+        username: username.trim(),
+        password,
+      });
       await refresh();
       router.push('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.detail : 'Could not sign in.');
+      setError(err instanceof ApiError ? err.detail : 'Could not create account.');
     } finally {
       setBusy(false);
     }
@@ -37,24 +42,48 @@ export default function LoginPage() {
       >
         <header className="text-center">
           <p className="font-display italic text-mint-julep text-xs uppercase tracking-[0.3em]">
-            Sun God Derby
+            Welcome to Sun God Derby
           </p>
-          <h1 className="font-display text-3xl text-rose-dark mt-1">Sign in</h1>
+          <h1 className="font-display text-3xl text-rose-dark mt-1">Create account</h1>
         </header>
 
         <label className="block">
           <span className="text-xs uppercase tracking-wider font-semibold text-bourbon/70">
-            Email or username
+            Email
           </span>
           <input
+            type="email"
             autoFocus
             required
-            autoComplete="username"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="mt-1 w-full rounded-lg border border-bourbon/30 bg-cream/40 focus:border-rose-red focus:bg-white px-3 py-2 outline-none transition"
             placeholder="you@example.com"
           />
+        </label>
+
+        <label className="block">
+          <span className="text-xs uppercase tracking-wider font-semibold text-bourbon/70">
+            Username
+          </span>
+          <div className="mt-1 flex items-center rounded-lg border border-bourbon/30 bg-cream/40 focus-within:border-rose-red focus-within:bg-white transition">
+            <span className="pl-3 pr-1 text-bourbon/60">@</span>
+            <input
+              required
+              minLength={2}
+              maxLength={20}
+              pattern="[A-Za-z0-9_\-\.]+"
+              autoComplete="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="flex-1 bg-transparent px-1 py-2 outline-none"
+              placeholder="bourbon_wins"
+            />
+          </div>
+          <span className="text-xs text-bourbon/60 block mt-1.5">
+            Letters, numbers, <code>_ - .</code> — 2 to 20 characters.
+          </span>
         </label>
 
         <label className="block">
@@ -65,11 +94,14 @@ export default function LoginPage() {
             type="password"
             required
             minLength={8}
-            autoComplete="current-password"
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 w-full rounded-lg border border-bourbon/30 bg-cream/40 focus:border-rose-red focus:bg-white px-3 py-2 outline-none transition"
           />
+          <span className="text-xs text-bourbon/60 block mt-1.5">
+            At least 8 characters.
+          </span>
         </label>
 
         {error && (
@@ -78,16 +110,16 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          disabled={busy || !identifier || password.length < 8}
+          disabled={busy || !email || username.length < 2 || password.length < 8}
           className="w-full bg-rose-red text-cream font-semibold rounded-lg py-2.5 hover:bg-rose-dark disabled:opacity-60 transition"
         >
-          {busy ? 'Signing in…' : 'Sign in'}
+          {busy ? 'Creating account…' : 'Create account'}
         </button>
 
         <p className="text-center text-sm text-bourbon/80">
-          New here?{' '}
-          <Link href="/signup" className="text-rose-red hover:underline">
-            Create an account
+          Already have one?{' '}
+          <Link href="/login" className="text-rose-red hover:underline">
+            Sign in
           </Link>
         </p>
       </form>

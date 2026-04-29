@@ -22,7 +22,7 @@ function isActive(pathname: string, href: string): boolean {
 export function SiteHeader() {
   const { me } = useMe();
   const pathname = usePathname() ?? '/';
-  const isAuthScreen = pathname === '/login' || pathname.startsWith('/auth/');
+  const isAuthScreen = pathname === '/login' || pathname === '/signup';
 
   const Brand = (
     <Link href={me ? '/' : '/login'} className="flex items-center shrink-0" aria-label="Sun God Derby">

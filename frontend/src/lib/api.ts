@@ -8,7 +8,6 @@ import type {
   PollStatus,
   RaceResultsList,
   ResultValue,
-  VerifyResponse,
   VoteValue,
 } from './types';
 
@@ -47,12 +46,10 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 export const api = {
   // auth
-  requestLink: (email: string) =>
-    request<void>('/auth/request-link', { method: 'POST', body: JSON.stringify({ email }) }),
-  verify: (token: string) =>
-    request<VerifyResponse>(`/auth/verify?token=${encodeURIComponent(token)}`),
-  completeSignup: (username: string) =>
-    request<Me>('/auth/complete-signup', { method: 'POST', body: JSON.stringify({ username }) }),
+  signup: (body: { email: string; username: string; password: string }) =>
+    request<Me>('/auth/signup', { method: 'POST', body: JSON.stringify(body) }),
+  login: (body: { identifier: string; password: string }) =>
+    request<Me>('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
   logout: () => request<void>('/auth/logout', { method: 'POST' }),
   me: () => request<Me>('/auth/me'),
   updateUsername: (username: string) =>

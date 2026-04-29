@@ -37,37 +37,6 @@ resource "aws_dynamodb_table" "users" {
 }
 
 ########################################
-# magic_link_tokens — PK token, GSI email, TTL on expires_at
-########################################
-resource "aws_dynamodb_table" "magic_link_tokens" {
-  name         = "${var.app_name}-magic-link-tokens"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "token"
-
-  attribute {
-    name = "token"
-    type = "S"
-  }
-  attribute {
-    name = "email"
-    type = "S"
-  }
-
-  global_secondary_index {
-    name            = "email-index"
-    hash_key        = "email"
-    projection_type = "ALL"
-  }
-
-  ttl {
-    attribute_name = "expires_at"
-    enabled        = true
-  }
-
-  tags = merge(local.standard_tags, { "name" = "${var.app_name}-magic-link-tokens" })
-}
-
-########################################
 # picks — PK id, GSI event_id
 ########################################
 resource "aws_dynamodb_table" "picks" {
