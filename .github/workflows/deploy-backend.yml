@@ -1,0 +1,195 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch:
+    inputs:
+      deploy_mode:
+        description: "What to deploy"
+        required: true
+        type: choice
+        default: all
+        options: [all, specific]
+      specific_lambdas:
+        description: "Comma-separated lambda dir names (mode=specific)"
+        required: false
+        default: ""
+      deploy_common_layer:
+        description: "Also redeploy the shared layer"
+        required: false
+        type: boolean
+        default: true
+
+env:
+  AWS_REGION: us-east-1
+  APP_NAME: derby
+  PYTHON_VERSION: "3.11"
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      common_changed: ${{ steps.changes.outputs.common }}
+      changed_lambdas: ${{ steps.changes.outputs.changed_lambdas }}
+      all_lambdas: ${{ steps.all-lambdas.outputs.all_lambdas }}
+      has_lambda_changes: ${{ steps.changes.outputs.has_lambda_changes }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: changes
+        run: |
+          MODE="${{ github.event.inputs.deploy_mode }}"
+          SPECIFIC="${{ github.event.inputs.specific_lambdas }}"
+          DEPLOY_LAYER="${{ github.event.inputs.deploy_common_layer }}"
+
+          if [ "$MODE" = "all" ]; then
+            ALL=$(ls -d lambdas/*/ 2>/dev/null | grep -v "lambdas/common/" | xargs -n1 basename | jq -R -s -c 'split("\n") | map(select(length>0))')
+            echo "common=true" >> $GITHUB_OUTPUT
+            echo "changed_lambdas=$ALL" >> $GITHUB_OUTPUT
+            echo "has_lambda_changes=true" >> $GITHUB_OUTPUT
+          elif [ "$MODE" = "specific" ] && [ -n "$SPECIFIC" ]; then
+            JSON=$(echo "$SPECIFIC" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | jq -R -s -c 'split("\n") | map(select(length>0))')
+            echo "common=$DEPLOY_LAYER" >> $GITHUB_OUTPUT
+            echo "changed_lambdas=$JSON" >> $GITHUB_OUTPUT
+            echo "has_lambda_changes=true" >> $GITHUB_OUTPUT
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only HEAD)
+            if echo "$CHANGED" | grep -q "^backend/lambdas/common/"; then
+              echo "common=true" >> $GITHUB_OUTPUT
+            else
+              echo "common=false" >> $GITHUB_OUTPUT
+            fi
+            CHANGED_DIRS=$(echo "$CHANGED" | grep "^backend/lambdas/" | grep -v "^backend/lambdas/common/" | cut -d'/' -f3 | sort -u | grep -v '^$' || true)
+            if [ -n "$CHANGED_DIRS" ]; then
+              JSON=$(echo "$CHANGED_DIRS" | jq -R -s -c 'split("\n") | map(select(length>0))')
+              echo "changed_lambdas=$JSON" >> $GITHUB_OUTPUT
+              echo "has_lambda_changes=true" >> $GITHUB_OUTPUT
+            else
+              echo "changed_lambdas=[]" >> $GITHUB_OUTPUT
+              echo "has_lambda_changes=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - id: all-lambdas
+        run: |
+          ALL=$(ls -d lambdas/*/ 2>/dev/null | grep -v "lambdas/common/" | xargs -n1 basename | jq -R -s -c 'split("\n") | map(select(length>0))')
+          echo "all_lambdas=$ALL" >> $GITHUB_OUTPUT
+
+  deploy-layer:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.common_changed == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      layer_arn: ${{ steps.publish.outputs.layer_arn }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Build layer zip
+        run: |
+          mkdir -p python/lambdas
+          cp -r lambdas/common python/lambdas/
+          touch python/lambdas/__init__.py
+          python -m pip install --upgrade pip
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: -t python/ -r requirements.txt
+          cd python && zip -r ../${APP_NAME}-shared-packages.zip . >/dev/null
+
+      - id: publish
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          OUT=$(aws lambda publish-layer-version \
+            --layer-name ${APP_NAME}-shared-packages \
+            --zip-file fileb://${APP_NAME}-shared-packages.zip \
+            --compatible-runtimes python${{ env.PYTHON_VERSION }} \
+            --region $AWS_REGION --output json)
+          ARN=$(echo $OUT | jq -r .LayerVersionArn)
+          echo "layer_arn=$ARN" >> $GITHUB_OUTPUT
+          echo "Published layer: $ARN"
+
+  update-all-lambdas-layer:
+    needs: [detect-changes, deploy-layer]
+    if: always() && needs.detect-changes.outputs.common_changed == 'true' && needs.deploy-layer.result == 'success'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lambda: ${{ fromJson(needs.detect-changes.outputs.all_lambdas) }}
+      fail-fast: false
+    steps:
+      - name: Update layer config
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          FN="${APP_NAME}-$(echo "${{ matrix.lambda }}" | tr '_' '-')"
+          aws lambda wait function-updated --function-name $FN --region $AWS_REGION || true
+          aws lambda update-function-configuration \
+            --function-name $FN \
+            --layers ${{ needs.deploy-layer.outputs.layer_arn }} \
+            --region $AWS_REGION \
+            || echo "Function $FN not found, skipping"
+
+  deploy-changed-lambdas:
+    needs: [detect-changes, deploy-layer]
+    if: always() && needs.detect-changes.outputs.has_lambda_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lambda: ${{ fromJson(needs.detect-changes.outputs.changed_lambdas) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Package lambda
+        run: |
+          cd lambdas/${{ matrix.lambda }}
+          zip -r ../../${{ matrix.lambda }}.zip *
+
+      - name: Deploy code
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          FN="${APP_NAME}-$(echo "${{ matrix.lambda }}" | tr '_' '-')"
+          echo "Deploying $FN"
+          aws lambda update-function-code --function-name $FN \
+            --zip-file fileb://${{ matrix.lambda }}.zip \
+            --region $AWS_REGION
+          aws lambda wait function-updated --function-name $FN --region $AWS_REGION
+
+          if [ -n "${{ needs.deploy-layer.outputs.layer_arn }}" ]; then
+            aws lambda update-function-configuration --function-name $FN \
+              --layers ${{ needs.deploy-layer.outputs.layer_arn }} \
+              --region $AWS_REGION
+            aws lambda wait function-updated --function-name $FN --region $AWS_REGION
+          fi
+          echo "✅ $FN deployed"
+
+  summary:
+    needs: [detect-changes, deploy-layer, update-all-lambdas-layer, deploy-changed-lambdas]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "## Backend Deploy" >> $GITHUB_STEP_SUMMARY
+          echo "- Common changed: ${{ needs.detect-changes.outputs.common_changed }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Lambdas changed: \`${{ needs.detect-changes.outputs.changed_lambdas }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Layer ARN: \`${{ needs.deploy-layer.outputs.layer_arn }}\`" >> $GITHUB_STEP_SUMMARY

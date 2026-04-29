@@ -1,72 +1,131 @@
+variable "app_name" {
+  type    = string
+  default = "derby"
+}
+
+variable "domain_suffix" {
+  type    = string
+  default = ".xomware.com"
+}
+
+variable "route53_zone_name" {
+  type    = string
+  default = "xomware.com"
+}
+
 variable "aws_region" {
-  description = "AWS region for resources"
-  type        = string
-  default     = "us-east-1"
+  type    = string
+  default = "us-east-1"
 }
 
-variable "parent_domain" {
-  description = "Parent domain hosting the derby subdomain"
-  type        = string
-  default     = "xoware.com"
+variable "from_email" {
+  type    = string
+  default = "noreply@derby.xomware.com"
 }
 
-variable "subdomain" {
-  description = "Web subdomain (creates web app DNS for <subdomain>.<parent_domain>)"
+variable "admin_emails" {
+  description = "Comma-separated emails granted is_admin on first login"
   type        = string
-  default     = "derby"
+  default     = "dominickj.giordano@gmail.com,gtatich@gmail.com"
 }
 
-variable "api_subdomain" {
-  description = "API subdomain (creates DNS for <api_subdomain>.<parent_domain>)"
-  type        = string
-  default     = "api.derby"
+variable "event_id" {
+  type    = string
+  default = "2026-kentucky-derby"
 }
 
-variable "vercel_cname_target" {
-  description = "Vercel CNAME target for the web app. Get this from Vercel project domain settings."
-  type        = string
-  default     = "cname.vercel-dns.com"
+variable "event_name" {
+  type    = string
+  default = "2026 Kentucky Derby"
 }
 
-variable "api_cname_target" {
-  description = "Backend host CNAME target. Vercel project hostname for the API (api.derby.xoware.com)."
-  type        = string
-  default     = "cname.vercel-dns.com"
+variable "poll_enabled" {
+  type    = bool
+  default = false
 }
 
-# --- Resend (email) ---
-
-variable "resend_send_subdomain" {
-  description = "Subdomain Resend uses for SPF/MX records (typically 'send')"
-  type        = string
-  default     = "send.derby"
+variable "poll_window_start_utc" {
+  type    = string
+  default = "2026-05-02T16:00:00Z"
 }
 
-variable "resend_dkim_record_name" {
-  description = "DKIM record name from the Resend dashboard (e.g. 'resend._domainkey.derby')"
-  type        = string
+variable "poll_window_end_utc" {
+  type    = string
+  default = "2026-05-03T00:00:00Z"
 }
 
-variable "resend_dkim_record_value" {
-  description = "DKIM TXT value from the Resend dashboard"
+variable "poll_provider" {
+  type    = string
+  default = "fake"
+}
+
+# Lambda
+variable "lambda_runtime" {
+  type    = string
+  default = "python3.11"
+}
+
+variable "lambda_memory_size" {
+  type    = number
+  default = 256
+}
+
+variable "lambda_timeout" {
+  type    = number
+  default = 10
+}
+
+variable "lambda_trace_mode" {
+  type    = string
+  default = "Active"
+}
+
+# JWT secret — auto-generated if not provided.
+variable "jwt_secret" {
+  description = "JWT signing key. Leave empty to generate via random_password."
   type        = string
+  default     = ""
   sensitive   = true
 }
 
-variable "resend_smtp_mx_target" {
-  description = "Resend MX target for the send subdomain (e.g. 'feedback-smtp.us-east-1.amazonses.com')"
-  type        = string
-  default     = "feedback-smtp.us-east-1.amazonses.com"
+# CloudFront / SPA
+variable "cloudfront_origin_path" {
+  type    = string
+  default = ""
 }
 
-variable "resend_spf_value" {
-  description = "SPF TXT for the send subdomain"
-  type        = string
-  default     = "v=spf1 include:amazonses.com ~all"
+variable "us_canada_only" {
+  type    = bool
+  default = true
 }
 
-variable "enable_dmarc" {
-  description = "Add a basic DMARC record at _dmarc.<derby_subdomain>"
-  type        = bool
-  default     = true
+variable "custom_error_response_page_path" {
+  type    = string
+  default = "/index.html"
+}
+
+variable "retain_on_delete" {
+  type    = bool
+  default = false
+}
+
+variable "minimum_tls_version" {
+  type    = string
+  default = "TLSv1.2_2018"
+}
+
+variable "enable_cloudfront_cache" {
+  type    = bool
+  default = true
+}
+
+# API Gateway
+variable "api_stage_name" {
+  type    = string
+  default = "v1"
+}
+
+variable "cors_allowed_origins" {
+  type    = string
+  default = "https://derby.xomware.com"
 }

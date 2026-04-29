@@ -1,35 +1,41 @@
-# Derby — Terraform
+# Derby — Infrastructure
 
-Manages DNS records on the existing `xoware.com` Route53 zone for:
+Terraform stack for `derby.xomware.com`. Mirrors the conventions used in
+`xomify-infrastructure`, `meals-infrastructure`, etc.
 
-- `derby.xoware.com` → Vercel (web app)
-- `api.derby.xoware.com` → Railway / Fly.io (FastAPI)
-- `send.derby.xoware.com` MX + SPF, DKIM TXT, optional DMARC → Resend (email)
+## What it provisions
 
-State lives in the existing `xomware-terraform-state` S3 bucket under `derby/terraform.tfstate`.
+| Resource                       | Notes                                                 |
+| ------------------------------ | ----------------------------------------------------- |
+| Web hosting (S3 + CloudFront)  | Shared module `domgiordano/web-hosting@v1.1.0`       |
+| API Gateway + custom domain    | Shared module `domgiordano/api-gateway-service@v2.3.0`|
+| ACM cert (us-east-1, regional) | DNS-validated via Route53                             |
+| DynamoDB                       | 5 tables, PAY_PER_REQUEST, PITR on (most)             |
+| Lambda functions               | Authorizer + ~17 handlers (stub on first apply)       |
+| Lambda layer                   | `derby-shared-packages` (stub; deploy workflow fills) |
+| EventBridge schedule           | Race-day poll trigger (disabled until `poll_enabled=true`)|
+| SES domain identity            | `derby.xomware.com` with DKIM, SPF, MX, DMARC         |
+| KMS key                        | S3 bucket encryption                                  |
+| WAF                            | Consumes shared ACLs from `xomware-infrastructure`    |
+| SSM parameters                 | JWT secret, API ID, invoke URL                        |
 
-## Order of operations (Day 1)
+## Apply order
 
-1. **Create Vercel project** for `apps/web`. Add `derby.xoware.com` as a domain → Vercel gives you a CNAME target (default: `cname.vercel-dns.com`).
-2. **Create Railway/Fly project** for `apps/api`. Add `api.derby.xoware.com` as a custom domain → copy the hostname.
-3. **Create Resend account**. Add domain `derby.xoware.com`. Resend gives you DKIM record name + value, plus standard MX / SPF on `send.derby.xoware.com`.
-4. Copy `terraform.tfvars.example` → `terraform.tfvars`, fill in the three placeholder values:
-   - `api_cname_target`
-   - `resend_dkim_record_name`
-   - `resend_dkim_record_value`
-5. Run:
+1. `cp terraform.tfvars.example terraform.tfvars`
+2. `terraform init`
+3. `terraform plan`
+4. `terraform apply`
 
-```bash
-terraform init
-terraform plan
-terraform apply
-```
+Initial apply will leave Lambda code as the stub from `templates/lambda_stub.zip`.
+The `deploy-backend.yml` GitHub Actions workflow uploads real code on push.
 
-6. Verify:
-   - `dig CNAME derby.xoware.com` → Vercel
-   - `dig CNAME api.derby.xoware.com` → Railway/Fly
-   - Click "Verify DNS" in Resend dashboard → status should flip to `Verified` within minutes.
+## State
 
-## Variables that don't change
+Stored in the shared `xomware-terraform-state` S3 bucket under
+`derby/terraform.tfstate`. Lock table: `xomware-terraform-locks`.
 
-The MX target (`feedback-smtp.us-east-1.amazonses.com`) and SPF (`v=spf1 include:amazonses.com ~all`) are Resend defaults; only override if Resend tells you to.
+## What's still TODO
+
+- Real `churchill_downs` poll provider (Day 1 task — verify scrape source).
+- SES production access (SES starts in sandbox; request prod access in console
+  before May 2 so unverified recipient emails work).

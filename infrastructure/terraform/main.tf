@@ -8,4 +8,4 @@ terraform {
   }
 }
 
-data "aws_caller_identity" "current" {}
+data "aws_caller_identity" "web_app_account" {}

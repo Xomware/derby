@@ -1,32 +1,35 @@
-# Xoware Derby — Project Plan (v2)
+# Sun God Derby — Project Plan (v3)
 
-Personal project. Grant's annual Kentucky Derby picks site with tail/fade voting, leaderboard, and live results.
+Grant's annual Kentucky Derby picks site with tail/fade voting, leaderboard, and live results.
 
-- **Deadline**: May 2, 2026 (Derby Day) — 3 days
-- **URL**: derby.xoware.com
+- **Deadline**: May 2, 2026 (Derby Day)
+- **URL**: derby.xomware.com
 - **Audience**: Public site, organic distribution to Grant's friend group via shared link
+- **Admins**: dominickj.giordano@gmail.com, gtatich@gmail.com
 
 ## Stack (locked in)
 
-| Layer            | Choice                                       |
-| ---------------- | -------------------------------------------- |
-| Frontend         | Next.js on Vercel (Hobby)                    |
-| Backend          | FastAPI on Vercel Python serverless (Hobby)  |
-| Database         | Neon (Free)                                  |
-| Auth             | Magic link, custom, JWT-based                |
-| Email            | Resend (Free)                                |
-| Polling worker   | GitHub Actions cron → `/internal/poll`       |
-| Domain           | derby.xoware.com (subdomain)                 |
+Mirrors the AWS pattern used across all other Xomware apps.
 
-Cost: $0/month (no credit card needed at any vendor).
-Decision history: originally planned for Fly.io. Switched to Vercel-only
-because Fly requires a credit card on file even for the free tier, and the
-serverless model removes the multi-instance APScheduler risk we flagged in
-brainstorming.
+| Layer          | Choice                                                       |
+| -------------- | ------------------------------------------------------------ |
+| Frontend       | Next.js 15 (static export) → S3 + CloudFront                 |
+| Backend        | Python 3.11 Lambdas behind API Gateway (`api.derby.xomware.com`) |
+| Storage        | DynamoDB                                                     |
+| Auth           | Magic link via SES → JWT in `derby_session` cookie           |
+| Polling worker | EventBridge cron → `cron_poll_results` Lambda                |
+| DNS / Email    | Route53 + SES on `derby.xomware.com`                         |
+
+Cost: $0/month (everything fits in AWS Free Tier).
+
+Decision history: previous drafts proposed Fly.io and Vercel serverless. Both
+discarded — Fly requires a CC, Vercel doesn't match the existing infra
+patterns. Final stack mirrors `xomify-infrastructure` / `meals-infrastructure`.
 
 ## Branding (locked in)
 
-**Name**: TBD — leaning toward Sun Oracle with G Titty the Sun Oracle as the persona/byline.
+**Name**: Sun God Derby. Wordmark only — handwritten "Sun God" in mint-julep
+green + serif "Derby" in bourbon. No icon mark (sketch versions rejected).
 
 **Color palette**:
 - Rose Red `#C8102E` — primary
@@ -35,13 +38,13 @@ brainstorming.
 - Cream `#FAF6E8` — background (suggested)
 - Dark Rose `#8B0A1F` — primary depth/shadow tone (suggested)
 
-**Logo**: roses required. Four concept directions; awaiting Grant's pick.
-1. Sunburst Rose — sun rays radiating from a central rose
-2. Horseshoe Crest — bourbon horseshoe framing sun + rose
-3. Rose Garland — half-wreath like the Derby winner's garland
-4. Monogram (SO) — bold "SO" with rose dotting the O
+**Logo**: typographic only. No icon. Inspiration sketches retained in chat
+history — Grant rejected the icon work and crossed "Kentucky" out, keeping
+"SUN GOD DERBY" as the wordmark direction.
 
-**Typography**: serif for headings, sans for body.
+**Typography**: serif for headings, sans for body. Italic/handwritten variant
+for "Sun God" half of the wordmark (mint-julep green); bourbon-brown serif
+for "Derby".
 
 ## Features
 

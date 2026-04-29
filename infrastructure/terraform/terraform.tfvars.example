@@ -1,16 +1,13 @@
-aws_region    = "us-east-1"
-parent_domain = "xoware.com"
-subdomain     = "derby"
-api_subdomain = "api.derby"
-
-# After Vercel project is created, copy CNAME target from Vercel domain settings.
-vercel_cname_target = "cname.vercel-dns.com"
-
-# Vercel projects share the same CNAME target. Override only if Vercel's project
-# domain settings tell you to use a different host.
-api_cname_target = "cname.vercel-dns.com"
-
-# After Resend domain verification is initiated, copy DKIM record name + value.
-# Resend dashboard shows these on the "Domains" page.
-resend_dkim_record_name  = "resend._domainkey.derby"
-resend_dkim_record_value = "p=PASTE_DKIM_PUBLIC_KEY_HERE"
+app_name             = "derby"
+domain_suffix        = ".xomware.com"
+route53_zone_name    = "xomware.com"
+aws_region           = "us-east-1"
+from_email           = "noreply@derby.xomware.com"
+admin_emails         = "dominickj.giordano@gmail.com,gtatich@gmail.com"
+event_id             = "2026-kentucky-derby"
+event_name           = "2026 Kentucky Derby"
+poll_enabled         = false
+poll_window_start_utc = "2026-05-02T16:00:00Z"
+poll_window_end_utc   = "2026-05-03T00:00:00Z"
+poll_provider         = "fake"
+cors_allowed_origins  = "https://derby.xomware.com"

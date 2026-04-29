@@ -1,0 +1,96 @@
+import type {
+  AdminUser,
+  Leaderboard,
+  Me,
+  Pick,
+  PicksGrouped,
+  PollStatus,
+  ResultValue,
+  VerifyResponse,
+  VoteValue,
+} from './types';
+
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? 'https://api.derby.xomware.com';
+
+class ApiError extends Error {
+  status: number;
+  detail: string;
+  constructor(status: number, detail: string) {
+    super(detail);
+    this.status = status;
+    this.detail = detail;
+  }
+}
+
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    credentials: 'include',
+    headers: { 'content-type': 'application/json', ...(init.headers ?? {}) },
+    ...init,
+  });
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const body = await res.json();
+      detail = body?.error?.message ?? body?.detail ?? detail;
+    } catch {
+      /* ignore */
+    }
+    throw new ApiError(res.status, detail);
+  }
+  if (res.status === 204) return undefined as T;
+  return (await res.json()) as T;
+}
+
+export const api = {
+  // auth
+  requestLink: (email: string) =>
+    request<void>('/auth/request-link', { method: 'POST', body: JSON.stringify({ email }) }),
+  verify: (token: string) =>
+    request<VerifyResponse>(`/auth/verify?token=${encodeURIComponent(token)}`),
+  completeSignup: (username: string) =>
+    request<Me>('/auth/complete-signup', { method: 'POST', body: JSON.stringify({ username }) }),
+  logout: () => request<void>('/auth/logout', { method: 'POST' }),
+  me: () => request<Me>('/auth/me'),
+
+  // picks
+  picks: () => request<PicksGrouped>('/picks/list'),
+  pick: (id: string) => request<Pick>(`/picks/${encodeURIComponent(id)}`),
+
+  // votes
+  vote: (pick_id: string, vote: VoteValue) =>
+    request('/votes/cast', { method: 'POST', body: JSON.stringify({ pick_id, vote }) }),
+  myVotes: () => request<Array<{ pick_id: string; vote: VoteValue; updated_at: string }>>('/votes/mine'),
+
+  // leaderboard
+  leaderboard: () => request<Leaderboard>('/leaderboard/rank'),
+
+  // admin
+  adminCreatePick: (body: AdminPickInput) =>
+    request<Pick>('/admin-picks/create', { method: 'POST', body: JSON.stringify(body) }),
+  adminUpdatePick: (id: string, body: Partial<AdminPickInput>) =>
+    request<Pick>('/admin-picks/update', { method: 'POST', body: JSON.stringify({ id, ...body }) }),
+  adminDeletePick: (id: string) =>
+    request<void>('/admin-picks/delete', { method: 'POST', body: JSON.stringify({ id }) }),
+  adminSetResult: (id: string, result: ResultValue) =>
+    request<Pick>('/admin-picks/set-result', { method: 'POST', body: JSON.stringify({ id, result }) }),
+  adminUsers: () => request<AdminUser[]>('/admin-users/list'),
+  adminPollStatus: () => request<PollStatus>('/admin-poll/status'),
+  adminPollNow: () => request('/admin-poll/now', { method: 'POST' }),
+};
+
+export interface AdminPickInput {
+  race_number: number;
+  race_post_time: string;
+  horse_name: string;
+  post_position?: number | null;
+  jockey?: string | null;
+  trainer?: string | null;
+  odds_at_pick?: string | null;
+  confidence?: number;
+  writeup?: string | null;
+  display_order?: number;
+}
+
+export { ApiError };
