@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import { useMe } from '@/lib/hooks';
-import { RosePetals } from '@/components/RosePetals';
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState('');
@@ -31,8 +30,7 @@ export default function LoginPage() {
   }
 
   return (
-    <section className="max-w-md mx-auto pt-12 px-2 relative">
-      <RosePetals />
+    <section className="max-w-md mx-auto pt-12 px-2">
       <form
         onSubmit={onSubmit}
         className="rounded-2xl border border-bourbon/15 bg-white p-6 sm:p-8 shadow-sm space-y-5"

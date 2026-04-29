@@ -3,6 +3,7 @@ import './globals.css';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { AuthGate } from '@/components/AuthGate';
+import { RosePetals } from '@/components/RosePetals';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://derby.xomware.com'),
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col antialiased">
+        <RosePetals />
         <SiteHeader />
         <main className="flex-1 max-w-5xl mx-auto w-full px-4 pb-16">
           <AuthGate>{children}</AuthGate>

@@ -56,7 +56,8 @@ export function RosePetals() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      className="pointer-events-none fixed inset-0 overflow-hidden"
+      style={{ zIndex: 0 }}
     >
       {petals.map((p) => (
         <span
