@@ -107,7 +107,8 @@ jobs:
           touch python/lambdas/__init__.py
           python -m pip install --upgrade pip
           pip install --platform manylinux2014_x86_64 --only-binary=:all: -t python/ -r requirements.txt
-          cd python && zip -r ../${APP_NAME}-shared-packages.zip . >/dev/null
+          # Layer must keep the python/ prefix at root so Lambda adds it to sys.path.
+          zip -r ${APP_NAME}-shared-packages.zip python >/dev/null
 
       - id: publish
         env:
