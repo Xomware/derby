@@ -23,6 +23,8 @@ MAGIC_LINK_TABLE = os.environ.get("MAGIC_LINK_TABLE", f"{APP_NAME}-magic-link-to
 PICKS_TABLE = os.environ.get("PICKS_TABLE", f"{APP_NAME}-picks")
 VOTES_TABLE = os.environ.get("VOTES_TABLE", f"{APP_NAME}-votes")
 POLL_RUNS_TABLE = os.environ.get("POLL_RUNS_TABLE", f"{APP_NAME}-poll-runs")
+RACE_RESULTS_TABLE = os.environ.get("RACE_RESULTS_TABLE", f"{APP_NAME}-race-results")
+VISITS_TABLE = os.environ.get("VISITS_TABLE", f"{APP_NAME}-visits")
 
 # GSI names
 USERS_USERNAME_INDEX = "username-index"
@@ -31,6 +33,8 @@ MAGIC_LINK_EMAIL_INDEX = "email-index"
 PICKS_EVENT_INDEX = "event-index"
 VOTES_USER_INDEX = "user-index"
 POLL_RUNS_TYPE_INDEX = "type-index"
+VISITS_USER_INDEX = "user-index"
+VISITS_DAY_INDEX = "day-index"
 
 # Result + vote enums
 RESULT_VALUES = ("pending", "won", "placed", "showed", "finished", "scratched")

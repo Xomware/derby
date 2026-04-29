@@ -80,6 +80,10 @@ data "aws_iam_policy_document" "lambda_role_policy" {
       "${aws_dynamodb_table.votes.arn}/index/*",
       aws_dynamodb_table.poll_runs.arn,
       "${aws_dynamodb_table.poll_runs.arn}/index/*",
+      aws_dynamodb_table.race_results.arn,
+      "${aws_dynamodb_table.race_results.arn}/index/*",
+      aws_dynamodb_table.visits.arn,
+      "${aws_dynamodb_table.visits.arn}/index/*",
     ]
   }
 

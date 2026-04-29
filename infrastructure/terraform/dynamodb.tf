@@ -126,6 +126,66 @@ resource "aws_dynamodb_table" "votes" {
 }
 
 ########################################
+# race_results — PK race_number, holds all finishers for a race
+########################################
+resource "aws_dynamodb_table" "race_results" {
+  name         = "${var.app_name}-race-results"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "race_number"
+
+  attribute {
+    name = "race_number"
+    type = "N"
+  }
+
+  point_in_time_recovery { enabled = true }
+
+  tags = merge(local.standard_tags, { "name" = "${var.app_name}-race-results" })
+}
+
+########################################
+# visits — PK visit_id, GSI by user_id+ran_at, GSI by day-bucket
+########################################
+resource "aws_dynamodb_table" "visits" {
+  name         = "${var.app_name}-visits"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "visit_id"
+
+  attribute {
+    name = "visit_id"
+    type = "S"
+  }
+  attribute {
+    name = "user_id"
+    type = "S"
+  }
+  attribute {
+    name = "day"
+    type = "S"
+  }
+  attribute {
+    name = "ts"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "user-index"
+    hash_key        = "user_id"
+    range_key       = "ts"
+    projection_type = "ALL"
+  }
+
+  global_secondary_index {
+    name            = "day-index"
+    hash_key        = "day"
+    range_key       = "ts"
+    projection_type = "ALL"
+  }
+
+  tags = merge(local.standard_tags, { "name" = "${var.app_name}-visits" })
+}
+
+########################################
 # poll_runs — PK id, GSI by type+ran_at (for "latest run" query)
 ########################################
 resource "aws_dynamodb_table" "poll_runs" {
