@@ -17,6 +17,9 @@ SESSION_COOKIE = "derby_session"
 SIGNUP_COOKIE = "derby_signup"
 SESSION_DAYS = int(os.environ.get("SESSION_DAYS", "30"))
 
+# Voting closes this many seconds before each race's post time.
+LOCK_BUFFER_SECONDS = int(os.environ.get("LOCK_BUFFER_SECONDS", "300"))
+
 # DynamoDB tables (set per-app via Terraform-injected env vars)
 USERS_TABLE = os.environ.get("USERS_TABLE", f"{APP_NAME}-users")
 MAGIC_LINK_TABLE = os.environ.get("MAGIC_LINK_TABLE", f"{APP_NAME}-magic-link-tokens")

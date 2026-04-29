@@ -34,6 +34,7 @@ export interface Pick {
   event_id: string;
   race_number: number;
   race_post_time: string;
+  lock_time: string;
   horse_name: string;
   post_position: number | null;
   jockey: string | null;
@@ -52,6 +53,7 @@ export interface Pick {
 export interface RaceGroup {
   race_number: number;
   race_post_time: string;
+  lock_time: string;
   locked: boolean;
   picks: Pick[];
 }

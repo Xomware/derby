@@ -30,6 +30,7 @@ locals {
     POLL_WINDOW_START_UTC = var.poll_window_start_utc
     POLL_WINDOW_END_UTC   = var.poll_window_end_utc
     POLL_PROVIDER         = var.poll_provider
+    LOCK_BUFFER_SECONDS   = tostring(var.lock_buffer_seconds)
     AWS_ACCOUNT_ID        = local.web_app_account_id
   }
 

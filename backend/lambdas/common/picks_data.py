@@ -9,7 +9,15 @@ from typing import Any
 
 from boto3.dynamodb.conditions import Key
 
-from lambdas.common.constants import EVENT_ID, EVENT_NAME, PICKS_EVENT_INDEX, VOTES_USER_INDEX
+from datetime import timedelta
+
+from lambdas.common.constants import (
+    EVENT_ID,
+    EVENT_NAME,
+    LOCK_BUFFER_SECONDS,
+    PICKS_EVENT_INDEX,
+    VOTES_USER_INDEX,
+)
 from lambdas.common.dynamo_helpers import picks_table, votes_table, query_all
 from lambdas.common.utility_helpers import parse_iso, utcnow
 
@@ -26,9 +34,14 @@ def _to_str_or_none(v: Any) -> str | None:
     return str(v)
 
 
+def lock_time(race_post_time_iso: str) -> datetime:
+    """Voting closes LOCK_BUFFER_SECONDS before the race's post time."""
+    return parse_iso(race_post_time_iso) - timedelta(seconds=LOCK_BUFFER_SECONDS)
+
+
 def is_locked(race_post_time_iso: str, now: datetime | None = None) -> bool:
     now = now or utcnow()
-    return now >= parse_iso(race_post_time_iso)
+    return now >= lock_time(race_post_time_iso)
 
 
 def list_picks_for_event(event_id: str = EVENT_ID) -> list[dict]:
@@ -79,6 +92,7 @@ def serialize_pick(pick: dict, votes: list[dict], usernames_by_user_id: dict[str
         "event_id": pick["event_id"],
         "race_number": _to_int(pick["race_number"]),
         "race_post_time": rpt,
+        "lock_time": lock_time(rpt).isoformat(),
         "horse_name": pick["horse_name"],
         "post_position": _to_int(pick.get("post_position")) if pick.get("post_position") not in (None, "") else None,
         "jockey": _to_str_or_none(pick.get("jockey")),
@@ -113,6 +127,7 @@ def picks_grouped_by_race(picks: list[dict], votes: list[dict], usernames_by_use
             {
                 "race_number": p["race_number"],
                 "race_post_time": p["race_post_time"],
+                "lock_time": p["lock_time"],
                 "locked": p["locked"],
                 "picks": [],
             },

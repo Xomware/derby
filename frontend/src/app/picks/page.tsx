@@ -10,7 +10,7 @@ export default function PicksPage() {
   const { me } = useMe();
   const router = useRouter();
 
-  const earliest = picks?.races.map((r) => r.race_post_time).sort()[0];
+  const earliest = picks?.races.map((r) => r.lock_time).sort()[0];
 
   return (
     <section className="pt-8 space-y-8">
@@ -48,7 +48,7 @@ export default function PicksPage() {
           <section key={race.race_number}>
             <header className="flex items-baseline justify-between mb-3">
               <h2 className="font-display text-2xl text-rose-dark">Race {race.race_number}</h2>
-              <Countdown target={race.race_post_time} label="Lock" />
+              <Countdown target={race.lock_time} label="Lock" />
             </header>
             <div className="grid sm:grid-cols-2 gap-4">
               {race.picks.map((p) => (

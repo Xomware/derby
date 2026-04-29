@@ -59,6 +59,12 @@ variable "poll_provider" {
   default = "fake"
 }
 
+variable "lock_buffer_seconds" {
+  description = "Vote lock cuts off this many seconds before each race's post time."
+  type        = number
+  default     = 300
+}
+
 # Lambda
 variable "lambda_runtime" {
   type    = string

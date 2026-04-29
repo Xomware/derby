@@ -1,0 +1,30 @@
+{
+  "event_id": "2026-kentucky-derby",
+  "event_name": "2026 Kentucky Derby",
+  "picks": [
+    {
+      "race_number": 12,
+      "race_post_time": "2026-05-02T22:57:00-04:00",
+      "horse_name": "Bourbon Sunrise",
+      "post_position": 5,
+      "jockey": "TBD Jockey",
+      "trainer": "TBD Trainer",
+      "odds_at_pick": "8/1",
+      "confidence": 4,
+      "display_order": 0,
+      "writeup": "Closer with a wide turn — stalks pace and finishes hard.\n\nThe trainer's been pointing here all year and the work tab looks sharp. Sun God says ride."
+    },
+    {
+      "race_number": 12,
+      "race_post_time": "2026-05-02T22:57:00-04:00",
+      "horse_name": "Mint Julep Magic",
+      "post_position": 11,
+      "jockey": "TBD Jockey",
+      "trainer": "TBD Trainer",
+      "odds_at_pick": "12/1",
+      "confidence": 3,
+      "display_order": 1,
+      "writeup": "Live longshot. If pace collapses, this one comes flying late."
+    }
+  ]
+}
