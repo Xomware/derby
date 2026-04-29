@@ -42,6 +42,16 @@ export default function Home() {
         priority
         className="w-full max-w-lg h-auto"
       />
+      <video
+        src="/sungod.mp4"
+        poster="/sungod-poster.jpg"
+        autoPlay
+        loop
+        muted
+        playsInline
+        aria-hidden
+        className="mt-6 w-full max-w-2xl rounded-xl border border-rose-red/15 shadow-sm bg-cream"
+      />
       <p className="mt-5 text-bourbon/80 max-w-xl">
         Grant&apos;s annual Derby pool. Pick a side on every horse he likes, then
         watch the leaderboard sort itself out as the races run.

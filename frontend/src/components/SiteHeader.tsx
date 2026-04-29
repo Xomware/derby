@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMe } from '@/lib/hooks';
@@ -21,7 +22,18 @@ export function SiteHeader() {
   if (isAuthScreen) {
     return (
       <header className="border-b border-rose-red/15 bg-cream/85 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-3 h-12" />
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-center">
+          <Link href="/" aria-label="Sun God Derby">
+            <Image
+              src="/banner.png"
+              alt="Sun God Derby"
+              width={240}
+              height={56}
+              priority
+              className="h-10 w-auto"
+            />
+          </Link>
+        </div>
       </header>
     );
   }
@@ -52,7 +64,16 @@ export function SiteHeader() {
             })}
           </nav>
         ) : (
-          <span className="font-display text-bourbon text-lg">Sun God Derby</span>
+          <Link href="/" aria-label="Sun God Derby">
+            <Image
+              src="/banner.png"
+              alt="Sun God Derby"
+              width={200}
+              height={48}
+              priority
+              className="h-9 w-auto"
+            />
+          </Link>
         )}
         {me ? (
           <ProfileMenu me={me} />
