@@ -21,9 +21,9 @@ def send_magic_link_email(*, to: str, link: str) -> None:
         f"If you didn't request it, ignore this email."
     )
     html = (
-        '<div style="font-family: Georgia, serif; color:#2b2018; line-height:1.5;">'
-        '<p style="font-size:18px;"><em style="color:#7BA77B;">Sun God</em> '
-        '<span style="color:#5D4037;">Derby</span></p>'
+        '<div style="font-family: Georgia, serif; color:#2b2018; line-height:1.5; max-width:520px;">'
+        '<img src="https://derby.xomware.com/banner.png" alt="Sun God Derby" '
+        'style="max-width:280px; height:auto; display:block; margin-bottom:8px;" />'
         f'<p>Tap the link below to sign in to <strong>derby.xomware.com</strong>.</p>'
         f'<p><a href="{link}" style="display:inline-block;padding:12px 18px;'
         'background:#C8102E;color:#FAF6E8;text-decoration:none;border-radius:6px;">'
