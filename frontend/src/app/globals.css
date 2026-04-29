@@ -28,32 +28,3 @@ h3,
   letter-spacing: -0.01em;
 }
 
-/* Galloping horses running across the screen.
-   Translates from off-screen-right to off-screen-left, looping forever.
-   Each horse gets its own duration / delay / scale / bottom from JS. */
-.horse {
-  position: absolute;
-  right: -150px;
-  display: inline-block;
-  will-change: transform;
-  animation-name: horse-gallop;
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
-  transform-origin: center;
-}
-
-@keyframes horse-gallop {
-  0% {
-    right: -150px;
-  }
-  100% {
-    right: 100%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .horse {
-    animation: none;
-    display: none;
-  }
-}
