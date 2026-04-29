@@ -7,7 +7,7 @@ Query params:
 
 from __future__ import annotations
 
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 
 from boto3.dynamodb.conditions import Key
@@ -52,6 +52,30 @@ def handler(event, context):
     page_counts = Counter(r.get("page", "/") for r in rows).most_common(20)
     user_counts = Counter(r.get("username", "?") for r in rows).most_common(20)
 
+    # Per-user × page matrix: for each user, count visits AND breakdown by page.
+    per_user: dict[str, dict] = defaultdict(
+        lambda: {"username": "", "total": 0, "pages": Counter(), "last_seen": ""}
+    )
+    for r in rows:
+        username = r.get("username") or "?"
+        slot = per_user[username]
+        slot["username"] = username
+        slot["total"] += 1
+        slot["pages"][r.get("page", "/")] += 1
+        ts = r.get("ts", "")
+        if ts > slot["last_seen"]:
+            slot["last_seen"] = ts
+
+    user_breakdown = [
+        {
+            "username": v["username"],
+            "total": v["total"],
+            "last_seen": v["last_seen"] or None,
+            "pages": [{"page": p, "count": c} for p, c in v["pages"].most_common(10)],
+        }
+        for v in sorted(per_user.values(), key=lambda v: v["total"], reverse=True)
+    ]
+
     recent = [
         {
             "username": r.get("username"),
@@ -68,5 +92,6 @@ def handler(event, context):
         "by_day": [{"day": d, "count": c} for d, c in sorted(by_day.items(), reverse=True)],
         "top_pages": [{"page": p, "count": c} for p, c in page_counts],
         "top_users": [{"username": u, "count": c} for u, c in user_counts],
+        "user_breakdown": user_breakdown,
         "recent": recent,
     })

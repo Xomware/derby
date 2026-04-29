@@ -121,5 +121,11 @@ export interface AdminVisitsStats {
   by_day: { day: string; count: number }[];
   top_pages: { page: string; count: number }[];
   top_users: { username: string; count: number }[];
+  user_breakdown: {
+    username: string;
+    total: number;
+    last_seen: string | null;
+    pages: { page: string; count: number }[];
+  }[];
   recent: { username: string; page: string; ts: string; referrer: string | null }[];
 }

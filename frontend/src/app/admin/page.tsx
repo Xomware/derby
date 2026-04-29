@@ -6,8 +6,18 @@ import { api, ApiError, AdminRaceResultInput } from '@/lib/api';
 import { useMe } from '@/lib/hooks';
 import type { RaceFinisher } from '@/lib/types';
 
+type AdminTab = 'visits' | 'users' | 'results' | 'polling';
+
+const TABS: { id: AdminTab; label: string }[] = [
+  { id: 'visits', label: 'Visits' },
+  { id: 'users', label: 'Users' },
+  { id: 'results', label: 'Race results' },
+  { id: 'polling', label: 'Polling' },
+];
+
 export default function AdminPage() {
   const { me, isLoading: meLoading } = useMe();
+  const [tab, setTab] = useState<AdminTab>('visits');
 
   if (meLoading) return <p className="pt-12 text-center">Loading…</p>;
   if (!me) {
@@ -25,18 +35,42 @@ export default function AdminPage() {
   }
 
   return (
-    <section className="pt-8 space-y-10">
+    <section className="pt-8 space-y-6">
       <header>
         <h1 className="font-display text-3xl text-rose-dark">Admin</h1>
         <p className="text-sm text-bourbon/70 mt-1">
-          Picks + rationale ship via <code>backend/scripts/upload_picks.py</code> from Grant&apos;s writeup —
-          not editable here.
+          Picks + rationale ship via{' '}
+          <code className="text-xs">backend/scripts/upload_picks.py</code> — not editable here.
         </p>
       </header>
-      <PollPanel />
-      <VisitsPanel />
-      <UsersPanel />
-      <RaceResultsPanel />
+
+      <nav
+        className="flex gap-1 border-b border-bourbon/20 overflow-x-auto"
+        aria-label="Admin sections"
+      >
+        {TABS.map((t) => {
+          const active = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTab(t.id)}
+              className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px whitespace-nowrap transition ${
+                active
+                  ? 'border-rose-red text-rose-dark'
+                  : 'border-transparent text-bourbon/70 hover:text-rose-red'
+              }`}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </nav>
+
+      {tab === 'visits' && <VisitsPanel />}
+      {tab === 'users' && <UsersPanel />}
+      {tab === 'results' && <RaceResultsPanel />}
+      {tab === 'polling' && <PollPanel />}
     </section>
   );
 }
@@ -175,11 +209,57 @@ function VisitsPanel() {
       {isLoading || !data ? (
         <p className="text-sm text-bourbon/70">Loading…</p>
       ) : (
-        <>
-          <div className="grid sm:grid-cols-3 gap-3 mb-5">
+        <div className="space-y-6">
+          <div className="grid sm:grid-cols-3 gap-3">
             <Stat label="Total visits" value={data.total_visits} />
             <Stat label="Unique visitors" value={data.unique_visitors} />
             <Stat label="Days tracked" value={data.by_day.length} />
+          </div>
+
+          <div>
+            <h3 className="text-xs uppercase tracking-wider text-bourbon/70 mb-2">
+              Per-user activity
+            </h3>
+            {data.user_breakdown.length === 0 ? (
+              <p className="text-sm text-bourbon/60">No visits yet.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs uppercase tracking-wider text-bourbon/70 border-b border-bourbon/20">
+                      <th className="py-1.5 pr-2">User</th>
+                      <th className="py-1.5 px-2 text-right">Visits</th>
+                      <th className="py-1.5 px-2">Last seen</th>
+                      <th className="py-1.5 pl-2">Pages (count)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.user_breakdown.map((u) => (
+                      <tr key={u.username} className="border-b border-bourbon/10 align-top">
+                        <td className="py-1.5 pr-2 font-semibold text-bourbon">@{u.username}</td>
+                        <td className="py-1.5 px-2 text-right font-mono">{u.total}</td>
+                        <td className="py-1.5 px-2 text-bourbon/70 whitespace-nowrap">
+                          {u.last_seen ? new Date(u.last_seen).toLocaleString() : '—'}
+                        </td>
+                        <td className="py-1.5 pl-2 text-xs">
+                          <div className="flex flex-wrap gap-1">
+                            {u.pages.map((p) => (
+                              <span
+                                key={p.page}
+                                className="inline-flex items-center gap-1 rounded bg-cream/60 border border-bourbon/15 px-1.5 py-0.5"
+                              >
+                                <span className="text-bourbon/80">{p.page}</span>
+                                <span className="font-mono text-bourbon">{p.count}</span>
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           <div className="grid sm:grid-cols-2 gap-5">
@@ -188,36 +268,37 @@ function VisitsPanel() {
               rows={data.top_pages.map((r) => ({ left: r.page, right: r.count }))}
             />
             <SimpleList
-              title="Top users"
-              rows={data.top_users.map((r) => ({ left: `@${r.username}`, right: r.count }))}
-            />
-            <SimpleList
               title="By day"
               rows={data.by_day.map((r) => ({ left: r.day, right: r.count }))}
             />
-            <div>
-              <h3 className="text-xs uppercase tracking-wider text-bourbon/70 mb-2">
-                Recent
-              </h3>
-              {data.recent.length === 0 ? (
-                <p className="text-sm text-bourbon/60">No visits yet.</p>
-              ) : (
-                <ul className="text-xs space-y-1 max-h-64 overflow-auto pr-1">
-                  {data.recent.slice(0, 50).map((v, i) => (
-                    <li key={i} className="flex justify-between gap-2 border-b border-bourbon/10 pb-1">
-                      <span className="text-bourbon/80 truncate">
-                        @{v.username} <span className="text-bourbon/60">{v.page}</span>
-                      </span>
-                      <time className="text-bourbon/50 whitespace-nowrap">
-                        {new Date(v.ts).toLocaleString()}
-                      </time>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
           </div>
-        </>
+
+          <div>
+            <h3 className="text-xs uppercase tracking-wider text-bourbon/70 mb-2">
+              Recent activity
+            </h3>
+            {data.recent.length === 0 ? (
+              <p className="text-sm text-bourbon/60">No visits yet.</p>
+            ) : (
+              <ul className="text-xs space-y-1 max-h-72 overflow-auto pr-1">
+                {data.recent.slice(0, 100).map((v, i) => (
+                  <li
+                    key={i}
+                    className="flex justify-between gap-2 border-b border-bourbon/10 pb-1"
+                  >
+                    <span className="text-bourbon/80 truncate">
+                      <span className="font-semibold">@{v.username}</span>{' '}
+                      <span className="text-bourbon/60">{v.page}</span>
+                    </span>
+                    <time className="text-bourbon/50 whitespace-nowrap">
+                      {new Date(v.ts).toLocaleString()}
+                    </time>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
       )}
     </section>
   );
