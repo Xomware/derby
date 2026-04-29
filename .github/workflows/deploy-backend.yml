@@ -165,20 +165,34 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Package lambda
+        id: package
         run: |
+          if [ ! -d "lambdas/${{ matrix.lambda }}" ]; then
+            echo "Lambda dir lambdas/${{ matrix.lambda }} no longer exists — skipping"
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
           cd lambdas/${{ matrix.lambda }}
           zip -r ../../${{ matrix.lambda }}.zip *
 
       - name: Deploy code
+        if: steps.package.outputs.skip != 'true'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           FN="${APP_NAME}-$(echo "${{ matrix.lambda }}" | tr '_' '-')"
           echo "Deploying $FN"
-          aws lambda update-function-code --function-name $FN \
-            --zip-file fileb://${{ matrix.lambda }}.zip \
-            --region $AWS_REGION
+          if ! aws lambda update-function-code --function-name $FN \
+              --zip-file fileb://${{ matrix.lambda }}.zip \
+              --region $AWS_REGION 2>/tmp/lambda-err; then
+            if grep -q "ResourceNotFoundException" /tmp/lambda-err; then
+              echo "Function $FN doesn't exist (probably removed in TF) — skipping"
+              exit 0
+            fi
+            cat /tmp/lambda-err >&2
+            exit 1
+          fi
           aws lambda wait function-updated --function-name $FN --region $AWS_REGION
 
           if [ -n "${{ needs.deploy-layer.outputs.layer_arn }}" ]; then

@@ -27,3 +27,47 @@ h3,
   font-family: var(--font-display);
   letter-spacing: -0.01em;
 }
+
+/* Falling rose petals on the auth screens.
+   Two animations stacked: a vertical fall + a sideways sway.
+   --drift is set per-petal as a CSS custom property in JS. */
+.petal {
+  position: absolute;
+  top: -40px;
+  display: inline-block;
+  will-change: transform, top;
+  animation-name: petal-fall, petal-sway;
+  animation-iteration-count: infinite, infinite;
+  animation-timing-function: linear, ease-in-out;
+  animation-direction: normal, alternate;
+}
+
+@keyframes petal-fall {
+  0% {
+    top: -8%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    top: 110%;
+    opacity: 0.9;
+  }
+}
+
+@keyframes petal-sway {
+  0% {
+    margin-left: 0;
+  }
+  100% {
+    margin-left: var(--drift, 0px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .petal {
+    animation: none;
+    display: none;
+  }
+}
