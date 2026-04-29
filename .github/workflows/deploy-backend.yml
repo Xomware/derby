@@ -29,13 +29,12 @@ env:
   APP_NAME: derby
   PYTHON_VERSION: "3.11"
 
-defaults:
-  run:
-    working-directory: backend
-
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     outputs:
       common_changed: ${{ steps.changes.outputs.common }}
       changed_lambdas: ${{ steps.changes.outputs.changed_lambdas }}
@@ -89,6 +88,9 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.common_changed == 'true'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     outputs:
       layer_arn: ${{ steps.publish.outputs.layer_arn }}
     steps:
@@ -147,6 +149,9 @@ jobs:
     needs: [detect-changes, deploy-layer]
     if: always() && needs.detect-changes.outputs.has_lambda_changes == 'true'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     strategy:
       matrix:
         lambda: ${{ fromJson(needs.detect-changes.outputs.changed_lambdas) }}
