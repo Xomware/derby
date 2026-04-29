@@ -6,11 +6,13 @@ import useSWR from 'swr';
 import { api, ApiError } from './api';
 import type { Leaderboard, Me, PicksGrouped, RaceResultsList } from './types';
 
-const swallow401 = async <T>(fn: () => Promise<T>): Promise<T | null> => {
+const swallowUnauth = async <T>(fn: () => Promise<T>): Promise<T | null> => {
   try {
     return await fn();
   } catch (e) {
-    if (e instanceof ApiError && e.status === 401) return null;
+    // API Gateway returns 403 when the Cookie identity source is missing,
+    // 401 when the authorizer denies. Both mean "not signed in".
+    if (e instanceof ApiError && (e.status === 401 || e.status === 403)) return null;
     throw e;
   }
 };
@@ -18,7 +20,7 @@ const swallow401 = async <T>(fn: () => Promise<T>): Promise<T | null> => {
 export function useMe() {
   const { data, error, isLoading, mutate } = useSWR<Me | null>(
     'me',
-    () => swallow401(() => api.me()),
+    () => swallowUnauth(() => api.me()),
     { revalidateOnFocus: false }
   );
   return { me: data ?? null, error, isLoading, refresh: mutate };

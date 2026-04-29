@@ -28,45 +28,31 @@ h3,
   letter-spacing: -0.01em;
 }
 
-/* Falling rose petals on the auth screens.
-   Two animations stacked: a vertical fall + a sideways sway.
-   --drift is set per-petal as a CSS custom property in JS. */
-.petal {
+/* Galloping horses running across the screen.
+   Translates from off-screen-right to off-screen-left, looping forever.
+   Each horse gets its own duration / delay / scale / bottom from JS. */
+.horse {
   position: absolute;
-  top: -40px;
+  right: -150px;
   display: inline-block;
-  will-change: transform, top;
-  animation-name: petal-fall, petal-sway;
-  animation-iteration-count: infinite, infinite;
-  animation-timing-function: linear, ease-in-out;
-  animation-direction: normal, alternate;
+  will-change: transform;
+  animation-name: horse-gallop;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  transform-origin: center;
 }
 
-@keyframes petal-fall {
+@keyframes horse-gallop {
   0% {
-    top: -8%;
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
+    right: -150px;
   }
   100% {
-    top: 110%;
-    opacity: 0.9;
-  }
-}
-
-@keyframes petal-sway {
-  0% {
-    margin-left: 0;
-  }
-  100% {
-    margin-left: var(--drift, 0px);
+    right: 100%;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .petal {
+  .horse {
     animation: none;
     display: none;
   }
