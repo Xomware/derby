@@ -1,0 +1,38 @@
+name: Race-Day Polling
+
+# Polls the API every 5 minutes during the Derby Day race window.
+# Hobby Vercel doesn't allow sub-daily crons; GitHub Actions covers it for free.
+# - Day-of: Sat May 2, 2026 — race window roughly 16:00–24:00 UTC (12pm–8pm ET)
+# - Off-window runs are skipped server-side (POLL_WINDOW_*_UTC envs)
+# - Manual trigger via workflow_dispatch for spot checks
+
+on:
+  schedule:
+    # 5-min cadence on May 2, 2026 (UTC). Single date keeps log noise down.
+    - cron: '*/5 16-23 2 5 *'
+    - cron: '0 0 3 5 *'
+  workflow_dispatch:
+
+concurrency:
+  group: derby-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit /internal/poll
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          INTERNAL_SECRET: ${{ secrets.INTERNAL_SECRET }}
+        run: |
+          if [ -z "$API_URL" ] || [ -z "$INTERNAL_SECRET" ]; then
+            echo "Missing secrets API_URL or INTERNAL_SECRET" >&2
+            exit 1
+          fi
+          response=$(curl -sS -o /tmp/body -w "%{http_code}" \
+            -X POST "$API_URL/internal/poll" \
+            -H "X-Internal-Secret: $INTERNAL_SECRET")
+          echo "HTTP $response"
+          cat /tmp/body
+          test "$response" = "200"

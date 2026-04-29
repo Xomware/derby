@@ -29,10 +29,9 @@ variable "vercel_cname_target" {
 }
 
 variable "api_cname_target" {
-  description = "Backend host CNAME target. Set to your Railway or Fly.io public hostname."
+  description = "Backend host CNAME target. Vercel project hostname for the API (api.derby.xoware.com)."
   type        = string
-  # Example Railway: "derby-api-production.up.railway.app"
-  # Example Fly:     "derby-api.fly.dev"
+  default     = "cname.vercel-dns.com"
 }
 
 # --- Resend (email) ---

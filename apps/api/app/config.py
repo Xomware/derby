@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     poll_interval_seconds: int = Field(default=120)
     poll_provider: str = Field(default="fake")
 
+    # Shared secret for internal endpoints (GitHub Actions cron, etc.)
+    internal_secret: str = Field(default="")
+
     @property
     def admin_email_list(self) -> list[str]:
         return [e.strip().lower() for e in self.admin_emails.split(",") if e.strip()]

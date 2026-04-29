@@ -8,18 +8,21 @@ Personal project. Grant's annual Kentucky Derby picks site with tail/fade voting
 
 ## Stack (locked in)
 
-| Layer            | Choice                          |
-| ---------------- | ------------------------------- |
-| Frontend         | Next.js on Vercel               |
-| Backend          | FastAPI                         |
-| Database         | Neon (free Postgres)            |
-| Auth             | Magic link, custom, JWT-based   |
-| Email            | Resend (free tier)              |
-| Backend hosting  | Railway or Fly.io               |
-| Polling worker   | Same backend, APScheduler       |
-| Domain           | derby.xoware.com (subdomain)    |
+| Layer            | Choice                                       |
+| ---------------- | -------------------------------------------- |
+| Frontend         | Next.js on Vercel (Hobby)                    |
+| Backend          | FastAPI on Vercel Python serverless (Hobby)  |
+| Database         | Neon (Free)                                  |
+| Auth             | Magic link, custom, JWT-based                |
+| Email            | Resend (Free)                                |
+| Polling worker   | GitHub Actions cron → `/internal/poll`       |
+| Domain           | derby.xoware.com (subdomain)                 |
 
-Cost estimate: ~$0–5/month
+Cost: $0/month (no credit card needed at any vendor).
+Decision history: originally planned for Fly.io. Switched to Vercel-only
+because Fly requires a credit card on file even for the free tier, and the
+serverless model removes the multi-instance APScheduler risk we flagged in
+brainstorming.
 
 ## Branding (locked in)
 
@@ -123,11 +126,12 @@ poll_runs
 
 ## Polling Strategy
 
-Goal: auto-update pick results within ~2 min of race finishing.
+Goal: auto-update pick results within ~5 min of race finishing.
 
 - **Primary source**: scrape Churchill Downs results page (verify URL + parseability Day 1).
 - **Backup source**: TwinSpires.
-- **Schedule**: every 2 min between 12:00pm and 8:00pm ET on Derby Day. Outside window, no polling.
+- **Trigger**: GitHub Actions workflow `.github/workflows/poll.yml` runs `*/5` between 16:00–24:00 UTC on May 2, 2026 (≈ 12pm–8pm ET). Workflow `POST`s to `/internal/poll` with `X-Internal-Secret` header.
+- **Schedule guard**: server-side, gated by `POLL_ENABLED` and `POLL_WINDOW_*_UTC`. Outside window, the endpoint returns `outside_window` without scraping.
 - **Failure mode**: page change → silent fail → manual admin override. Every poll logged to `poll_runs`. Errors surfaced in admin dashboard.
 
 ## Build Plan (3 days)

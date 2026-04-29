@@ -6,8 +6,9 @@ api_subdomain = "api.derby"
 # After Vercel project is created, copy CNAME target from Vercel domain settings.
 vercel_cname_target = "cname.vercel-dns.com"
 
-# After Railway/Fly project is created, copy hostname here.
-api_cname_target = "derby-api-production.up.railway.app"
+# Vercel projects share the same CNAME target. Override only if Vercel's project
+# domain settings tell you to use a different host.
+api_cname_target = "cname.vercel-dns.com"
 
 # After Resend domain verification is initiated, copy DKIM record name + value.
 # Resend dashboard shows these on the "Domains" page.

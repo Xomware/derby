@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import admin, auth, leaderboard, picks, votes
+from app.routers import admin, auth, internal, leaderboard, picks, votes
 from app.services.polling import start_scheduler, stop_scheduler
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -39,6 +39,7 @@ def create_app() -> FastAPI:
     app.include_router(votes.router)
     app.include_router(leaderboard.router)
     app.include_router(admin.router)
+    app.include_router(internal.router)
 
     @app.get("/healthz", tags=["meta"])
     def healthz() -> dict:
