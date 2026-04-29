@@ -3,7 +3,7 @@ resource "aws_lambda_function" "authorizer" {
   description      = "JWT authorizer (cookie or Bearer)"
   filename         = "${path.module}/templates/lambda_stub.zip"
   source_code_hash = filebase64sha256("${path.module}/templates/lambda_stub.zip")
-  handler          = "lambdas.authorizer.handler.handler"
+  handler          = "handler.handler"
   runtime          = var.lambda_runtime
   memory_size      = 256
   timeout          = var.lambda_timeout

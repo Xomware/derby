@@ -3,7 +3,7 @@ resource "aws_lambda_function" "cron_poll_results" {
   description      = "Race-day poll trigger (EventBridge schedule)"
   filename         = "${path.module}/templates/lambda_stub.zip"
   source_code_hash = filebase64sha256("${path.module}/templates/lambda_stub.zip")
-  handler          = "lambdas.cron_poll_results.handler.handler"
+  handler          = "handler.handler"
   layers           = [aws_lambda_layer_version.lambda_layer.arn]
   runtime          = var.lambda_runtime
   memory_size      = var.lambda_memory_size
