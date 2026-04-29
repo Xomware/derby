@@ -1,0 +1,54 @@
+# Fly.io app config — generated for Xoware Derby API.
+# Single primary region, single instance (APScheduler is in-process, so no scale-out).
+# Free tier sized: 256MB RAM, shared CPU. Adjust if Derby Day load needs more.
+
+app = "derby-api"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8000"
+
+[[services]]
+  internal_port = 8000
+  protocol = "tcp"
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 50
+    soft_limit = 25
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [[services.tcp_checks]]
+    grace_period = "10s"
+    interval = "30s"
+    timeout = "5s"
+
+  [[services.http_checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "get"
+    path = "/healthz"
+    protocol = "http"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+
+# Keep one machine warm. APScheduler relies on the process running through
+# the race window, so do not let Fly auto-stop us during May 2.
+[machine]
+  auto_stop = false
+  auto_start = false
+  min_machines_running = 1
