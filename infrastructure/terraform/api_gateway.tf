@@ -115,7 +115,7 @@ locals {
 }
 
 module "api" {
-  source = "git::https://github.com/domgiordano/api-gateway-service.git?ref=v2.3.0"
+  source = "git::https://github.com/domgiordano/api-gateway-service.git?ref=v2.4.0"
 
   app_name              = var.app_name
   stage_name            = var.api_stage_name
@@ -124,6 +124,12 @@ module "api" {
   tags                  = local.standard_tags
   allow_headers         = local.api_allow_headers
   allow_origin          = var.cors_allowed_origins
+
+  # REQUEST authorizer reads the cookie header — TOKEN authorizers only see
+  # Authorization, so cookie-based sessions never reach the Lambda.
+  authorizer_type                  = "REQUEST"
+  authorizer_identity_source       = "method.request.header.Cookie"
+  authorizer_result_ttl_in_seconds = 0
 
   domain_name     = local.api_domain_name
   certificate_arn = aws_acm_certificate_validation.api.certificate_arn
