@@ -1,0 +1,15 @@
+aws_region    = "us-east-1"
+parent_domain = "xoware.com"
+subdomain     = "derby"
+api_subdomain = "api.derby"
+
+# After Vercel project is created, copy CNAME target from Vercel domain settings.
+vercel_cname_target = "cname.vercel-dns.com"
+
+# After Railway/Fly project is created, copy hostname here.
+api_cname_target = "derby-api-production.up.railway.app"
+
+# After Resend domain verification is initiated, copy DKIM record name + value.
+# Resend dashboard shows these on the "Domains" page.
+resend_dkim_record_name  = "resend._domainkey.derby"
+resend_dkim_record_value = "p=PASTE_DKIM_PUBLIC_KEY_HERE"
