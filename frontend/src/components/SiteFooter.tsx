@@ -21,6 +21,18 @@ export function SiteFooter() {
           </svg>
           github
         </a>
+        <span aria-hidden className="hidden sm:inline">·</span>
+        <span>
+          created by{' '}
+          <a
+            href="https://github.com/domjgiordano"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-rose-red"
+          >
+            @domjgiordano
+          </a>
+        </span>
       </div>
     </footer>
   );

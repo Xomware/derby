@@ -1,10 +1,12 @@
 import type {
   AdminUser,
+  AdminVisitsStats,
   Leaderboard,
   Me,
   Pick,
   PicksGrouped,
   PollStatus,
+  RaceResultsList,
   ResultValue,
   VerifyResponse,
   VoteValue,
@@ -70,6 +72,9 @@ export const api = {
   // leaderboard
   leaderboard: () => request<Leaderboard>('/leaderboard/rank'),
 
+  // race-level results
+  results: () => request<RaceResultsList>('/results/list'),
+
   // admin
   adminCreatePick: (body: AdminPickInput) =>
     request<Pick>('/admin-picks/create', { method: 'POST', body: JSON.stringify(body) }),
@@ -82,7 +87,25 @@ export const api = {
   adminUsers: () => request<AdminUser[]>('/admin-users/list'),
   adminPollStatus: () => request<PollStatus>('/admin-poll/status'),
   adminPollNow: () => request('/admin-poll/now', { method: 'POST' }),
+  adminSetRaceResult: (body: AdminRaceResultInput) =>
+    request('/admin-results/set', { method: 'POST', body: JSON.stringify(body) }),
+  adminVisitsStats: (days = 7) =>
+    request<AdminVisitsStats>(`/admin-visits/stats?days=${days}`),
 };
+
+export interface AdminRaceResultInput {
+  race_number: number;
+  finishers: {
+    position: number;
+    horse_name: string;
+    jockey?: string | null;
+    win_payout?: string | null;
+    place_payout?: string | null;
+    show_payout?: string | null;
+  }[];
+  official_at?: string | null;
+  notes?: string | null;
+}
 
 export interface AdminPickInput {
   race_number: number;

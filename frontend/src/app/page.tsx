@@ -2,97 +2,68 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Countdown } from '@/components/Countdown';
-import { LeaderboardTable } from '@/components/LeaderboardTable';
-import { PickCard } from '@/components/PickCard';
-import { useLeaderboard, useMe, usePicks } from '@/lib/hooks';
+import { usePicks } from '@/lib/hooks';
+
+const SECTIONS: { href: string; title: string; copy: string }[] = [
+  {
+    href: '/picks',
+    title: 'Picks',
+    copy: 'See Grant’s picks for every race. Tail him, fade him, or pass.',
+  },
+  {
+    href: '/rationale',
+    title: 'Rationale',
+    copy: 'The thinking. Pace, post position, jockey, training notes — race by race.',
+  },
+  {
+    href: '/results',
+    title: 'Live Results',
+    copy: 'Finishers + payouts updated as the day unfolds.',
+  },
+  {
+    href: '/leaderboard',
+    title: 'Leaderboard',
+    copy: 'Who’s outsmarting Grant. +1 for every correct tail or fade.',
+  },
+];
 
 export default function Home() {
-  const { picks, isLoading, error } = usePicks();
-  const { leaderboard } = useLeaderboard();
-  const { me } = useMe();
-  const router = useRouter();
-
+  const { picks } = usePicks();
   const earliest = picks?.races.map((r) => r.race_post_time).sort()[0];
 
   return (
-    <>
-      <section className="pt-8 pb-6 flex flex-col items-center text-center">
-        <Image
-          src="/banner.png"
-          alt="Sun God Derby"
-          width={520}
-          height={120}
-          priority
-          className="w-full max-w-lg h-auto"
-        />
-        <p className="mt-3 text-bourbon/80 max-w-xl">
-          Tail Grant, fade Grant, or pass. Picks lock at post time. Leaderboard
-          updates as the results roll in.
-        </p>
-        {earliest && (
-          <div className="mt-5 inline-flex items-center gap-3 px-3 py-1.5 rounded-full border border-rose-red/20 bg-white">
-            <Countdown target={earliest} label="First lock" />
-          </div>
-        )}
-      </section>
-
-      {error && (
-        <div className="rounded border border-rose-red/40 bg-rose-red/10 p-3 text-sm text-rose-dark">
-          Could not load picks. Try again in a moment.
-        </div>
-      )}
-      {isLoading && (
-        <div className="text-center text-bourbon/70 py-12">Loading picks…</div>
-      )}
-
-      {picks && picks.races.length === 0 && !isLoading && (
-        <div className="text-center text-bourbon/70 py-12">
-          No picks posted yet — Grant&apos;s working on them. Check back soon.
+    <section className="pt-10 pb-12 flex flex-col items-center text-center">
+      <Image
+        src="/banner.png"
+        alt="Sun God Derby"
+        width={520}
+        height={120}
+        priority
+        className="w-full max-w-lg h-auto"
+      />
+      <p className="mt-5 text-bourbon/80 max-w-xl">
+        Grant&apos;s annual Derby pool. Pick a side on every horse he likes, then
+        watch the leaderboard sort itself out as the races run.
+      </p>
+      {earliest && (
+        <div className="mt-5 inline-flex items-center gap-3 px-3 py-1.5 rounded-full border border-rose-red/20 bg-white">
+          <Countdown target={earliest} label="First lock" />
         </div>
       )}
 
-      {picks && picks.races.length > 0 && (
-        <div className="space-y-8">
-          {picks.races.map((race) => (
-            <section key={race.race_number}>
-              <header className="flex items-baseline justify-between mb-3">
-                <h2 className="font-display text-2xl text-rose-dark">
-                  Race {race.race_number}
-                </h2>
-                <Countdown target={race.race_post_time} label="Lock" />
-              </header>
-              <div className="grid sm:grid-cols-2 gap-4">
-                {race.picks.map((p) => (
-                  <PickCard
-                    key={p.id}
-                    pick={p}
-                    isAuthed={!!me}
-                    onRequireAuth={() => router.push('/login')}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      )}
-
-      <section className="mt-12">
-        <header className="flex items-baseline justify-between mb-3">
-          <h2 className="font-display text-2xl text-rose-dark">Leaderboard</h2>
-          <Link href="/leaderboard" className="text-xs text-rose-red hover:underline">
-            View full
+      <div className="mt-12 grid gap-4 sm:grid-cols-2 w-full max-w-3xl text-left">
+        {SECTIONS.map((s) => (
+          <Link
+            key={s.href}
+            href={s.href}
+            className="rounded-xl border border-rose-red/15 bg-white p-5 hover:border-rose-red transition shadow-sm"
+          >
+            <h2 className="font-display text-xl text-rose-dark">{s.title}</h2>
+            <p className="text-sm text-bourbon/80 mt-1.5 leading-relaxed">{s.copy}</p>
           </Link>
-        </header>
-        {leaderboard && (
-          <LeaderboardTable
-            rows={leaderboard.rows}
-            highlightUsername={me?.username ?? null}
-            limit={5}
-          />
-        )}
-      </section>
-    </>
+        ))}
+      </div>
+    </section>
   );
 }

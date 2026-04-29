@@ -1,8 +1,10 @@
 'use client';
 
+import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import useSWR from 'swr';
 import { api, ApiError } from './api';
-import type { Leaderboard, Me, PicksGrouped } from './types';
+import type { Leaderboard, Me, PicksGrouped, RaceResultsList } from './types';
 
 const swallow401 = async <T>(fn: () => Promise<T>): Promise<T | null> => {
   try {
@@ -38,4 +40,25 @@ export function useLeaderboard() {
     { refreshInterval: 30_000 }
   );
   return { leaderboard: data, error, isLoading, refresh: mutate };
+}
+
+export function useResults() {
+  const { data, error, isLoading, mutate } = useSWR<RaceResultsList>(
+    'results',
+    () => api.results(),
+    { refreshInterval: 60_000 }
+  );
+  return { results: data, error, isLoading, refresh: mutate };
+}
+
+/** Fire-and-forget visit logging on every authed route change. */
+export function useTrackVisit() {
+  const pathname = usePathname() ?? '/';
+  const { me } = useMe();
+  useEffect(() => {
+    if (!me) return;
+    api.trackVisit(pathname).catch(() => {
+      /* tracking is best-effort */
+    });
+  }, [pathname, me]);
 }

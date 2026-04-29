@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import { useMe } from '@/lib/hooks';
@@ -72,6 +73,17 @@ export function ProfileMenu({ me }: { me: Me }) {
                   Change username
                 </button>
               </li>
+              {me.is_admin && (
+                <li>
+                  <Link
+                    href="/admin"
+                    onClick={() => setOpen(false)}
+                    className="block px-4 py-2 hover:bg-bourbon/10 text-mint-julep"
+                  >
+                    Admin portal
+                  </Link>
+                </li>
+              )}
               <li>
                 <button
                   onClick={logout}

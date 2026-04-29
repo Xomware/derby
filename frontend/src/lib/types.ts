@@ -90,5 +90,39 @@ export interface PollStatus {
   last_picks_updated: number | null;
   last_errors: string | null;
   poll_enabled: boolean;
-  next_run_at: string | null;
+  next_run_at?: string | null;
+  window_start_utc?: string | null;
+  window_end_utc?: string | null;
+}
+
+export interface RaceFinisher {
+  position: number;
+  horse_name: string;
+  jockey: string | null;
+  win_payout: string | null;
+  place_payout: string | null;
+  show_payout: string | null;
+}
+
+export interface RaceResult {
+  race_number: number;
+  finishers: RaceFinisher[];
+  official_at: string | null;
+  notes: string | null;
+  updated_at: string | null;
+  updated_by: string | null;
+  source: string | null;
+}
+
+export interface RaceResultsList {
+  races: RaceResult[];
+}
+
+export interface AdminVisitsStats {
+  total_visits: number;
+  unique_visitors: number;
+  by_day: { day: string; count: number }[];
+  top_pages: { page: string; count: number }[];
+  top_users: { username: string; count: number }[];
+  recent: { username: string; page: string; ts: string; referrer: string | null }[];
 }

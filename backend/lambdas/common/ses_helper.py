@@ -22,14 +22,7 @@ def send_magic_link_email(*, to: str, link: str) -> None:
     )
     html = f"""\
 <div style="font-family: -apple-system, Segoe UI, Roboto, sans-serif; color:#2b2018; line-height:1.5; max-width:480px; margin:0 auto; padding:24px;">
-  <table role="presentation" style="width:100%; margin-bottom:20px; border-collapse:collapse;"><tr>
-    <td style="vertical-align:middle;">
-      <img src="https://derby.xomware.com/icon.png" alt="" width="40" height="40" style="display:block;border:0;" />
-    </td>
-    <td style="vertical-align:middle; padding-left:12px;">
-      <strong style="font-family: Georgia, serif; font-size:18px; color:#5D4037;">Sun God Derby</strong>
-    </td>
-  </tr></table>
+  <img src="https://derby.xomware.com/banner.png" alt="Sun God Derby" style="display:block; max-width:320px; height:auto; margin:0 0 20px; border:0;" />
   <h1 style="font-family: Georgia, serif; font-size:22px; color:#8B0A1F; margin:0 0 12px;">Sign in</h1>
   <p style="margin:0 0 18px;">Tap the button to sign in to <strong>derby.xomware.com</strong>.</p>
   <p style="margin:0 0 24px;">

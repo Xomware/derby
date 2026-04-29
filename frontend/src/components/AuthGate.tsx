@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useMe } from '@/lib/hooks';
+import { useMe, useTrackVisit } from '@/lib/hooks';
 
 const PUBLIC_ROUTES = ['/login', '/auth/verify'];
 
@@ -14,6 +14,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? '/';
   const router = useRouter();
   const { me, isLoading } = useMe();
+  useTrackVisit();
 
   useEffect(() => {
     if (isLoading) return;
