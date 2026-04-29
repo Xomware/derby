@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { Countdown } from '@/components/Countdown';
 import { usePicks } from '@/lib/hooks';
@@ -33,15 +32,7 @@ export default function Home() {
   const earliest = picks?.races.map((r) => r.race_post_time).sort()[0];
 
   return (
-    <section className="pt-10 pb-12 flex flex-col items-center text-center">
-      <Image
-        src="/banner.png"
-        alt="Sun God Derby"
-        width={520}
-        height={120}
-        priority
-        className="w-full max-w-lg h-auto"
-      />
+    <section className="pt-8 pb-12 flex flex-col items-center text-center">
       <video
         src="/sungod.mp4"
         poster="/sungod-poster.jpg"
@@ -50,11 +41,11 @@ export default function Home() {
         muted
         playsInline
         aria-hidden
-        className="mt-6 w-full max-w-2xl rounded-xl border border-rose-red/15 shadow-sm bg-cream"
+        className="w-full max-w-xs sm:max-w-sm rounded-xl border border-rose-red/15 shadow-sm bg-cream"
       />
-      <p className="mt-5 text-bourbon/80 max-w-xl">
-        Grant&apos;s annual Derby pool. Pick a side on every horse he likes, then
-        watch the leaderboard sort itself out as the races run.
+      <p className="mt-6 text-bourbon/80 max-w-xl">
+        Grant&apos;s annual Derby pool. Pick a side on every horse he likes,
+        then watch the leaderboard sort itself out as the races run.
       </p>
       {earliest && (
         <div className="mt-5 inline-flex items-center gap-3 px-3 py-1.5 rounded-full border border-rose-red/20 bg-white">

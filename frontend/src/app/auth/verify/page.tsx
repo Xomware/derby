@@ -23,6 +23,10 @@ function VerifyInner() {
       setError('Missing token.');
       return;
     }
+    // Drop the token from the URL so it stays out of browser history + share/copy.
+    if (typeof window !== 'undefined') {
+      window.history.replaceState({}, '', '/auth/verify/');
+    }
     (async () => {
       try {
         const res = await api.verify(token);

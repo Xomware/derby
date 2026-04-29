@@ -14,25 +14,34 @@ const NAV_ITEMS: { href: string; label: string }[] = [
   { href: '/leaderboard', label: 'Leaderboard' },
 ];
 
+function isActive(pathname: string, href: string): boolean {
+  if (href === '/') return pathname === '/';
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function SiteHeader() {
   const { me } = useMe();
   const pathname = usePathname() ?? '/';
   const isAuthScreen = pathname === '/login' || pathname.startsWith('/auth/');
 
+  const Brand = (
+    <Link href={me ? '/' : '/login'} className="flex items-center shrink-0" aria-label="Sun God Derby">
+      <Image
+        src="/banner.png"
+        alt="Sun God Derby"
+        width={200}
+        height={48}
+        priority
+        className="h-9 w-auto sm:h-10"
+      />
+    </Link>
+  );
+
   if (isAuthScreen) {
     return (
       <header className="border-b border-rose-red/15 bg-cream/85 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-center">
-          <Link href="/" aria-label="Sun God Derby">
-            <Image
-              src="/banner.png"
-              alt="Sun God Derby"
-              width={240}
-              height={56}
-              priority
-              className="h-10 w-auto"
-            />
-          </Link>
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-center">
+          {Brand}
         </div>
       </header>
     );
@@ -40,14 +49,13 @@ export function SiteHeader() {
 
   return (
     <header className="border-b border-rose-red/15 bg-cream/85 backdrop-blur sticky top-0 z-10">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-        {me ? (
-          <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
+      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
+        {Brand}
+
+        {me && (
+          <nav className="flex-1 flex items-center justify-center gap-1 sm:gap-2 overflow-x-auto">
             {NAV_ITEMS.map((item) => {
-              const active =
-                item.href === '/'
-                  ? pathname === '/'
-                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const active = isActive(pathname, item.href);
               return (
                 <Link
                   key={item.href}
@@ -63,28 +71,20 @@ export function SiteHeader() {
               );
             })}
           </nav>
-        ) : (
-          <Link href="/" aria-label="Sun God Derby">
-            <Image
-              src="/banner.png"
-              alt="Sun God Derby"
-              width={200}
-              height={48}
-              priority
-              className="h-9 w-auto"
-            />
-          </Link>
         )}
-        {me ? (
-          <ProfileMenu me={me} />
-        ) : (
-          <Link
-            href="/login"
-            className="text-sm px-3 py-1.5 rounded bg-rose-red text-cream hover:bg-rose-dark"
-          >
-            Sign in
-          </Link>
-        )}
+
+        <div className="ml-auto flex items-center shrink-0">
+          {me ? (
+            <ProfileMenu me={me} />
+          ) : (
+            <Link
+              href="/login"
+              className="text-sm px-3 py-1.5 rounded bg-rose-red text-cream hover:bg-rose-dark"
+            >
+              Sign in
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );

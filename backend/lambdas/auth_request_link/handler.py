@@ -58,7 +58,7 @@ def handler(event, context):
         }
     )
 
-    link = f"{APP_BASE_URL.rstrip('/')}/auth/verify?token={token}"
+    link = f"{APP_BASE_URL.rstrip('/')}/auth/verify/?token={token}"
     send_magic_link_email(to=email, link=link)
     _ = cutoff_iso  # quiet
     return no_content()

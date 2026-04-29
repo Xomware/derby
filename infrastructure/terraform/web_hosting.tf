@@ -1,5 +1,5 @@
 module "web" {
-  source = "git::https://github.com/domgiordano/web-hosting.git?ref=v1.1.0"
+  source = "git::https://github.com/domgiordano/web-hosting.git?ref=v1.2.0"
 
   app_name    = var.app_name
   domain_name = local.domain_name
@@ -15,4 +15,9 @@ module "web" {
   origin_path               = var.cloudfront_origin_path
   minimum_tls_version       = var.minimum_tls_version
   retain_on_delete          = var.retain_on_delete
+
+  # Required for Next.js output:'export' deep routes (/auth/verify, /picks, etc.)
+  # — without this every subpath served the home page chunk via the SPA fallback,
+  # so token in the magic-link URL never reached the verify handler.
+  enable_subroute_rewrite = true
 }
