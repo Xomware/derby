@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Countdown } from '@/components/Countdown';
+import { RosePetals } from '@/components/RosePetals';
 import { usePicks } from '@/lib/hooks';
 
 const SECTIONS: { href: string; title: string; copy: string }[] = [
@@ -32,7 +33,8 @@ export default function Home() {
   const earliest = picks?.races.map((r) => r.lock_time).sort()[0];
 
   return (
-    <section className="pt-8 pb-12 flex flex-col items-center text-center">
+    <section className="pt-8 pb-12 flex flex-col items-center text-center relative">
+      <RosePetals />
       <video
         src="/sungod.mp4"
         poster="/sungod-poster.jpg"
