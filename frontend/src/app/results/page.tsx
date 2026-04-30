@@ -2,8 +2,9 @@
 
 import { useMemo } from 'react';
 import { Countdown } from '@/components/Countdown';
-import { EVENT_DERBY, EVENT_OAKS, usePicks } from '@/lib/hooks';
+import { usePicks } from '@/lib/hooks';
 import type { Pick, ResultValue } from '@/lib/types';
+import { CURRENT_YEAR } from '@/lib/year';
 
 const RESULT_TO_POSITION: Record<ResultValue, number | null> = {
   won: 1,
@@ -41,33 +42,39 @@ function sortForResults(picks: Pick[]): Pick[] {
 }
 
 export default function ResultsPage() {
-  const { picks: derby, isLoading: derbyLoading } = usePicks(EVENT_DERBY);
-  const { picks: oaks, isLoading: oaksLoading } = usePicks(EVENT_OAKS);
+  const { picks: derby, isLoading: derbyLoading, year } = usePicks('derby');
+  const { picks: oaks, isLoading: oaksLoading } = usePicks('oaks');
+  const isArchive = year !== CURRENT_YEAR;
 
   return (
     <section className="pt-8 max-w-3xl mx-auto space-y-10">
       <header>
-        <h1 className="font-display text-3xl text-rose-dark">Live Results</h1>
+        <h1 className="font-display text-3xl text-rose-dark">
+          {isArchive ? `${year} Results` : 'Live Results'}
+        </h1>
         <p className="text-bourbon/80 text-sm mt-1">
-          Oaks and Derby. Horses sit in post-position order until the race goes
-          official, then re-sort to Win / Place / Show on top.
+          {isArchive
+            ? `Final order from the ${year} Oaks and Derby.`
+            : 'Oaks and Derby. Horses sit in post-position order until the race goes official, then re-sort to Win / Place / Show on top.'}
         </p>
       </header>
 
       <RaceSection
         title="Kentucky Oaks"
-        eyebrow="Friday, May 1, 2026"
+        eyebrow={isArchive ? `${year} Oaks` : 'The Run for the Lilies'}
         picks={oaks?.races.flatMap((r) => r.picks) ?? []}
         lockTime={oaks?.races[0]?.lock_time}
         loading={oaksLoading}
+        isArchive={isArchive}
       />
 
       <RaceSection
         title="Kentucky Derby"
-        eyebrow="Saturday, May 2, 2026"
+        eyebrow={isArchive ? `${year} Derby` : 'The Run for the Roses'}
         picks={derby?.races.flatMap((r) => r.picks) ?? []}
         lockTime={derby?.races[0]?.lock_time}
         loading={derbyLoading}
+        isArchive={isArchive}
       />
     </section>
   );
@@ -79,12 +86,14 @@ function RaceSection({
   picks,
   lockTime,
   loading,
+  isArchive,
 }: {
   title: string;
   eyebrow: string;
   picks: Pick[];
   lockTime?: string;
   loading: boolean;
+  isArchive: boolean;
 }) {
   const sorted = useMemo(() => sortForResults(picks), [picks]);
   const anyOfficial = sorted.some((p) => RESULT_TO_POSITION[p.result] !== null);
@@ -98,7 +107,7 @@ function RaceSection({
           </p>
           <h2 className="font-display text-2xl text-bourbon">{title}</h2>
         </div>
-        {lockTime && !anyOfficial && <Countdown target={lockTime} label="Lock" />}
+        {lockTime && !anyOfficial && !isArchive && <Countdown target={lockTime} label="Lock" />}
         {anyOfficial && (
           <span className="text-xs uppercase tracking-wider font-semibold text-rose-dark">
             Official

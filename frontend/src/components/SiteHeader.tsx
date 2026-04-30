@@ -6,11 +6,13 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useUsername } from '@/lib/identity';
 import { UsernameModal } from './UsernameModal';
+import { YearSelector } from './YearSelector';
 
 const NAV_ITEMS: { href: string; label: string }[] = [
   { href: '/', label: 'Home' },
-  { href: '/derby', label: 'Kentucky Derby' },
-  { href: '/oaks', label: 'Kentucky Oaks' },
+  { href: '/derby', label: 'Derby' },
+  { href: '/oaks', label: 'Oaks' },
+  { href: '/picks', label: 'Picks' },
   { href: '/results', label: 'Live Results' },
   { href: '/leaderboard', label: 'Leaderboard' },
 ];
@@ -89,6 +91,7 @@ export function SiteHeader() {
           )}
 
           <div className="ml-auto flex items-center gap-2 shrink-0">
+            {username && <YearSelector className="hidden sm:inline-flex" />}
             {username && (
               <button
                 onClick={() => setEditName(true)}
@@ -155,7 +158,11 @@ export function SiteHeader() {
                     </li>
                   );
                 })}
-                <li className="border-t border-bourbon/15 mt-2 pt-2">
+                <li className="border-t border-bourbon/15 mt-2 pt-2 flex items-center justify-between gap-2 px-2 py-2">
+                  <span className="text-bourbon/70 text-sm">Year</span>
+                  <YearSelector />
+                </li>
+                <li>
                   <button
                     onClick={() => {
                       setMobileOpen(false);

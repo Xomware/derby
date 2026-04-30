@@ -26,6 +26,8 @@ VOTES_TABLE = os.environ.get("VOTES_TABLE", f"{APP_NAME}-votes")
 POLL_RUNS_TABLE = os.environ.get("POLL_RUNS_TABLE", f"{APP_NAME}-poll-runs")
 RACE_RESULTS_TABLE = os.environ.get("RACE_RESULTS_TABLE", f"{APP_NAME}-race-results")
 VISITS_TABLE = os.environ.get("VISITS_TABLE", f"{APP_NAME}-visits")
+PREDICTIONS_TABLE = os.environ.get("PREDICTIONS_TABLE", f"{APP_NAME}-predictions")
+COMMENTS_TABLE = os.environ.get("COMMENTS_TABLE", f"{APP_NAME}-comments")
 
 # GSI names
 USERS_USERNAME_INDEX = "username-index"
@@ -55,5 +57,13 @@ POLL_WINDOW_END_UTC = os.environ.get("POLL_WINDOW_END_UTC", "")
 POLL_PROVIDER = os.environ.get("POLL_PROVIDER", "fake")
 
 RESERVED_USERNAMES = {
-    "admin", "administrator", "root", "system", "moderator",
+    "ADMIN", "ADMINISTRATOR", "ROOT", "SYSTEM", "MODERATOR",
+}
+
+ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "")
+
+# Map event_id -> "main" race number (used to gate hide-others logic)
+EVENT_MAIN_RACES = {
+    "kentucky-derby": 12,
+    "kentucky-oaks": 11,
 }

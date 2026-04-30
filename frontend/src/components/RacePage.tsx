@@ -3,8 +3,9 @@
 import { useMemo, useState } from 'react';
 import { Countdown } from '@/components/Countdown';
 import { SidePanel, SidePanelItem } from '@/components/SidePanel';
-import { usePicks } from '@/lib/hooks';
+import { usePicks, type RaceKind } from '@/lib/hooks';
 import type { Pick } from '@/lib/types';
+import { CURRENT_YEAR } from '@/lib/year';
 
 type SortKey = 'post' | 'name' | 'odds';
 
@@ -43,16 +44,17 @@ function oddsToNumber(odds: string | null): number {
 }
 
 export function RacePage({
-  eventId,
+  kind,
   title,
   eyebrow,
 }: {
-  eventId: string;
+  kind: RaceKind;
   title: string;
   eyebrow: string;
 }) {
-  const { picks, isLoading } = usePicks(eventId);
+  const { picks, isLoading, year } = usePicks(kind);
   const [sortKey, setSortKey] = useState<SortKey>('post');
+  const isArchive = year !== CURRENT_YEAR;
 
   const flatPicks = useMemo(
     () => (picks?.races ?? []).flatMap((r) => r.picks),
@@ -94,16 +96,24 @@ export function RacePage({
       <section className="space-y-6 min-w-0">
         <header>
           <p className="font-display italic text-mint-julep text-xs uppercase tracking-[0.3em]">
-            {eyebrow}
+            {isArchive ? `${year} — Archive` : eyebrow}
           </p>
           <div className="mt-1 flex flex-wrap items-baseline justify-between gap-3">
-            <h1 className="font-display text-3xl text-rose-dark">{title}</h1>
-            {earliestLock && (
+            <h1 className="font-display text-3xl text-rose-dark">
+              {title}
+              {isArchive && <span className="text-bourbon/50 text-xl ml-2">{year}</span>}
+            </h1>
+            {earliestLock && !isArchive && (
               <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-full border border-rose-red/20 bg-white">
                 <Countdown target={earliestLock} label="Lock" />
               </div>
             )}
           </div>
+          {isArchive && (
+            <div className="mt-3 rounded-md border-l-4 border-bourbon/40 bg-bourbon/5 px-3 py-2 text-xs text-bourbon/80">
+              Viewing {year} archive — picks &amp; comments are read-only.
+            </div>
+          )}
         </header>
 
         <div className="flex items-center gap-2 flex-wrap">

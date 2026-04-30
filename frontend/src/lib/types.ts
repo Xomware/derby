@@ -1,4 +1,3 @@
-export type VoteValue = 'tail' | 'fade' | 'pass';
 export type ResultValue =
   | 'pending'
   | 'won'
@@ -6,22 +5,6 @@ export type ResultValue =
   | 'showed'
   | 'finished'
   | 'scratched';
-
-export interface Me {
-  id: string;
-  username: string;
-  is_admin: boolean;
-}
-
-export interface VoteCounts {
-  tail: number;
-  fade: number;
-  pass: number;
-}
-
-export interface Voter {
-  username: string;
-}
 
 export interface Pick {
   id: string;
@@ -46,9 +29,6 @@ export interface Pick {
   result: ResultValue;
   display_order: number;
   locked: boolean;
-  counts: VoteCounts;
-  voters: { tail: Voter[]; fade: Voter[]; pass: Voter[] };
-  my_vote: VoteValue | null;
 }
 
 export interface RaceGroup {
@@ -68,34 +48,12 @@ export interface LeaderboardRow {
   rank: number;
   username: string;
   score: number;
-  correct_tails: number;
-  correct_fades: number;
-  picks_voted: number;
+  picks_made: number;
 }
 
 export interface Leaderboard {
+  year: number;
   rows: LeaderboardRow[];
-}
-
-export interface AdminUser {
-  id: string;
-  email: string;
-  username: string;
-  is_admin: boolean;
-  created_at: string;
-  last_login_at: string | null;
-  vote_count: number;
-}
-
-export interface PollStatus {
-  last_ran_at: string | null;
-  last_source: string | null;
-  last_picks_updated: number | null;
-  last_errors: string | null;
-  poll_enabled: boolean;
-  next_run_at?: string | null;
-  window_start_utc?: string | null;
-  window_end_utc?: string | null;
 }
 
 export interface RaceFinisher {
@@ -122,19 +80,4 @@ export interface RaceResult {
 
 export interface RaceResultsList {
   races: RaceResult[];
-}
-
-export interface AdminVisitsStats {
-  total_visits: number;
-  unique_visitors: number;
-  by_day: { day: string; count: number }[];
-  top_pages: { page: string; count: number }[];
-  top_users: { username: string; count: number }[];
-  user_breakdown: {
-    username: string;
-    total: number;
-    last_seen: string | null;
-    pages: { page: string; count: number }[];
-  }[];
-  recent: { username: string; page: string; ts: string; referrer: string | null }[];
 }

@@ -1,35 +1,101 @@
 'use client';
 
 import useSWR from 'swr';
-import { api } from './api';
+import { api, type CommentsListResponse, type PredictionsListResponse } from './api';
 import type { Leaderboard, PicksGrouped, RaceResultsList } from './types';
+import { CURRENT_YEAR, derbyEventId, oaksEventId, useYear } from './year';
 
-export const EVENT_DERBY = '2026-kentucky-derby';
-export const EVENT_OAKS = '2026-kentucky-oaks';
+export type RaceKind = 'derby' | 'oaks';
 
-export function usePicks(eventId: string = EVENT_DERBY) {
+export function eventIdFor(year: number, kind: RaceKind): string {
+  return kind === 'derby' ? derbyEventId(year) : oaksEventId(year);
+}
+
+export function usePicks(kind: RaceKind, yearOverride?: number) {
+  const { year } = useYear();
+  const eventId = eventIdFor(yearOverride ?? year, kind);
   const { data, error, isLoading, mutate } = useSWR<PicksGrouped>(
     ['picks', eventId],
     () => api.picks(eventId),
     { refreshInterval: 30_000 }
   );
-  return { picks: data, error, isLoading, refresh: mutate };
+  return { picks: data, error, isLoading, refresh: mutate, eventId, year: yearOverride ?? year };
 }
 
-export function useLeaderboard() {
+export function useLeaderboard(yearOverride?: number) {
+  const { year } = useYear();
+  const effectiveYear = yearOverride ?? year;
   const { data, error, isLoading, mutate } = useSWR<Leaderboard>(
-    'leaderboard',
-    () => api.leaderboard(),
+    ['leaderboard', effectiveYear],
+    () => api.leaderboard(effectiveYear),
     { refreshInterval: 30_000 }
   );
-  return { leaderboard: data, error, isLoading, refresh: mutate };
+  return { leaderboard: data, error, isLoading, refresh: mutate, year: effectiveYear };
 }
 
-export function useResults() {
+export function useResults(yearOverride?: number) {
+  const { year } = useYear();
+  const effectiveYear = yearOverride ?? year;
   const { data, error, isLoading, mutate } = useSWR<RaceResultsList>(
-    'results',
-    () => api.results(),
+    ['results', effectiveYear],
+    () => api.results(effectiveYear),
     { refreshInterval: 60_000 }
   );
-  return { results: data, error, isLoading, refresh: mutate };
+  return { results: data, error, isLoading, refresh: mutate, year: effectiveYear };
+}
+
+export function useGrantPicks(kind: RaceKind, yearOverride?: number) {
+  const { year } = useYear();
+  const effectiveYear = yearOverride ?? year;
+  const { data, error, isLoading } = useSWR<GrantPicks>(
+    ['grant-picks', effectiveYear, kind],
+    async () => {
+      const res = await fetch(`/grants-picks/${effectiveYear}/${kind}.json`);
+      if (!res.ok) throw new Error(`No Grant picks for ${effectiveYear} ${kind}`);
+      return (await res.json()) as GrantPicks;
+    }
+  );
+  return { grantPicks: data, error, isLoading, year: effectiveYear, isCurrent: effectiveYear === CURRENT_YEAR };
+}
+
+export interface GrantPicks {
+  year: number;
+  event: RaceKind;
+  win: string | null;
+  place: string | null;
+  show: string | null;
+  long_shot: string | null;
+  inferred?: boolean;
+  notes?: string | null;
+}
+
+export function useComments(kind: RaceKind, yearOverride?: number) {
+  const { year } = useYear();
+  const eventId = eventIdFor(yearOverride ?? year, kind);
+  const isCurrent = (yearOverride ?? year) === CURRENT_YEAR;
+  const { data, error, isLoading, mutate } = useSWR<CommentsListResponse>(
+    isCurrent ? ['comments', eventId] : null,
+    () => api.commentsList(eventId),
+    { refreshInterval: 60_000 }
+  );
+  return {
+    comments: data?.comments ?? [],
+    error,
+    isLoading,
+    refresh: mutate,
+    eventId,
+    isCurrent,
+  };
+}
+
+export function usePredictions(kind: RaceKind, username: string | null, yearOverride?: number) {
+  const { year } = useYear();
+  const eventId = eventIdFor(yearOverride ?? year, kind);
+  const isCurrent = (yearOverride ?? year) === CURRENT_YEAR;
+  const { data, error, isLoading, mutate } = useSWR<PredictionsListResponse>(
+    isCurrent ? ['predictions', eventId, username ?? ''] : null,
+    () => api.predictionsList(eventId, username),
+    { refreshInterval: 30_000 }
+  );
+  return { data, error, isLoading, refresh: mutate, eventId, year: yearOverride ?? year, isCurrent };
 }

@@ -29,6 +29,13 @@ variable "admin_usernames" {
   default     = "Sun_God,domjg"
 }
 
+variable "admin_token" {
+  description = "Shared password for /results/admin gate. Override via tfvars / TF_VAR_admin_token."
+  type        = string
+  default     = "derbytime"
+  sensitive   = true
+}
+
 variable "event_id" {
   type    = string
   default = "2026-kentucky-derby"

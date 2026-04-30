@@ -2,18 +2,24 @@
 
 import Link from 'next/link';
 import { Countdown } from '@/components/Countdown';
-import { EVENT_DERBY, usePicks } from '@/lib/hooks';
+import { usePicks } from '@/lib/hooks';
+import { CURRENT_YEAR } from '@/lib/year';
 
 const SECTIONS: { href: string; title: string; copy: string }[] = [
   {
     href: '/derby',
     title: 'Kentucky Derby',
-    copy: "Saturday, May 2. Grant's full breakdown on every Derby horse — stats, style, and his take.",
+    copy: "Grant's full breakdown on every Derby horse — stats, style, and his take.",
   },
   {
     href: '/oaks',
     title: 'Kentucky Oaks',
-    copy: 'Friday, May 1. Same treatment for the Oaks field.',
+    copy: 'Same treatment for the Oaks field.',
+  },
+  {
+    href: '/picks',
+    title: 'Make your picks',
+    copy: 'Lock in Win / Place / Show + a long shot for both races.',
   },
   {
     href: '/results',
@@ -28,8 +34,9 @@ const SECTIONS: { href: string; title: string; copy: string }[] = [
 ];
 
 export default function Home() {
-  const { picks } = usePicks(EVENT_DERBY);
+  const { picks, year } = usePicks('derby');
   const earliest = picks?.races.map((r) => r.lock_time).sort()[0];
+  const isArchive = year !== CURRENT_YEAR;
 
   return (
     <section className="pt-8 pb-12 flex flex-col items-center text-center">
@@ -47,9 +54,14 @@ export default function Home() {
         Grant&apos;s annual Derby pool. Read his full take on every horse,
         pick your finish order, and see how you rank.
       </p>
-      {earliest && (
+      {earliest && !isArchive && (
         <div className="mt-5 inline-flex items-center gap-3 px-3 py-1.5 rounded-full border border-rose-red/20 bg-white">
           <Countdown target={earliest} label="Derby lock" />
+        </div>
+      )}
+      {isArchive && (
+        <div className="mt-5 inline-flex items-center px-3 py-1.5 rounded-full border border-bourbon/30 bg-cream text-bourbon text-xs uppercase tracking-wider">
+          Viewing {year} archive
         </div>
       )}
 

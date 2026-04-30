@@ -112,6 +112,26 @@ locals {
       authorization = l.authorization
     }
   ]
+
+  predictions_endpoints = [
+    for l in local.predictions_lambdas : {
+      name          = l.name
+      path_part     = l.path_part
+      http_method   = l.http_method
+      invoke_arn    = aws_lambda_function.predictions[l.name].invoke_arn
+      authorization = l.authorization
+    }
+  ]
+
+  comments_endpoints = [
+    for l in local.comments_lambdas : {
+      name          = l.name
+      path_part     = l.path_part
+      http_method   = l.http_method
+      invoke_arn    = aws_lambda_function.comments[l.name].invoke_arn
+      authorization = l.authorization
+    }
+  ]
 }
 
 module "api" {
@@ -146,5 +166,7 @@ module "api" {
     admin-poll    = { path_prefix = "admin-poll", endpoints = local.admin_poll_endpoints }
     admin-results = { path_prefix = "admin-results", endpoints = local.admin_results_endpoints }
     admin-visits  = { path_prefix = "admin-visits", endpoints = local.admin_visits_endpoints }
+    predictions   = { path_prefix = "predictions", endpoints = local.predictions_endpoints }
+    comments      = { path_prefix = "comments", endpoints = local.comments_endpoints }
   }
 }

@@ -1,14 +1,9 @@
 import type {
-  AdminUser,
-  AdminVisitsStats,
   Leaderboard,
-  Me,
   Pick,
   PicksGrouped,
-  PollStatus,
   RaceResultsList,
   ResultValue,
-  VoteValue,
 } from './types';
 
 export const API_URL =
@@ -26,7 +21,6 @@ class ApiError extends Error {
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
-    credentials: 'include',
     headers: { 'content-type': 'application/json', ...(init.headers ?? {}) },
     ...init,
   });
@@ -45,55 +39,97 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  // auth
-  signup: (body: { username: string; password: string }) =>
-    request<Me>('/auth/signup', { method: 'POST', body: JSON.stringify(body) }),
-  login: (body: { username: string; password: string }) =>
-    request<Me>('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
-  logout: () => request<void>('/auth/logout', { method: 'POST' }),
-  me: () => request<Me>('/auth/me'),
-  updateUsername: (username: string) =>
-    request<Me>('/auth/update-username', { method: 'POST', body: JSON.stringify({ username }) }),
-  trackVisit: (page: string) =>
-    request<void>('/track/visit', { method: 'POST', body: JSON.stringify({ page }) }),
-
-  // picks
-  picks: (eventId?: string) => {
-    const qs = eventId ? `?event_id=${encodeURIComponent(eventId)}` : '';
-    return request<PicksGrouped>(`/picks/list${qs}`);
-  },
+  picks: (eventId: string) =>
+    request<PicksGrouped>(`/picks/list?event_id=${encodeURIComponent(eventId)}`),
   pick: (id: string) => request<Pick>(`/picks/${encodeURIComponent(id)}`),
 
-  // votes
-  vote: (pick_id: string, vote: VoteValue) =>
-    request('/votes/cast', { method: 'POST', body: JSON.stringify({ pick_id, vote }) }),
-  myVotes: () => request<Array<{ pick_id: string; vote: VoteValue; updated_at: string }>>('/votes/mine'),
+  leaderboard: (year: number) =>
+    request<Leaderboard>(`/leaderboard/rank?year=${year}`),
 
-  // leaderboard
-  leaderboard: () => request<Leaderboard>('/leaderboard/rank'),
+  results: (year: number) =>
+    request<RaceResultsList>(`/results/list?year=${year}`),
 
-  // race-level results
-  results: () => request<RaceResultsList>('/results/list'),
+  predictionsList: (eventId: string, username?: string | null) => {
+    const u = username
+      ? `&username=${encodeURIComponent(username)}`
+      : '';
+    return request<PredictionsListResponse>(
+      `/predictions/list?event_id=${encodeURIComponent(eventId)}${u}`
+    );
+  },
+  predictionsUpsert: (body: PredictionUpsertInput) =>
+    request<Prediction>('/predictions/upsert', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
 
-  // admin
-  adminCreatePick: (body: AdminPickInput) =>
-    request<Pick>('/admin-picks/create', { method: 'POST', body: JSON.stringify(body) }),
-  adminUpdatePick: (id: string, body: Partial<AdminPickInput>) =>
-    request<Pick>('/admin-picks/update', { method: 'POST', body: JSON.stringify({ id, ...body }) }),
-  adminDeletePick: (id: string) =>
-    request<void>('/admin-picks/delete', { method: 'POST', body: JSON.stringify({ id }) }),
-  adminSetResult: (id: string, result: ResultValue) =>
-    request<Pick>('/admin-picks/set-result', { method: 'POST', body: JSON.stringify({ id, result }) }),
-  adminUsers: () => request<AdminUser[]>('/admin-users/list'),
-  adminPollStatus: () => request<PollStatus>('/admin-poll/status'),
-  adminPollNow: () => request('/admin-poll/now', { method: 'POST' }),
+  commentsList: (eventId: string) =>
+    request<CommentsListResponse>(
+      `/comments/list?event_id=${encodeURIComponent(eventId)}`
+    ),
+  commentsPost: (body: CommentPostInput) =>
+    request<Comment>('/comments/post', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
   adminSetRaceResult: (body: AdminRaceResultInput) =>
-    request('/admin-results/set', { method: 'POST', body: JSON.stringify(body) }),
-  adminVisitsStats: (days = 7) =>
-    request<AdminVisitsStats>(`/admin-visits/stats?days=${days}`),
+    request('/admin-results/set', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
 };
 
+export interface Prediction {
+  event_id: string;
+  username: string;
+  win: string;
+  place: string;
+  show: string;
+  long_shot: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PredictionsListResponse {
+  event_id: string;
+  post_time: string | null;
+  locked: boolean;
+  my: Prediction | null;
+  others: Prediction[];
+  others_count: number;
+}
+
+export interface PredictionUpsertInput {
+  event_id: string;
+  username: string;
+  win: string;
+  place: string;
+  show: string;
+  long_shot: string;
+}
+
+export interface Comment {
+  id: string;
+  event_id: string;
+  username: string;
+  body: string;
+  created_at: string;
+}
+
+export interface CommentsListResponse {
+  event_id: string;
+  comments: Comment[];
+}
+
+export interface CommentPostInput {
+  event_id: string;
+  username: string;
+  body: string;
+}
+
 export interface AdminRaceResultInput {
+  event_id: string;
   race_number: number;
   finishers: {
     position: number;
@@ -105,19 +141,12 @@ export interface AdminRaceResultInput {
   }[];
   official_at?: string | null;
   notes?: string | null;
+  admin_token: string;
 }
 
-export interface AdminPickInput {
-  race_number: number;
-  race_post_time: string;
-  horse_name: string;
-  post_position?: number | null;
-  jockey?: string | null;
-  trainer?: string | null;
-  odds_at_pick?: string | null;
-  confidence?: number;
-  writeup?: string | null;
-  display_order?: number;
-}
+export type AdminPickResultUpdate = {
+  pick_id: string;
+  result: ResultValue;
+};
 
 export { ApiError };

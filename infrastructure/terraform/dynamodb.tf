@@ -155,6 +155,52 @@ resource "aws_dynamodb_table" "visits" {
 }
 
 ########################################
+# predictions — PK event_id, SK username (uppercase canonical)
+########################################
+resource "aws_dynamodb_table" "predictions" {
+  name         = "${var.app_name}-predictions"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "event_id"
+  range_key    = "username"
+
+  attribute {
+    name = "event_id"
+    type = "S"
+  }
+  attribute {
+    name = "username"
+    type = "S"
+  }
+
+  point_in_time_recovery { enabled = true }
+
+  tags = merge(local.standard_tags, { "name" = "${var.app_name}-predictions" })
+}
+
+########################################
+# comments — PK event_id, SK created_at#uuid (lexicographic chronological)
+########################################
+resource "aws_dynamodb_table" "comments" {
+  name         = "${var.app_name}-comments"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "event_id"
+  range_key    = "id"
+
+  attribute {
+    name = "event_id"
+    type = "S"
+  }
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  point_in_time_recovery { enabled = true }
+
+  tags = merge(local.standard_tags, { "name" = "${var.app_name}-comments" })
+}
+
+########################################
 # poll_runs — PK id, GSI by type+ran_at (for "latest run" query)
 ########################################
 resource "aws_dynamodb_table" "poll_runs" {

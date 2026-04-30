@@ -25,6 +25,9 @@ locals {
     POLL_RUNS_TABLE       = aws_dynamodb_table.poll_runs.id
     RACE_RESULTS_TABLE    = aws_dynamodb_table.race_results.id
     VISITS_TABLE          = aws_dynamodb_table.visits.id
+    PREDICTIONS_TABLE     = aws_dynamodb_table.predictions.id
+    COMMENTS_TABLE        = aws_dynamodb_table.comments.id
+    ADMIN_TOKEN           = var.admin_token
     POLL_ENABLED          = var.poll_enabled ? "true" : "false"
     POLL_WINDOW_START_UTC = var.poll_window_start_utc
     POLL_WINDOW_END_UTC   = var.poll_window_end_utc

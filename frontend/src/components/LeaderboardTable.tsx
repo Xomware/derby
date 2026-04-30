@@ -13,7 +13,7 @@ export function LeaderboardTable({ rows, highlightUsername, limit }: Props) {
   if (rows.length === 0) {
     return (
       <p className="text-sm text-bourbon/70">
-        No votes yet. Be the first to tail or fade.
+        No picks scored yet — board fills in after each race goes official.
       </p>
     );
   }
@@ -24,9 +24,7 @@ export function LeaderboardTable({ rows, highlightUsername, limit }: Props) {
           <th className="py-2 pr-2 w-10">#</th>
           <th className="py-2 pr-2">User</th>
           <th className="py-2 px-2 text-right">Score</th>
-          <th className="py-2 px-2 text-right">Tails✓</th>
-          <th className="py-2 px-2 text-right">Fades✓</th>
-          <th className="py-2 pl-2 text-right">Voted</th>
+          <th className="py-2 pl-2 text-right">Picks</th>
         </tr>
       </thead>
       <tbody>
@@ -43,9 +41,7 @@ export function LeaderboardTable({ rows, highlightUsername, limit }: Props) {
                 {me && <span className="ml-1 text-xs text-mint-julep">(you)</span>}
               </td>
               <td className="py-2 px-2 text-right font-semibold">{r.score}</td>
-              <td className="py-2 px-2 text-right">{r.correct_tails}</td>
-              <td className="py-2 px-2 text-right">{r.correct_fades}</td>
-              <td className="py-2 pl-2 text-right">{r.picks_voted}</td>
+              <td className="py-2 pl-2 text-right">{r.picks_made}</td>
             </tr>
           );
         })}

@@ -6,8 +6,10 @@ import boto3
 
 from lambdas.common.constants import (
     AWS_DEFAULT_REGION,
+    COMMENTS_TABLE,
     PICKS_TABLE,
     POLL_RUNS_TABLE,
+    PREDICTIONS_TABLE,
     RACE_RESULTS_TABLE,
     USERS_TABLE,
     VISITS_TABLE,
@@ -22,6 +24,8 @@ votes_table = _dynamodb.Table(VOTES_TABLE)
 poll_runs_table = _dynamodb.Table(POLL_RUNS_TABLE)
 race_results_table = _dynamodb.Table(RACE_RESULTS_TABLE)
 visits_table = _dynamodb.Table(VISITS_TABLE)
+predictions_table = _dynamodb.Table(PREDICTIONS_TABLE)
+comments_table = _dynamodb.Table(COMMENTS_TABLE)
 
 
 def query_all(table, **kwargs) -> list[dict]:
