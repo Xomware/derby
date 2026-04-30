@@ -190,7 +190,7 @@ export default function LeaderboardPage() {
           longShotThreshold={8}
           missingPick={
             showMissingPickCta && username
-              ? { username, href: `/picks?event=${kind}` }
+              ? { username, href: `/picks?event=${kind}#your-picks` }
               : null
           }
         />
