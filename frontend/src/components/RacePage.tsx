@@ -6,14 +6,12 @@ import { SidePanel, SidePanelItem } from '@/components/SidePanel';
 import { usePicks } from '@/lib/hooks';
 import type { Pick } from '@/lib/types';
 
-type SortKey = 'post' | 'name' | 'odds' | 'confidence' | 'style';
+type SortKey = 'post' | 'name' | 'odds';
 
 const SORTS: { id: SortKey; label: string }[] = [
   { id: 'post', label: 'Post' },
   { id: 'name', label: 'Name' },
   { id: 'odds', label: 'Odds' },
-  { id: 'confidence', label: 'Confidence' },
-  { id: 'style', label: 'Style' },
 ];
 
 const STAT_DESCRIPTIONS: Record<string, string> = {
@@ -68,16 +66,6 @@ export function RacePage({
         return arr.sort((a, b) => a.horse_name.localeCompare(b.horse_name));
       case 'odds':
         return arr.sort((a, b) => oddsToNumber(a.odds_at_pick) - oddsToNumber(b.odds_at_pick));
-      case 'confidence':
-        return arr.sort(
-          (a, b) =>
-            b.confidence - a.confidence ||
-            (a.post_position ?? 99) - (b.post_position ?? 99)
-        );
-      case 'style':
-        return arr.sort((a, b) =>
-          (a.style ?? 'zzz').localeCompare(b.style ?? 'zzz')
-        );
       case 'post':
       default:
         return arr.sort((a, b) => (a.post_position ?? 99) - (b.post_position ?? 99));
@@ -94,7 +82,6 @@ export function RacePage({
         meta: [
           p.post_position != null ? `Post ${p.post_position}` : null,
           p.odds_at_pick,
-          '★'.repeat(p.confidence) + '☆'.repeat(5 - p.confidence),
         ]
           .filter(Boolean)
           .join(' · '),
@@ -193,20 +180,14 @@ function HorseCard({ pick: p }: { pick: Pick }) {
       id={`horse-${p.id}`}
       className="scroll-mt-24 rounded-xl border border-bourbon/15 bg-white p-5 shadow-sm"
     >
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <div>
-          <div className="text-[11px] uppercase tracking-wider text-bourbon/60">
-            {p.post_position != null && <>Post {p.post_position}</>}
-            {p.odds_at_pick && <> · {p.odds_at_pick}</>}
-          </div>
-          <h3 className="font-display text-2xl text-rose-dark leading-tight">
-            {p.horse_name}
-          </h3>
+      <header>
+        <div className="text-[11px] uppercase tracking-wider text-bourbon/60">
+          {p.post_position != null && <>Post {p.post_position}</>}
+          {p.odds_at_pick && <> · {p.odds_at_pick}</>}
         </div>
-        <span aria-label={`${p.confidence} of 5 stars`} className="text-rose-red leading-none">
-          {'★'.repeat(p.confidence)}
-          <span className="text-rose-red/30">{'★'.repeat(5 - p.confidence)}</span>
-        </span>
+        <h3 className="font-display text-2xl text-rose-dark leading-tight">
+          {p.horse_name}
+        </h3>
       </header>
 
       {(p.jockey || p.trainer) && (

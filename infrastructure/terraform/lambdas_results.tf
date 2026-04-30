@@ -1,6 +1,6 @@
 locals {
   results_lambdas = [
-    { name = "results_list", description = "GET /results — race finishers", path_part = "list", http_method = "GET", authorization = "CUSTOM" },
+    { name = "results_list", description = "GET /results — race finishers", path_part = "list", http_method = "GET", authorization = "NONE" },
   ]
 
   admin_results_lambdas = [

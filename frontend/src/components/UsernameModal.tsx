@@ -1,16 +1,21 @@
 'use client';
 
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { isValidGuestName, setGuestName } from '@/lib/guest';
+import { isValidUsername, readUsername, setUsername } from '@/lib/identity';
 
-export function GuestDialog({
+/**
+ * First-visit username prompt. Renders a modal that pops up whenever the
+ * page mounts and there's no name in localStorage. Title + first-time text
+ * change if the user is editing their existing name (returning visitor).
+ */
+export function UsernameModal({
   open,
   onClose,
-  onContinue,
+  mode = 'first-time',
 }: {
   open: boolean;
   onClose: () => void;
-  onContinue: () => void;
+  mode?: 'first-time' | 'change';
 }) {
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -18,45 +23,45 @@ export function GuestDialog({
 
   useEffect(() => {
     if (open) {
-      setName('');
+      setName(mode === 'change' ? readUsername() ?? '' : '');
       setError(null);
-      // Tiny delay so the input is mounted before we focus.
       const id = window.setTimeout(() => inputRef.current?.focus(), 30);
       return () => window.clearTimeout(id);
     }
-  }, [open]);
+  }, [open, mode]);
 
-  // Esc to close
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape' && mode === 'change') onClose();
     }
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  }, [open, mode, onClose]);
 
   if (!open) return null;
 
   function submit(e: FormEvent) {
     e.preventDefault();
-    const result = isValidGuestName(name);
+    const result = isValidUsername(name);
     if (!result.ok) {
       setError(result.error ?? 'Try a different name');
       return;
     }
-    setGuestName(name.trim());
-    onContinue();
+    setUsername(name.trim());
+    onClose();
   }
+
+  const isFirstTime = mode === 'first-time';
 
   return (
     <div
       className="fixed inset-0 z-50 grid place-items-center bg-ink/40 px-4"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="guest-title"
+      aria-labelledby="username-title"
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (mode === 'change' && e.target === e.currentTarget) onClose();
       }}
     >
       <form
@@ -64,22 +69,24 @@ export function GuestDialog({
         className="w-full max-w-sm rounded-2xl bg-cream border border-bourbon/20 shadow-xl p-6 space-y-4"
       >
         <header>
+          <p className="font-display italic text-mint-julep text-xs uppercase tracking-[0.3em]">
+            Sun God Derby
+          </p>
           <h2
-            id="guest-title"
-            className="font-display text-2xl text-rose-dark"
+            id="username-title"
+            className="font-display text-2xl text-rose-dark mt-1"
           >
-            Pop in as a guest
+            {isFirstTime ? 'What should we call you?' : 'Change your name'}
           </h2>
-          <p className="text-sm text-bourbon/80 mt-1">
-            Just a name so we know who&apos;s who. <strong>You won&apos;t be
-            able to save picks</strong> — for that, sign up. You can switch
-            anytime.
+          <p className="text-sm text-bourbon/80 mt-2">
+            Just a name to track your picks. If you come back later, use the
+            same name and your picks should still be here.
           </p>
         </header>
 
         <label className="block">
           <span className="text-xs uppercase tracking-wider font-semibold text-bourbon/70">
-            Name
+            Your name
           </span>
           <input
             ref={inputRef}
@@ -93,19 +100,21 @@ export function GuestDialog({
         </label>
 
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 rounded-lg border border-bourbon/30 py-2 text-sm text-bourbon hover:bg-bourbon/10"
-          >
-            Back
-          </button>
+          {!isFirstTime && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-lg border border-bourbon/30 py-2 text-sm text-bourbon hover:bg-bourbon/10"
+            >
+              Cancel
+            </button>
+          )}
           <button
             type="submit"
             disabled={!name.trim()}
             className="flex-1 rounded-lg bg-rose-red text-cream font-semibold py-2 text-sm hover:bg-rose-dark disabled:opacity-60"
           >
-            Continue as guest
+            {isFirstTime ? "Let's go" : 'Save'}
           </button>
         </div>
       </form>

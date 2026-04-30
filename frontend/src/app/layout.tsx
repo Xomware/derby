@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
-import { AuthGate } from '@/components/AuthGate';
+import { UsernameGate } from '@/components/UsernameGate';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://derby.xomware.com'),
@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen flex flex-col antialiased">
         <SiteHeader />
         <main className="flex-1 max-w-5xl mx-auto w-full px-4 pb-16">
-          <AuthGate>{children}</AuthGate>
+          <UsernameGate>{children}</UsernameGate>
         </main>
         <SiteFooter />
       </body>
