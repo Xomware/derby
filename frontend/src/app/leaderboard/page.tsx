@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { LeaderboardTable } from '@/components/LeaderboardTable';
 import {
@@ -119,6 +120,15 @@ export default function LeaderboardPage() {
     return combined.map((r, i) => ({ ...r, rank: i + 1 }));
   }, [leaderboard, grantPicks, finishers, oddsByHorse]);
 
+  const userOnLeaderboard = useMemo(
+    () =>
+      !!username &&
+      rowsWithGrant.some((r) => r.username.toUpperCase() === username.toUpperCase()),
+    [rowsWithGrant, username]
+  );
+  const showMissingPickCta =
+    !!username && !isArchive && !!leaderboard && !leaderboard.finished && !userOnLeaderboard;
+
   return (
     <section className="pt-8 max-w-4xl mx-auto space-y-6">
       <header>
@@ -183,6 +193,36 @@ export default function LeaderboardPage() {
       )}
 
       {!isArchive && <PickDistribution data={distribution} />}
+
+      {showMissingPickCta && username && (
+        <MissingPickCta username={username} kind={kind} />
+      )}
+    </section>
+  );
+}
+
+function MissingPickCta({ username, kind }: { username: string; kind: RaceKind }) {
+  const eventLabel = kind === 'derby' ? 'Derby' : 'Oaks';
+  return (
+    <section
+      aria-label="Enter your picks"
+      className="rounded-xl border-2 border-dashed border-rose-red/40 bg-rose-red/5 p-4"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-baseline gap-3 min-w-0">
+          <span className="font-mono text-bourbon/50 text-sm">#?</span>
+          <span className="font-semibold text-bourbon truncate">@{username}</span>
+          <span className="text-bourbon/70 text-sm">
+            no {eventLabel} picks yet
+          </span>
+        </div>
+        <Link
+          href={`/picks?event=${kind}`}
+          className="rounded bg-rose-red px-4 py-1.5 text-sm font-semibold text-white hover:bg-rose-dark transition"
+        >
+          Enter your picks →
+        </Link>
+      </div>
     </section>
   );
 }
