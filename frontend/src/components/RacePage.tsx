@@ -12,7 +12,7 @@ import { PowerRankings } from '@/components/PowerRankings';
 import { StatTile } from '@/components/StatTile';
 import { useResults } from '@/lib/hooks';
 
-type SortKey = 'post' | 'name' | 'odds';
+type SortKey = 'post' | 'name' | 'odds' | 'beyer' | 'brisnet' | 'equibase';
 
 const SUB_TABS: { id: 'overview' | 'plays' | 'rankings'; label: string }[] = [
   { id: 'overview', label: 'Race & horses' },
@@ -38,11 +38,27 @@ interface DisplayHorse {
   scratched: boolean;
 }
 
-const SORTS: { id: SortKey; label: string }[] = [
-  { id: 'post', label: 'Post' },
-  { id: 'name', label: 'Name' },
-  { id: 'odds', label: 'Odds' },
-];
+const SORTS_BY_KIND: Record<RaceKind, { id: SortKey; label: string }[]> = {
+  derby: [
+    { id: 'post', label: 'Post' },
+    { id: 'name', label: 'Name' },
+    { id: 'odds', label: 'Odds' },
+    { id: 'beyer', label: 'Beyer' },
+    { id: 'brisnet', label: 'Brisnet' },
+  ],
+  oaks: [
+    { id: 'post', label: 'Post' },
+    { id: 'name', label: 'Name' },
+    { id: 'odds', label: 'Odds' },
+    { id: 'equibase', label: 'Equibase' },
+  ],
+};
+
+function statToNumber(v: string | null | undefined): number {
+  if (!v) return -1;
+  const n = parseFloat(v);
+  return Number.isFinite(n) ? n : -1;
+}
 
 const STAT_DESCRIPTIONS: Record<string, string> = {
   Odds:
@@ -165,6 +181,14 @@ export function RacePage({
         return arr.sort((a, b) => a.horse_name.localeCompare(b.horse_name));
       case 'odds':
         return arr.sort((a, b) => oddsToNumber(a.odds_at_pick) - oddsToNumber(b.odds_at_pick));
+      case 'beyer':
+        return arr.sort((a, b) => statToNumber(b.beyer) - statToNumber(a.beyer));
+      case 'brisnet':
+        return arr.sort((a, b) => statToNumber(b.brisnet) - statToNumber(a.brisnet));
+      case 'equibase':
+        return arr.sort(
+          (a, b) => statToNumber(b.equibase_rating) - statToNumber(a.equibase_rating)
+        );
       case 'post':
       default:
         return arr.sort((a, b) => (a.post_position ?? 99) - (b.post_position ?? 99));
@@ -279,7 +303,7 @@ export function RacePage({
                   Sort by
                 </label>
                 <div className="flex gap-1 flex-wrap">
-                  {SORTS.map((s) => {
+                  {SORTS_BY_KIND[kind].map((s) => {
                     const active = sortKey === s.id;
                     return (
                       <button
