@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { api, ApiError, type Prediction } from '@/lib/api';
-import type { Pick } from '@/lib/types';
+import { computeStamp, type Slot } from '@/lib/stamps';
+import type { Pick, RaceFinisher } from '@/lib/types';
+import { StampBadge } from './StampBadge';
 
-const FIELDS: { key: 'win' | 'place' | 'show' | 'long_shot'; label: string; help: string }[] = [
+const FIELDS: { key: Slot; label: string; help: string }[] = [
   { key: 'win', label: 'Win (1st)', help: 'Your call to take it all.' },
   { key: 'place', label: 'Place (2nd)', help: 'Different horse than Win.' },
   { key: 'show', label: 'Show (3rd)', help: 'Different from Win + Place.' },
@@ -17,10 +19,19 @@ interface Props {
   locked: boolean;
   existing: Prediction | null;
   username: string | null;
+  finishers: RaceFinisher[];
   onSaved: () => void;
 }
 
-export function PickForm({ horses, eventId, locked, existing, username, onSaved }: Props) {
+export function PickForm({
+  horses,
+  eventId,
+  locked,
+  existing,
+  username,
+  finishers,
+  onSaved,
+}: Props) {
   const [win, setWin] = useState('');
   const [place, setPlace] = useState('');
   const [show, setShow] = useState('');
@@ -69,6 +80,7 @@ export function PickForm({ horses, eventId, locked, existing, username, onSaved 
 
   const top3 = [win, place, show].filter(Boolean);
   const dupTop3 = top3.length === 3 && new Set(top3).size !== 3;
+  const showStamps = existing && finishers.length > 0;
 
   return (
     <section className="rounded-xl border border-bourbon/20 bg-white p-4">
@@ -79,6 +91,29 @@ export function PickForm({ horses, eventId, locked, existing, username, onSaved 
           {existing ? ' Saved — edit anytime until lock.' : ' Lock in your top 3 + a long shot.'}
         </p>
       </header>
+
+      {showStamps && (
+        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+          {FIELDS.map((f) => {
+            const value = (existing as Prediction)[f.key];
+            const stamp = computeStamp(value, f.key, finishers);
+            return (
+              <div
+                key={f.key}
+                className="rounded-md border border-bourbon/15 bg-cream/40 px-3 py-2"
+              >
+                <dt className="text-[10px] uppercase tracking-wider text-bourbon/70 font-semibold flex items-center justify-between gap-1">
+                  <span>{f.label.replace(/\s*\([^)]*\)/, '')}</span>
+                  {stamp && <StampBadge stamp={stamp} />}
+                </dt>
+                <dd className="text-sm font-semibold text-bourbon mt-0.5">
+                  {value}
+                </dd>
+              </div>
+            );
+          })}
+        </dl>
+      )}
 
       {locked ? (
         <div className="rounded-md border border-rose-red/30 bg-rose-red/5 px-3 py-2 text-sm text-rose-dark">

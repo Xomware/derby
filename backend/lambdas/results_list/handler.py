@@ -1,20 +1,23 @@
-"""GET /results/list — full Derby weekend race card with finishers as they land.
+"""GET /results/list?year=YYYY — full Derby weekend race card with finishers.
 
-Returns the schedule for both Oaks Day and Derby Day, merged with any race
-results that have been entered (manually via /admin or by the cron poller).
-Each race entry has finishers when results exist, empty otherwise.
+Returns the schedule for both Oaks Day and Derby Day, merged with race results
+keyed by (event_id, race_number). Defaults to the schedule's year.
 """
 
 from __future__ import annotations
 
 from decimal import Decimal
 
-from lambdas.common.dynamo_helpers import race_results_table, scan_all
+from boto3.dynamodb.conditions import Key
+
+from lambdas.common.dynamo_helpers import query_all, race_results_table
 from lambdas.common.errors import handle_errors
 from lambdas.common.schedule import SCHEDULE
-from lambdas.common.utility_helpers import success_response
+from lambdas.common.utility_helpers import get_query_params, success_response
 
 HANDLER = "results_list"
+
+DEFAULT_YEAR = 2026
 
 
 def _norm_finishers(finishers: list | None) -> list[dict]:
@@ -29,22 +32,34 @@ def _norm_finishers(finishers: list | None) -> list[dict]:
     return cleaned
 
 
-@handle_errors(HANDLER)
-def handler(event, context):
-    # Pull every saved race-result row, key by race_number for fast merge.
-    saved = {}
-    for row in scan_all(race_results_table):
+def _fetch_results(event_id: str) -> dict[int, dict]:
+    items = query_all(
+        race_results_table,
+        KeyConditionExpression=Key("event_id").eq(event_id),
+    )
+    out: dict[int, dict] = {}
+    for row in items:
         rn = row.get("race_number")
         if isinstance(rn, Decimal):
             rn = int(rn)
         if rn is None:
             continue
-        saved[int(rn)] = row
+        out[int(rn)] = row
+    return out
 
-    # The schedule may have repeated race_numbers across days, so we key by
-    # (day, race_number). Saved results are race-number-only — we apply the
-    # same finishers to whichever day's race matches. (Two race-1 entries
-    # exist; the cron / admin form should specify day if we ever need it.)
+
+@handle_errors(HANDLER)
+def handler(event, context):
+    qp = get_query_params(event)
+    year_str = qp.get("year") or str(DEFAULT_YEAR)
+    try:
+        year = int(year_str)
+    except ValueError:
+        year = DEFAULT_YEAR
+
+    derby_results = _fetch_results(f"{year}-kentucky-derby")
+    oaks_results = _fetch_results(f"{year}-kentucky-oaks")
+
     races: list[dict] = []
     for slot in SCHEDULE:
         rn = slot["race_number"]
@@ -58,12 +73,12 @@ def handler(event, context):
             "notes": None,
             "source": None,
         }
-        if rn in saved:
-            row = saved[rn]
-            merged["finishers"] = _norm_finishers(row.get("finishers"))
-            merged["official_at"] = row.get("official_at")
-            merged["notes"] = row.get("notes")
-            merged["source"] = row.get("source")
+        saved = (oaks_results if slot["day"] == "oaks" else derby_results).get(rn)
+        if saved:
+            merged["finishers"] = _norm_finishers(saved.get("finishers"))
+            merged["official_at"] = saved.get("official_at")
+            merged["notes"] = saved.get("notes")
+            merged["source"] = saved.get("source")
         races.append(merged)
 
-    return success_response({"races": races})
+    return success_response({"year": year, "races": races})

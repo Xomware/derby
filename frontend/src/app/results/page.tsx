@@ -2,18 +2,9 @@
 
 import { useMemo } from 'react';
 import { Countdown } from '@/components/Countdown';
-import { usePicks } from '@/lib/hooks';
-import type { Pick, ResultValue } from '@/lib/types';
+import { usePicks, useResults, type RaceKind } from '@/lib/hooks';
+import type { Pick, RaceFinisher } from '@/lib/types';
 import { CURRENT_YEAR } from '@/lib/year';
-
-const RESULT_TO_POSITION: Record<ResultValue, number | null> = {
-  won: 1,
-  placed: 2,
-  showed: 3,
-  finished: null,
-  scratched: null,
-  pending: null,
-};
 
 const POSITION_LABEL: Record<number, string> = {
   1: 'Win',
@@ -27,24 +18,42 @@ const POSITION_TONE: Record<number, string> = {
   3: 'bg-bourbon/10 text-bourbon border-bourbon/20',
 };
 
-function sortForResults(picks: Pick[]): Pick[] {
-  const arr = [...picks];
-  const positioned = arr.filter((p) => RESULT_TO_POSITION[p.result] !== null);
-  const others = arr.filter((p) => RESULT_TO_POSITION[p.result] === null);
+function normalizeName(s: string): string {
+  return s.trim().toLowerCase().replace(/[’']/g, "'");
+}
 
-  positioned.sort((a, b) => {
-    const ap = RESULT_TO_POSITION[a.result] ?? 99;
-    const bp = RESULT_TO_POSITION[b.result] ?? 99;
-    return ap - bp;
+function positionOf(horse: Pick, finishers: RaceFinisher[]): number | null {
+  const target = normalizeName(horse.horse_name);
+  const m = finishers.find((f) => normalizeName(f.horse_name) === target);
+  return m ? m.position : null;
+}
+
+function sortForResults(horses: Pick[], finishers: RaceFinisher[]): Pick[] {
+  const arr = [...horses];
+  if (finishers.length === 0) {
+    return arr.sort((a, b) => (a.post_position ?? 99) - (b.post_position ?? 99));
+  }
+  return arr.sort((a, b) => {
+    const pa = positionOf(a, finishers) ?? 99;
+    const pb = positionOf(b, finishers) ?? 99;
+    if (pa !== pb) return pa - pb;
+    return (a.post_position ?? 99) - (b.post_position ?? 99);
   });
-  others.sort((a, b) => (a.post_position ?? 99) - (b.post_position ?? 99));
-  return [...positioned, ...others];
 }
 
 export default function ResultsPage() {
   const { picks: derby, isLoading: derbyLoading, year } = usePicks('derby');
   const { picks: oaks, isLoading: oaksLoading } = usePicks('oaks');
+  const { results } = useResults(year);
   const isArchive = year !== CURRENT_YEAR;
+
+  const finishersFor = (kind: RaceKind): RaceFinisher[] => {
+    const main = kind === 'derby' ? 12 : 11;
+    return (
+      (results?.races ?? []).find((r) => r.day === kind && r.race_number === main)
+        ?.finishers ?? []
+    );
+  };
 
   return (
     <section className="pt-8 max-w-3xl mx-auto space-y-10">
@@ -62,7 +71,8 @@ export default function ResultsPage() {
       <RaceSection
         title="Kentucky Oaks"
         eyebrow={isArchive ? `${year} Oaks` : 'The Run for the Lilies'}
-        picks={oaks?.races.flatMap((r) => r.picks) ?? []}
+        horses={oaks?.races.flatMap((r) => r.picks) ?? []}
+        finishers={finishersFor('oaks')}
         lockTime={oaks?.races[0]?.lock_time}
         loading={oaksLoading}
         isArchive={isArchive}
@@ -71,7 +81,8 @@ export default function ResultsPage() {
       <RaceSection
         title="Kentucky Derby"
         eyebrow={isArchive ? `${year} Derby` : 'The Run for the Roses'}
-        picks={derby?.races.flatMap((r) => r.picks) ?? []}
+        horses={derby?.races.flatMap((r) => r.picks) ?? []}
+        finishers={finishersFor('derby')}
         lockTime={derby?.races[0]?.lock_time}
         loading={derbyLoading}
         isArchive={isArchive}
@@ -83,20 +94,22 @@ export default function ResultsPage() {
 function RaceSection({
   title,
   eyebrow,
-  picks,
+  horses,
+  finishers,
   lockTime,
   loading,
   isArchive,
 }: {
   title: string;
   eyebrow: string;
-  picks: Pick[];
+  horses: Pick[];
+  finishers: RaceFinisher[];
   lockTime?: string;
   loading: boolean;
   isArchive: boolean;
 }) {
-  const sorted = useMemo(() => sortForResults(picks), [picks]);
-  const anyOfficial = sorted.some((p) => RESULT_TO_POSITION[p.result] !== null);
+  const sorted = useMemo(() => sortForResults(horses, finishers), [horses, finishers]);
+  const official = finishers.length > 0;
 
   return (
     <section>
@@ -107,8 +120,8 @@ function RaceSection({
           </p>
           <h2 className="font-display text-2xl text-bourbon">{title}</h2>
         </div>
-        {lockTime && !anyOfficial && !isArchive && <Countdown target={lockTime} label="Lock" />}
-        {anyOfficial && (
+        {lockTime && !official && !isArchive && <Countdown target={lockTime} label="Lock" />}
+        {official && (
           <span className="text-xs uppercase tracking-wider font-semibold text-rose-dark">
             Official
           </span>
@@ -127,29 +140,28 @@ function RaceSection({
 
       <ol className="space-y-2">
         {sorted.map((p) => (
-          <HorseRow key={p.id} pick={p} />
+          <HorseRow key={p.id} pick={p} position={positionOf(p, finishers)} />
         ))}
       </ol>
     </section>
   );
 }
 
-function HorseRow({ pick: p }: { pick: Pick }) {
-  const position = RESULT_TO_POSITION[p.result];
-  const isScratched = p.result === 'scratched';
-  const isOut = p.result === 'finished';
-  const isPending = p.result === 'pending';
-
+function HorseRow({ pick: p, position }: { pick: Pick; position: number | null }) {
   return (
     <li
       className={`rounded-lg border bg-white px-4 py-2.5 flex items-center gap-3 ${
-        position
+        position && position <= 3
           ? POSITION_TONE[position]
-          : 'border-bourbon/15 ' + (isScratched ? 'opacity-50 line-through' : '')
+          : 'border-bourbon/15'
       }`}
     >
       <span className="text-xs uppercase tracking-wider w-12 shrink-0 font-semibold">
-        {position ? POSITION_LABEL[position] : `#${p.post_position ?? '?'}`}
+        {position && position <= 3
+          ? POSITION_LABEL[position]
+          : position
+          ? `#${position}`
+          : `#${p.post_position ?? '?'}`}
       </span>
       <div className="flex-1 min-w-0">
         <div className="font-semibold text-bourbon truncate">{p.horse_name}</div>
@@ -162,12 +174,6 @@ function HorseRow({ pick: p }: { pick: Pick }) {
       </div>
       <span className="text-[11px] text-bourbon/60 whitespace-nowrap">
         {p.odds_at_pick ?? '—'}
-      </span>
-      <span className="text-[11px] text-bourbon/70 w-16 text-right whitespace-nowrap">
-        {isPending && 'Pending'}
-        {isScratched && 'Scratched'}
-        {isOut && 'Out'}
-        {position && 'Official'}
       </span>
     </li>
   );

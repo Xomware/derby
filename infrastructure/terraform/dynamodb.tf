@@ -95,13 +95,18 @@ resource "aws_dynamodb_table" "votes" {
 }
 
 ########################################
-# race_results — PK race_number, holds all finishers for a race
+# race_results — PK event_id (S), SK race_number (N)
 ########################################
 resource "aws_dynamodb_table" "race_results" {
   name         = "${var.app_name}-race-results"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "race_number"
+  hash_key     = "event_id"
+  range_key    = "race_number"
 
+  attribute {
+    name = "event_id"
+    type = "S"
+  }
   attribute {
     name = "race_number"
     type = "N"

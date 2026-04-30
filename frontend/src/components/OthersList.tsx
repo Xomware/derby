@@ -1,15 +1,45 @@
 'use client';
 
 import type { Prediction } from '@/lib/api';
+import { computeStamp, type Slot } from '@/lib/stamps';
+import type { RaceFinisher } from '@/lib/types';
+import { StampBadge } from './StampBadge';
+
+const SLOTS: { key: Slot; col: 'win' | 'place' | 'show' | 'long_shot' }[] = [
+  { key: 'win', col: 'win' },
+  { key: 'place', col: 'place' },
+  { key: 'show', col: 'show' },
+  { key: 'long_shot', col: 'long_shot' },
+];
+
+function Cell({
+  value,
+  slot,
+  finishers,
+}: {
+  value: string;
+  slot: Slot;
+  finishers: RaceFinisher[];
+}) {
+  const stamp = finishers.length > 0 ? computeStamp(value, slot, finishers) : null;
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span>{value}</span>
+      {stamp && <StampBadge stamp={stamp} />}
+    </span>
+  );
+}
 
 export function OthersList({
   others,
   othersCount,
   locked,
+  finishers,
 }: {
   others: Prediction[];
   othersCount: number;
   locked: boolean;
+  finishers: RaceFinisher[];
 }) {
   return (
     <section className="rounded-xl border border-bourbon/15 bg-white p-4">
@@ -48,10 +78,11 @@ export function OthersList({
               {others.map((p) => (
                 <tr key={p.username} className="border-b border-bourbon/10 align-top">
                   <td className="py-2 pr-2 sm:pl-0 pl-4 font-semibold">@{p.username}</td>
-                  <td className="py-2 px-2">{p.win}</td>
-                  <td className="py-2 px-2">{p.place}</td>
-                  <td className="py-2 px-2">{p.show}</td>
-                  <td className="py-2 pl-2 sm:pr-0 pr-4">{p.long_shot}</td>
+                  {SLOTS.map((s) => (
+                    <td key={s.key} className="py-2 px-2">
+                      <Cell value={p[s.col]} slot={s.key} finishers={finishers} />
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>

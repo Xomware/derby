@@ -11,6 +11,7 @@ import {
   useGrantPicks,
   usePicks,
   usePredictions,
+  useResults,
   type RaceKind,
 } from '@/lib/hooks';
 import { useUsername } from '@/lib/identity';
@@ -37,7 +38,16 @@ export default function PicksPage() {
   const { grantPicks } = useGrantPicks(kind);
   const { data: predictions, refresh } = usePredictions(kind, username);
   const { comments, refresh: refreshComments, eventId: commentsEventId } = useComments(kind);
+  const { results } = useResults(year);
   const isArchive = year !== CURRENT_YEAR;
+
+  const mainRaceNumber = kind === 'derby' ? 12 : 11;
+  const finishers = useMemo(
+    () =>
+      (results?.races ?? [])
+        .find((r) => r.day === kind && r.race_number === mainRaceNumber)?.finishers ?? [],
+    [results, kind, mainRaceNumber]
+  );
 
   const horses = useMemo<Pick[]>(
     () => (picks?.races ?? []).flatMap((r) => r.picks),
@@ -94,7 +104,13 @@ export default function PicksPage() {
       )}
 
       {grantPicks && (
-        <GrantPinned picks={grantPicks} kind={kind} year={year} isArchive={isArchive} />
+        <GrantPinned
+          picks={grantPicks}
+          kind={kind}
+          year={year}
+          isArchive={isArchive}
+          finishers={finishers}
+        />
       )}
 
       <RaceSummary horses={horses} kind={kind} />
@@ -106,6 +122,7 @@ export default function PicksPage() {
           locked={predictions?.locked ?? false}
           existing={predictions?.my ?? null}
           username={username}
+          finishers={finishers}
           onSaved={() => void refresh()}
         />
       )}
@@ -115,6 +132,7 @@ export default function PicksPage() {
           others={predictions?.others ?? []}
           othersCount={predictions?.others_count ?? 0}
           locked={predictions?.locked ?? false}
+          finishers={finishers}
         />
       )}
 

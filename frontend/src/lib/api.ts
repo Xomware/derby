@@ -73,6 +73,11 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  adminCheck: (admin_token: string) =>
+    request<{ ok: true }>('/admin-results/check', {
+      method: 'POST',
+      body: JSON.stringify({ admin_token }),
+    }),
   adminSetRaceResult: (body: AdminRaceResultInput) =>
     request('/admin-results/set', {
       method: 'POST',

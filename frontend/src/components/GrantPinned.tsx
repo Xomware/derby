@@ -1,8 +1,11 @@
 'use client';
 
 import type { GrantPicks, RaceKind } from '@/lib/hooks';
+import { computeStamp, type Slot } from '@/lib/stamps';
+import type { RaceFinisher } from '@/lib/types';
+import { StampBadge } from './StampBadge';
 
-const SLOTS: { key: keyof GrantPicks; label: string }[] = [
+const SLOTS: { key: Slot; label: string }[] = [
   { key: 'win', label: 'Win' },
   { key: 'place', label: 'Place' },
   { key: 'show', label: 'Show' },
@@ -14,11 +17,13 @@ export function GrantPinned({
   kind,
   year,
   isArchive,
+  finishers,
 }: {
   picks: GrantPicks;
   kind: RaceKind;
   year: number;
   isArchive: boolean;
+  finishers?: RaceFinisher[];
 }) {
   return (
     <section className="rounded-xl border-2 border-rose-red/30 bg-rose-red/5 p-4">
@@ -40,13 +45,15 @@ export function GrantPinned({
       <dl className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {SLOTS.map((s) => {
           const value = picks[s.key] as string | null;
+          const stamp = value && finishers ? computeStamp(value, s.key, finishers) : null;
           return (
             <div
               key={s.key}
               className="rounded-md border border-rose-red/20 bg-white px-3 py-2"
             >
-              <dt className="text-[10px] uppercase tracking-wider text-rose-red font-semibold">
-                {s.label}
+              <dt className="text-[10px] uppercase tracking-wider text-rose-red font-semibold flex items-center justify-between gap-1">
+                <span>{s.label}</span>
+                {stamp && <StampBadge stamp={stamp} />}
               </dt>
               <dd className="text-sm font-semibold text-bourbon mt-0.5">
                 {value ?? '—'}

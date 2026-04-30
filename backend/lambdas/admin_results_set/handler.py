@@ -1,24 +1,28 @@
-"""POST /admin-results/set — upsert race-level results.
+"""POST /admin-results/set — upsert a race result.
 
-Body:
-{
+Body: {
+  "event_id": "2026-kentucky-derby",
   "race_number": 12,
   "official_at": "2026-05-02T23:08:00Z" (optional),
   "finishers": [
     {"position": 1, "horse_name": "...", "jockey": "...", "win_payout": "8.20"},
-    {"position": 2, "horse_name": "...", ...},
-    {"position": 3, "horse_name": "...", ...}
+    ...
   ],
-  "notes": "..." (optional)
+  "notes": "..." (optional),
+  "admin_token": "derbytime"
 }
+
+Auth: caller must include `admin_token` matching the ADMIN_TOKEN env. No
+session / cookie required — the page that calls this prompts for the password
+client-side and stashes it in localStorage.
 """
 
 from __future__ import annotations
 
+from lambdas.common.constants import ADMIN_TOKEN
 from lambdas.common.dynamo_helpers import race_results_table
 from lambdas.common.errors import ForbiddenError, ValidationError, handle_errors
 from lambdas.common.utility_helpers import (
-    get_authorizer_context,
     iso_now,
     parse_body,
     require_fields,
@@ -30,13 +34,16 @@ HANDLER = "admin_results_set"
 
 @handle_errors(HANDLER)
 def handler(event, context):
-    ctx = get_authorizer_context(event)
-    if ctx.get("isAdmin") != "true":
-        raise ForbiddenError("Admin only")
-    username = ctx.get("username") or "?"
-
     body = parse_body(event)
-    require_fields(body, "race_number", "finishers")
+    require_fields(body, "event_id", "race_number", "finishers", "admin_token")
+
+    if not ADMIN_TOKEN or body.get("admin_token") != ADMIN_TOKEN:
+        raise ForbiddenError("Bad admin password")
+
+    event_id = str(body["event_id"]).strip()
+    if not event_id:
+        raise ValidationError("event_id is required", field="event_id")
+
     try:
         race_number = int(body["race_number"])
     except (TypeError, ValueError):
@@ -65,12 +72,12 @@ def handler(event, context):
     cleaned.sort(key=lambda x: x["position"])
 
     item = {
+        "event_id": event_id,
         "race_number": race_number,
         "finishers": cleaned,
         "official_at": str(body.get("official_at") or "")[:40] or None,
         "notes": str(body.get("notes") or "")[:500] or None,
         "updated_at": iso_now(),
-        "updated_by": username,
         "source": "manual",
     }
     race_results_table.put_item(Item=item)
