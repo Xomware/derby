@@ -56,5 +56,4 @@ POLL_PROVIDER = os.environ.get("POLL_PROVIDER", "fake")
 
 RESERVED_USERNAMES = {
     "admin", "administrator", "root", "system", "moderator",
-    "grant", "sungod", "sun-god", "sun_god", "oracle", "derby",
 }
