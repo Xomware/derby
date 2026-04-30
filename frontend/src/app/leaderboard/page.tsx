@@ -1,12 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CommentsBlock } from '@/components/CommentsBlock';
 import { Countdown } from '@/components/Countdown';
 import { LeaderboardTable } from '@/components/LeaderboardTable';
-import { useComments, useLeaderboard, type RaceKind } from '@/lib/hooks';
+import {
+  useComments,
+  useGrantPicks,
+  useLeaderboard,
+  usePicks,
+  useResults,
+  type RaceKind,
+} from '@/lib/hooks';
 import { useUsername } from '@/lib/identity';
 import { CURRENT_YEAR } from '@/lib/year';
+import { scoreGrantRow } from '@/lib/scoring';
+import type { LeaderboardRow } from '@/lib/types';
 
 const TABS: { id: RaceKind; label: string }[] = [
   { id: 'derby', label: 'Derby' },
@@ -29,10 +38,47 @@ export default function LeaderboardPage() {
     refresh: refreshComments,
     eventId: commentsEventId,
   } = useComments(kind);
+  const { picks } = usePicks(kind);
+  const { results } = useResults(year);
+  const { grantPicks } = useGrantPicks(kind);
   const isArchive = year !== CURRENT_YEAR;
 
   const hidePicks = !leaderboard?.locked;
   const showScores = !!leaderboard?.finished;
+
+  const mainRaceNumber = kind === 'derby' ? 12 : 11;
+  const finishers = useMemo(
+    () =>
+      (results?.races ?? []).find((r) => r.day === kind && r.race_number === mainRaceNumber)
+        ?.finishers ?? [],
+    [results, kind, mainRaceNumber]
+  );
+
+  // Collect odds for every horse in the field — used both to label the pick
+  // cells (`Renegade (5-1)`) and to score Grant's synthetic row.
+  const oddsByHorse = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const r of picks?.races ?? []) {
+      for (const p of r.picks) {
+        if (p.horse_name && p.odds_at_pick) {
+          m.set(p.horse_name.trim().toLowerCase(), p.odds_at_pick);
+        }
+      }
+    }
+    return m;
+  }, [picks]);
+
+  const rowsWithGrant = useMemo(() => {
+    const userRows = leaderboard?.rows ?? [];
+    if (!grantPicks) return userRows;
+    const grantRow = scoreGrantRow(grantPicks, finishers, oddsByHorse);
+    const combined: LeaderboardRow[] = [
+      grantRow,
+      ...userRows.filter((r) => r.username !== 'GRANT'),
+    ];
+    combined.sort((a, b) => b.score - a.score || a.username.localeCompare(b.username));
+    return combined.map((r, i) => ({ ...r, rank: i + 1 }));
+  }, [leaderboard, grantPicks, finishers, oddsByHorse]);
 
   return (
     <section className="pt-8 max-w-4xl mx-auto space-y-6">
@@ -98,10 +144,11 @@ export default function LeaderboardPage() {
       {isLoading && <p className="text-bourbon/70">Loading…</p>}
       {leaderboard && (
         <LeaderboardTable
-          rows={leaderboard.rows}
+          rows={rowsWithGrant}
           highlightUsername={username}
           hidePicks={hidePicks}
           showScores={showScores}
+          oddsByHorse={oddsByHorse}
         />
       )}
 

@@ -133,19 +133,52 @@ export default function ResultsPage() {
           <div className="text-bourbon/70 py-6 text-center text-sm">Loading…</div>
         )}
 
-        {!isLoading && sorted.length === 0 && (
+        {!isLoading && sorted.length === 0 && finishers.length === 0 && (
           <div className="rounded-lg border border-bourbon/20 bg-white p-6 text-center text-bourbon/70 text-sm">
-            No horses posted yet.
+            {isArchive
+              ? `No archived results for the ${year} ${kind === 'derby' ? 'Derby' : 'Oaks'}.`
+              : 'No horses posted yet.'}
           </div>
         )}
 
+        {/* Live / current-year flow: render the field with finish positions. */}
         <ol className="space-y-2">
           {sorted.map((p) => (
             <HorseRow key={p.id} pick={p} position={positionOf(p, finishers)} />
           ))}
         </ol>
+
+        {/* Archive fallback: no DDB picks for the year, but the race results
+            were seeded — render straight from finishers. */}
+        {sorted.length === 0 && finishers.length > 0 && (
+          <ol className="space-y-2">
+            {[...finishers]
+              .sort((a, b) => a.position - b.position)
+              .map((f) => (
+                <FinisherRow key={`${f.position}-${f.horse_name}`} finisher={f} />
+              ))}
+          </ol>
+        )}
       </section>
     </div>
+  );
+}
+
+function FinisherRow({ finisher: f }: { finisher: RaceFinisher }) {
+  const tone = f.position <= 3 ? POSITION_TONE[f.position] : 'border-bourbon/15';
+  const label = f.position <= 3 ? POSITION_LABEL[f.position] : `#${f.position}`;
+  return (
+    <li className={`rounded-lg border bg-white px-4 py-2.5 flex items-center gap-3 ${tone}`}>
+      <span className="text-xs uppercase tracking-wider w-12 shrink-0 font-semibold">
+        {label}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold text-bourbon truncate">{f.horse_name}</div>
+        {f.jockey && (
+          <div className="text-[11px] text-bourbon/70 truncate">{f.jockey}</div>
+        )}
+      </div>
+    </li>
   );
 }
 
