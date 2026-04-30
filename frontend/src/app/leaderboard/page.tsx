@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { CommentsBlock } from '@/components/CommentsBlock';
+import { Countdown } from '@/components/Countdown';
 import { LeaderboardTable } from '@/components/LeaderboardTable';
 import { useComments, useLeaderboard, type RaceKind } from '@/lib/hooks';
 import { useUsername } from '@/lib/identity';
@@ -84,6 +85,15 @@ export default function LeaderboardPage() {
           );
         })}
       </nav>
+
+      {hidePicks && leaderboard?.post_time && !isArchive && (
+        <div className="rounded-md border border-rose-red/30 bg-rose-red/5 px-3 py-2 flex flex-wrap items-center gap-3 text-sm">
+          <span className="text-bourbon/80">
+            Picks reveal at post time:
+          </span>
+          <Countdown target={leaderboard.post_time} label="Reveal" />
+        </div>
+      )}
 
       {isLoading && <p className="text-bourbon/70">Loading…</p>}
       {leaderboard && (

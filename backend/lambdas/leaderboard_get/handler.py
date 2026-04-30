@@ -22,7 +22,7 @@ from lambdas.common.dynamo_helpers import (
     race_results_table,
 )
 from lambdas.common.errors import handle_errors
-from lambdas.common.predictions_data import event_locked
+from lambdas.common.predictions_data import event_locked, post_time_for_event
 from lambdas.common.scoring import score_breakdown
 from lambdas.common.utility_helpers import get_query_params, success_response
 
@@ -102,6 +102,7 @@ def handler(event, context):
     finishers = _finishers_for(event_id, main_race)
     locked = event_locked(event_id)
     finished = len(finishers) > 0
+    post_time = post_time_for_event(event_id)
     odds_by_horse = _odds_index(event_id)
 
     rows = []
@@ -130,5 +131,6 @@ def handler(event, context):
         "event": event_kind,
         "locked": locked,
         "finished": finished,
+        "post_time": post_time,
         "rows": rows,
     })

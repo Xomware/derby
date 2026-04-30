@@ -63,6 +63,7 @@ export interface Leaderboard {
   event: 'derby' | 'oaks';
   locked: boolean;
   finished: boolean;
+  post_time: string | null;
   rows: LeaderboardRow[];
 }
 

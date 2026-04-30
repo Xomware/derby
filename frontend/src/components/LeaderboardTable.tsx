@@ -11,11 +11,11 @@ interface Props {
   showScores: boolean;
 }
 
-const SLOTS: { key: 'win' | 'place' | 'show' | 'long_shot'; label: string; tip: string }[] = [
-  { key: 'win', label: 'Win', tip: 'If your pick wins, you score the odds (5-1 → 5 pts).' },
-  { key: 'place', label: 'Place', tip: 'If your pick finishes top 2, you score odds ÷ 2.' },
-  { key: 'show', label: 'Show', tip: 'If your pick finishes top 3, you score odds ÷ 3.' },
-  { key: 'long_shot', label: 'Long shot', tip: '1 pt if your long shot finishes top 4.' },
+const SLOTS: { key: 'win' | 'place' | 'show' | 'long_shot'; label: string }[] = [
+  { key: 'win', label: 'Win' },
+  { key: 'place', label: 'Place' },
+  { key: 'show', label: 'Show' },
+  { key: 'long_shot', label: 'Long shot' },
 ];
 
 function pickKey(s: 'win' | 'place' | 'show' | 'long_shot'): keyof LeaderboardRow {
@@ -44,12 +44,7 @@ export function LeaderboardTable({ rows, highlightUsername, hidePicks, showScore
             <th className="py-2 px-2 text-right">Score</th>
             {SLOTS.map((s) => (
               <th key={s.key} className="py-2 px-2">
-                <span title={s.tip} className="cursor-help inline-flex items-center gap-1">
-                  {s.label}
-                  <span className="grid place-items-center w-3.5 h-3.5 rounded-full border border-bourbon/30 text-[9px] text-bourbon/60 leading-none">
-                    ?
-                  </span>
-                </span>
+                {s.label}
               </th>
             ))}
           </tr>
