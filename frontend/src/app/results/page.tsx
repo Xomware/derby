@@ -3,11 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Countdown } from '@/components/Countdown';
 import {
-  PickDistribution,
-  type DistributionData,
-  type SlotEntry,
-} from '@/components/PickDistribution';
-import {
   useGrantPicks,
   usePicks,
   usePredictions,
@@ -64,19 +59,14 @@ function emptySlot(): SlotTally {
   return { count: 0, voters: [] };
 }
 
-type View = 'horses' | 'distribution';
-
 export default function ResultsPage() {
   const { username } = useUsername();
   const [kind, setKind] = useState<RaceKind>('derby');
-  const [view, setView] = useState<View>('horses');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const e = params.get('event');
     if (e === 'oaks' || e === 'derby') setKind(e);
-    const v = params.get('view');
-    if (v === 'distribution' || v === 'horses') setView(v);
   }, []);
 
   const { picks, isLoading, year } = usePicks(kind);
@@ -198,35 +188,9 @@ export default function ResultsPage() {
     return m;
   }, [finishers]);
 
-  // Distribution view = same data as the per-horse tally, pivoted to
-  // slot → horse → voter list, with totals.
-  const distribution = useMemo<DistributionData>(() => {
-    const empty = (): SlotEntry => ({ voters: {}, total: 0 });
-    const out: DistributionData = {
-      win: empty(),
-      place: empty(),
-      show: empty(),
-      long_shot: empty(),
-    };
-    for (const horseName of Object.keys(tally)) {
-      // Recover the canonical horse name (we used normalize() as the key).
-      const display = horses.find((h) => normalize(h.name) === horseName)?.name ?? horseName;
-      const slots = tally[horseName];
-      for (const s of SLOTS) {
-        const voters = slots[s.key].voters;
-        if (voters.length === 0) continue;
-        out[s.key].voters[display] = voters;
-        out[s.key].total += voters.length;
-      }
-    }
-    return out;
-  }, [tally, horses]);
-
-  function pushUrl(nextKind: RaceKind, nextView: View) {
+  function pushUrl(nextKind: RaceKind) {
     const url = new URL(window.location.href);
     url.searchParams.set('event', nextKind);
-    if (nextView === 'horses') url.searchParams.delete('view');
-    else url.searchParams.set('view', nextView);
     window.history.replaceState(null, '', url.toString());
   }
 
@@ -256,7 +220,7 @@ export default function ResultsPage() {
               type="button"
               onClick={() => {
                 setKind(t.id);
-                pushUrl(t.id, view);
+                pushUrl(t.id);
               }}
               className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition ${
                 active
@@ -270,30 +234,6 @@ export default function ResultsPage() {
           );
         })}
       </nav>
-
-      <div className="flex flex-wrap gap-2">
-        {(['horses', 'distribution'] as const).map((v) => {
-          const active = view === v;
-          return (
-            <button
-              key={v}
-              type="button"
-              onClick={() => {
-                setView(v);
-                pushUrl(kind, v);
-              }}
-              className={`px-3 py-1.5 rounded text-xs font-semibold border transition ${
-                active
-                  ? 'bg-rose-red text-cream border-rose-red'
-                  : 'border-bourbon/30 text-bourbon hover:border-rose-red'
-              }`}
-              aria-pressed={active}
-            >
-              {v === 'horses' ? 'By horse' : 'Pool distribution'}
-            </button>
-          );
-        })}
-      </div>
 
       {lockTime && !official && !locked && !isArchive && (
         <div className="rounded-md border border-rose-red/30 bg-rose-red/5 px-3 py-2 flex flex-wrap items-center gap-3 text-sm">
@@ -314,7 +254,7 @@ export default function ResultsPage() {
         </div>
       )}
 
-      {view === 'horses' && sorted.length > 0 && (
+      {sorted.length > 0 && (
         <div className="rounded-xl border border-bourbon/15 bg-white overflow-hidden">
           <div className="hidden sm:grid grid-cols-[11rem_1fr_1fr_1fr_1fr] gap-2 bg-bourbon/5 border-b border-bourbon/15 px-4 py-2 text-[10px] uppercase tracking-wider font-semibold text-bourbon/70">
             <div>Horse</div>
@@ -338,8 +278,6 @@ export default function ResultsPage() {
           </ol>
         </div>
       )}
-
-      {view === 'distribution' && <PickDistribution data={distribution} />}
     </section>
   );
 }

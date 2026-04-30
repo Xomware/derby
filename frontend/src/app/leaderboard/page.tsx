@@ -3,9 +3,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { LeaderboardTable } from '@/components/LeaderboardTable';
 import {
+  PickDistribution,
+  type DistributionData,
+  type SlotEntry,
+} from '@/components/PickDistribution';
+import {
   useGrantPicks,
   useLeaderboard,
   usePicks,
+  usePredictions,
   useResults,
   type RaceKind,
 } from '@/lib/hooks';
@@ -13,6 +19,10 @@ import { useUsername } from '@/lib/identity';
 import { CURRENT_YEAR } from '@/lib/year';
 import { scoreGrantRow } from '@/lib/scoring';
 import type { LeaderboardRow } from '@/lib/types';
+
+const GRANT_ALIASES = new Set(['GRANT', 'GTATICH']);
+const SLOT_KEYS = ['win', 'place', 'show', 'long_shot'] as const;
+type SlotKey = (typeof SLOT_KEYS)[number];
 
 const TABS: { id: RaceKind; label: string }[] = [
   { id: 'derby', label: 'Derby' },
@@ -33,6 +43,7 @@ export default function LeaderboardPage() {
   const { picks } = usePicks(kind);
   const { results } = useResults(year);
   const { grantPicks } = useGrantPicks(kind);
+  const { data: predictions } = usePredictions(kind, username);
   const isArchive = year !== CURRENT_YEAR;
   const showScores = !!leaderboard?.finished;
 
@@ -67,6 +78,34 @@ export default function LeaderboardPage() {
     }
     return s;
   }, [picks]);
+
+  const distribution = useMemo<DistributionData>(() => {
+    const empty = (): SlotEntry => ({ voters: {}, total: 0 });
+    const out: DistributionData = {
+      win: empty(),
+      place: empty(),
+      show: empty(),
+      long_shot: empty(),
+    };
+    const all = [
+      ...(predictions?.my ? [predictions.my] : []),
+      ...(predictions?.others ?? []),
+    ];
+    const add = (slot: SlotKey, horse: string | null, voter: string) => {
+      if (!horse) return;
+      const bucket = out[slot];
+      (bucket.voters[horse] ||= []).push(voter);
+      bucket.total += 1;
+    };
+    for (const p of all) {
+      if (GRANT_ALIASES.has((p.username ?? '').toUpperCase())) continue;
+      for (const s of SLOT_KEYS) add(s, p[s], `@${p.username}`);
+    }
+    if (grantPicks) {
+      for (const s of SLOT_KEYS) add(s, grantPicks[s] ?? null, 'Grant');
+    }
+    return out;
+  }, [predictions, grantPicks]);
 
   const rowsWithGrant = useMemo(() => {
     const userRows = leaderboard?.rows ?? [];
@@ -142,6 +181,8 @@ export default function LeaderboardPage() {
           longShotThreshold={8}
         />
       )}
+
+      {!isArchive && <PickDistribution data={distribution} />}
     </section>
   );
 }

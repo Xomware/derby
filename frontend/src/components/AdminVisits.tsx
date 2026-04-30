@@ -108,12 +108,14 @@ export function AdminVisits({ adminToken }: { adminToken: string }) {
           </section>
 
           <section className="rounded-xl border border-bourbon/15 bg-white p-4">
-            <h4 className="font-semibold text-bourbon text-sm mb-2">By user</h4>
+            <h4 className="font-semibold text-bourbon text-sm mb-2">By user — most recent first</h4>
             {data.user_breakdown.length === 0 ? (
               <p className="text-bourbon/60 text-xs">No visitors yet.</p>
             ) : (
               <ul className="space-y-1.5 text-sm">
-                {data.user_breakdown.map((u) => (
+                {[...data.user_breakdown]
+                  .sort((a, b) => (b.last_seen ?? '').localeCompare(a.last_seen ?? ''))
+                  .map((u) => (
                   <li
                     key={u.username}
                     className="flex items-baseline gap-2 border-b border-bourbon/10 pb-1.5 last:border-b-0"
