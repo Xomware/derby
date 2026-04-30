@@ -13,39 +13,240 @@
     {
       "tier": "Top contenders",
       "horses": [
-        { "name": "Known Agenda", "note": "drawing the first post will work in his favor — closer who won't burn energy early" },
-        { "name": "Hot Rod Charlie", "note": "really high on him; comes down to the break between speed horses" },
-        { "name": "Essential Quality", "note": "best horse on paper but not worth 2-1" }
+        {
+          "name": "Known Agenda",
+          "note": "drawing the first post will work in his favor — closer who won't burn energy early"
+        },
+        {
+          "name": "Hot Rod Charlie",
+          "note": "really high on him; comes down to the break between speed horses"
+        },
+        {
+          "name": "Essential Quality",
+          "note": "best horse on paper but not worth 2-1"
+        }
       ]
     },
     {
       "tier": "Live underneath",
       "horses": [
-        { "name": "O Besos", "note": "closer-type. Could be better than odds suggest. Trifecta-back-end material" },
-        { "name": "King Fury", "note": "strong workouts; surrounded by speed in his post" },
-        { "name": "Highly Motivated", "note": "fast horse, only lost to Essential Quality by a neck" }
+        {
+          "name": "O Besos",
+          "note": "closer-type. Could be better than odds suggest. Trifecta-back-end material"
+        },
+        {
+          "name": "King Fury",
+          "note": "strong workouts; surrounded by speed in his post"
+        },
+        {
+          "name": "Highly Motivated",
+          "note": "fast horse, only lost to Essential Quality by a neck"
+        }
       ]
     },
     {
       "tier": "Long shots",
       "horses": [
-        { "name": "Sainthood", "note": "by far the best of the long-shot horses" },
-        { "name": "Helium", "note": "has good late speed splits, undefeated, intriguing price" },
-        { "name": "Like the King", "note": "won't hit the board, but won't be last" }
+        {
+          "name": "Sainthood",
+          "note": "by far the best of the long-shot horses"
+        },
+        {
+          "name": "Helium",
+          "note": "has good late speed splits, undefeated, intriguing price"
+        },
+        {
+          "name": "Like the King",
+          "note": "won't hit the board, but won't be last"
+        }
       ]
     },
     {
       "tier": "Pass",
       "horses": [
-        { "name": "Medina Spirit", "note": "Bob Baffert horse — doesn't have endurance to close" },
-        { "name": "Mandaloun", "note": "inconsistent — last race shit the bed" },
-        { "name": "Rock Your World", "note": "lightly raced, will need to come from behind" },
-        { "name": "Soup and Sandwich", "note": "speed horse stuck in 19th post; people pick him because of the name" },
-        { "name": "Bourbonic", "note": "won a slow race to qualify" },
-        { "name": "Brooklyn Strong", "note": "not good. Don't entertain" },
-        { "name": "Keepmeinmind", "note": "not good" },
-        { "name": "Hidden Stash", "note": "won't win" }
+        {
+          "name": "Medina Spirit",
+          "note": "Bob Baffert horse — doesn't have endurance to close"
+        },
+        {
+          "name": "Mandaloun",
+          "note": "inconsistent — last race shit the bed"
+        },
+        {
+          "name": "Rock Your World",
+          "note": "lightly raced, will need to come from behind"
+        },
+        {
+          "name": "Soup and Sandwich",
+          "note": "speed horse stuck in 19th post; people pick him because of the name"
+        },
+        {
+          "name": "Bourbonic",
+          "note": "won a slow race to qualify"
+        },
+        {
+          "name": "Brooklyn Strong",
+          "note": "not good. Don't entertain"
+        },
+        {
+          "name": "Keepmeinmind",
+          "note": "not good"
+        },
+        {
+          "name": "Hidden Stash",
+          "note": "won't win"
+        }
       ]
+    }
+  ],
+  "horses": [
+    {
+      "horse_name": "Like the King",
+      "post_position": 1,
+      "odds_at_pick": "50-1",
+      "beyer": "86",
+      "writeup": "One of the longshots that isn’t godawful. Will not hit the board, but also won’t be last. Could sneak in top 10.",
+      "brisnet": "94"
+    },
+    {
+      "horse_name": "Brooklyn Strong",
+      "post_position": 2,
+      "odds_at_pick": "50-1",
+      "writeup": "Not good. Don’t entertain."
+    },
+    {
+      "horse_name": "Keepmeinmind",
+      "post_position": 3,
+      "odds_at_pick": "50-1",
+      "writeup": "Not good."
+    },
+    {
+      "horse_name": "Sainthood",
+      "post_position": 4,
+      "odds_at_pick": "50-1",
+      "beyer": "84",
+      "writeup": "By far the best of the longshot horses. Has had good races and in his bad races got screwed in positioning. Might be worth throwing some money on him to place or show, or add in some trifectas. Price will probably come down a little bit by post time.",
+      "brisnet": "93"
+    },
+    {
+      "horse_name": "O Besos",
+      "post_position": 5,
+      "odds_at_pick": "20-1",
+      "beyer": "96",
+      "writeup": "A closer type horse looking for a fast pace at the start. Has improved his rating every race which means he could be even better than his odds indicate. Another potential horse to add into back end of trifectas. Rallied from back of the pack in both of his wins, could capitalize at the end.",
+      "brisnet": "94"
+    },
+    {
+      "horse_name": "Mandaloun",
+      "post_position": 6,
+      "odds_at_pick": "15-1",
+      "beyer": "98",
+      "writeup": "Has been very impressive in the past, but last race shit the bed which is the only reason he is not a top favorite. Not of fan of the inconsistency, and he doesn’t have good last quarter speed. Not for me, but could be worth a flyer with his price.",
+      "brisnet": "100"
+    },
+    {
+      "horse_name": "Medina Spirit",
+      "post_position": 7,
+      "odds_at_pick": "15-1",
+      "beyer": "99",
+      "writeup": "I hate Bob Baffert, and everyone will bet him because of it. He doesn’t have the endurance to close this race. Stay away, I hope he comes in last.",
+      "brisnet": "98"
+    },
+    {
+      "horse_name": "Hot Rod Charlie",
+      "post_position": 8,
+      "odds_at_pick": "8-1",
+      "beyer": "99",
+      "writeup": "Really really high on this horse, just not happy about his post position between a couple speed horses that could jump him out of the gate putting him in a tough spot to come from behind. However, if he is able to break well, he will have a great chance to win. Will play him to win, just comes down to the break for me.",
+      "brisnet": "100"
+    },
+    {
+      "horse_name": "Midnight Bourbon",
+      "post_position": 9,
+      "odds_at_pick": "20-1",
+      "beyer": "96",
+      "writeup": "Another fast horse, has kept pace with Hot Rod Charlie in the past, but not quite as good. He will use too much energy at the start to jump Hot Rod and will fade at the end.",
+      "brisnet": "98"
+    },
+    {
+      "horse_name": "Dynamic One",
+      "post_position": 10,
+      "odds_at_pick": "20-1",
+      "beyer": "89",
+      "writeup": "Good jockey and owner, but is Pletcher’s second best horse to Known Agenda. He will need a perfect race just to finish near the top. Don’t see him finishing top 5.",
+      "brisnet": "95"
+    },
+    {
+      "horse_name": "Helium",
+      "post_position": 11,
+      "odds_at_pick": "50-1",
+      "beyer": "84",
+      "writeup": "Has good late speed splits, could make a run at the end. Also is undefeated, but hasn’t raced in a while. Could make a late run, but I think will be too far behind. Intriguing price tho.",
+      "brisnet": "93"
+    },
+    {
+      "horse_name": "Hidden Stash",
+      "post_position": 12,
+      "odds_at_pick": "50-1",
+      "beyer": "83",
+      "writeup": "Don’t know much about this horse. He won’t win.",
+      "brisnet": "93"
+    },
+    {
+      "horse_name": "Essential Quality",
+      "post_position": 13,
+      "odds_at_pick": "2-1",
+      "beyer": "97",
+      "writeup": "The betting favorite, but not worth the price. While undefeated, the previous race didn’t have much any competition and was a slowish pace. Nonetheless the best horse in this race, but could have a lot of problems if it’s not a perfectly ideal race. Stay away, even in trifectas. Could very well win, just nowhere close to a 2-1 worth.",
+      "brisnet": "102"
+    },
+    {
+      "horse_name": "Rock Your World",
+      "post_position": 14,
+      "odds_at_pick": "5-1",
+      "beyer": "100",
+      "writeup": "Lightly raced horse who is also undefeated. Has great speed but has won his last races all while leading from the start. With an outside post he’ll be able to run free on the outside, but will have to work from behind which will be new for him and why I am staying away. Good horse though.",
+      "brisnet": "102"
+    },
+    {
+      "horse_name": "King Fury",
+      "post_position": 15,
+      "odds_at_pick": "20-1",
+      "beyer": "95",
+      "writeup": "Said to have had one of the strongest looking workouts. He is surrounded by speed in his post which will allow him to wait to make his push as he has some of the best last 1/8 mile splits. I like him to add in the backend of a trifecta or superfecta.",
+      "brisnet": "95"
+    },
+    {
+      "horse_name": "Highly Motivated",
+      "post_position": 16,
+      "odds_at_pick": "10-1",
+      "beyer": "97",
+      "writeup": "One of the fastest horses in the race. Only lost to Essential Quality by a neck, so has the quality of a top horse in the race. Good choice for the price. He will try to push the pace, just a matter of if he fades at the end. No horse has ever won out of the 17th post position which makes it long overdue.",
+      "brisnet": "102"
+    },
+    {
+      "horse_name": "Super Stock",
+      "post_position": 17,
+      "odds_at_pick": "30-1",
+      "beyer": "92",
+      "writeup": "Had a perfectly ideal race to get into the Derby, probably won’t be as lucky this time. Not gonna look  any further.",
+      "brisnet": "97"
+    },
+    {
+      "horse_name": "Soup and Sandwich",
+      "post_position": 18,
+      "odds_at_pick": "30-1",
+      "beyer": "90",
+      "writeup": "Also likes to lead from the start and that won’t be possible from 19th post.\nDumb ass name that dumb girls and rich people will be talking about all day because they think it makes them cool to choose the horse. I hope this thing doesn’t even finish. But of course, the idiots choosing this horse based off the name alone will probably get lucky and see it hit the board.",
+      "brisnet": "98"
+    },
+    {
+      "horse_name": "Bourbonic",
+      "post_position": 19,
+      "odds_at_pick": "30-1",
+      "beyer": "89",
+      "writeup": "Won a slow race to get in the derby, but won at 72-1 odds.. so who knows. Not for me.",
+      "brisnet": "94"
     }
   ]
 }

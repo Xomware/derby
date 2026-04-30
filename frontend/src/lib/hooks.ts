@@ -73,11 +73,28 @@ export interface GrantPicks {
   analysis?: string | null;
   betting_plays?: string | null;
   power_rankings?: PowerRankingTier[];
+  horses?: GrantArchiveHorse[];
 }
 
 export interface PowerRankingTier {
   tier: string;
   horses: { name: string; note: string | null }[];
+}
+
+export interface GrantArchiveHorse {
+  horse_name: string;
+  post_position?: number | null;
+  odds_at_pick?: string | null;
+  jockey?: string | null;
+  trainer?: string | null;
+  record?: string | null;
+  beyer?: string | null;
+  brisnet?: string | null;
+  equibase_rating?: string | null;
+  last_race?: string | null;
+  style?: string | null;
+  final_take?: string | null;
+  writeup?: string | null;
 }
 
 export function useComments(

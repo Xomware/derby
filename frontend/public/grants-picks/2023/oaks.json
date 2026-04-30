@@ -13,26 +13,139 @@
     {
       "tier": "Possible winners",
       "horses": [
-        { "name": "Southlawn", "note": null },
-        { "name": "Botanical", "note": null },
-        { "name": "Wet Paint", "note": null },
-        { "name": "Flying Connection", "note": null },
-        { "name": "Affirmative Lady", "note": null }
+        {
+          "name": "Southlawn",
+          "note": null
+        },
+        {
+          "name": "Botanical",
+          "note": null
+        },
+        {
+          "name": "Wet Paint",
+          "note": null
+        },
+        {
+          "name": "Flying Connection",
+          "note": null
+        },
+        {
+          "name": "Affirmative Lady",
+          "note": null
+        }
       ]
     },
     {
       "tier": "Two probable winners",
       "horses": [
-        { "name": "Southlawn", "note": null },
-        { "name": "Wet Paint", "note": null }
+        {
+          "name": "Southlawn",
+          "note": null
+        },
+        {
+          "name": "Wet Paint",
+          "note": null
+        }
       ]
     },
     {
       "tier": "Long-shot to hit board",
       "horses": [
-        { "name": "Promisher America", "note": null },
-        { "name": "Affirmative Lady", "note": null }
+        {
+          "name": "Promisher America",
+          "note": null
+        },
+        {
+          "name": "Affirmative Lady",
+          "note": null
+        }
       ]
+    }
+  ],
+  "horses": [
+    {
+      "horse_name": "Mimi Kakushi",
+      "post_position": 1,
+      "odds_at_pick": "20-1",
+      "writeup": "Japan horse, no speed figure, no way to comp\nMaybe good?"
+    },
+    {
+      "horse_name": "The Alys Look",
+      "post_position": 2,
+      "odds_at_pick": "15-1",
+      "writeup": "Got killed by Southlawn. Pass"
+    },
+    {
+      "horse_name": "Gambling Girl",
+      "post_position": 3,
+      "odds_at_pick": "15-1",
+      "writeup": "Closed well on Promisher America in prep race\nStarted in the back and stay until last turn"
+    },
+    {
+      "horse_name": "Southlawn",
+      "post_position": 4,
+      "odds_at_pick": "8-1",
+      "writeup": "Very strong finish over The Alys Look and Pretty Mischievous. Came back and blew by at the end"
+    },
+    {
+      "horse_name": "Wonder Wheel",
+      "post_position": 5,
+      "odds_at_pick": "12-1",
+      "writeup": "Killed by Defining Purpose in Ashland. Pass"
+    },
+    {
+      "horse_name": "Botanical",
+      "post_position": 6,
+      "odds_at_pick": "4-1",
+      "writeup": "Prep race was on synthetic dirt. This makes me pass, especially on the price\nKilled in each of her preps. Wire to wire win in prep"
+    },
+    {
+      "horse_name": "Wet Paint",
+      "post_position": 7,
+      "odds_at_pick": "5-2",
+      "writeup": "Favorite in Oaks\nStarted waaaaay in the back then steadily just ran her race and passed everyone on the last turn. Left me wanting a little bit more to be honest at the end as there were still some horses not too far off"
+    },
+    {
+      "horse_name": "Promisher America",
+      "post_position": 8,
+      "odds_at_pick": "30-1",
+      "writeup": "Beat a poor field in prep race, died at the end running out of gas. Won’t finish the Oaks strong"
+    },
+    {
+      "horse_name": "And Tell Me Nolies",
+      "post_position": 9,
+      "odds_at_pick": "15-1",
+      "writeup": "Runner up in prep race to best filly (not racing in Oaks), but by a lot"
+    },
+    {
+      "horse_name": "Flying Connection",
+      "post_position": 10,
+      "odds_at_pick": "15-1",
+      "writeup": "Wired race at a fast pace and held pace into the finish\nCheck length of Sunland vs Kentucky Oaks\nOaks is another 1/16 mile. Could be too much to keep pace\nFast speed rating\nIf can keep pace, has a chance to win\nDefinitely like her in an exotic"
+    },
+    {
+      "horse_name": "Defining Purpose",
+      "post_position": 11,
+      "odds_at_pick": "12-1",
+      "writeup": "Unimpressive in prep win against no other Oaks racers"
+    },
+    {
+      "horse_name": "Dorth Vader",
+      "post_position": 12,
+      "odds_at_pick": "20-1",
+      "writeup": "Pressed lead in prep entire race then lost to Affirmative Lady in last furlong by 2ish lengths"
+    },
+    {
+      "horse_name": "Affirmative Lady",
+      "post_position": 13,
+      "odds_at_pick": "10-1",
+      "writeup": "Had a tough trip but then held pace and won the race down the last stretch\nbeat Dorth Vader"
+    },
+    {
+      "horse_name": "Pretty Mischievous",
+      "post_position": 14,
+      "odds_at_pick": "10-1",
+      "writeup": "Had Southlawn until end then got blown by. Pass"
     }
   ]
 }

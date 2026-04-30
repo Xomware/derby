@@ -13,49 +13,343 @@
     {
       "tier": "Tier 1",
       "horses": [
-        { "name": "(none)", "note": "nobody is great this year — wide open which is why I'd rather sprinkle longshots" }
+        {
+          "name": "(none)",
+          "note": "nobody is great this year — wide open which is why I'd rather sprinkle longshots"
+        }
       ]
     },
     {
       "tier": "Tier 2 — Favorites",
       "horses": [
-        { "name": "Sovereignty", "note": "most consistent horse, could win with a good trip" },
-        { "name": "Sandman", "note": "looked great in last race, but I trust Sovereignty more" },
-        { "name": "Journalism", "note": "no blemishes on resume and will be bet heavy" }
+        {
+          "name": "Sovereignty",
+          "note": "most consistent horse, could win with a good trip"
+        },
+        {
+          "name": "Sandman",
+          "note": "looked great in last race, but I trust Sovereignty more"
+        },
+        {
+          "name": "Journalism",
+          "note": "no blemishes on resume and will be bet heavy"
+        }
       ]
     },
     {
       "tier": "Tier 3 — Closers that should take advantage of the fast pace breaking down",
       "horses": [
-        { "name": "Publisher", "note": "my underdog. Will 100% outrun his odds" },
-        { "name": "Baeza", "note": "improving and exciting horse who could outrun everyone" },
-        { "name": "Tiztastic", "note": "improved and will handle the distance well" },
-        { "name": "Final Gambit", "note": "wild card. Amazing closing speed" },
-        { "name": "Grande", "note": "lightly raced and keeps improving — capable" },
-        { "name": "Burnham Square", "note": "capable, but of the closers there are better" },
-        { "name": "Luxor Café", "note": "might be the real deal but passing on Japan" },
-        { "name": "Chunk of Gold", "note": "did well in Louisiana, but better proven horses ahead" }
+        {
+          "name": "Publisher",
+          "note": "my underdog. Will 100% outrun his odds"
+        },
+        {
+          "name": "Baeza",
+          "note": "improving and exciting horse who could outrun everyone"
+        },
+        {
+          "name": "Tiztastic",
+          "note": "improved and will handle the distance well"
+        },
+        {
+          "name": "Final Gambit",
+          "note": "wild card. Amazing closing speed"
+        },
+        {
+          "name": "Grande",
+          "note": "lightly raced and keeps improving — capable"
+        },
+        {
+          "name": "Burnham Square",
+          "note": "capable, but of the closers there are better"
+        },
+        {
+          "name": "Luxor Café",
+          "note": "might be the real deal but passing on Japan"
+        },
+        {
+          "name": "Chunk of Gold",
+          "note": "did well in Louisiana, but better proven horses ahead"
+        }
       ]
     },
     {
       "tier": "Tier 4 — Pace pushers",
       "horses": [
-        { "name": "Rodriguez", "note": "took step up in the Wood, tougher trip this go" },
-        { "name": "American Promise", "note": "looked great against bad competition. Don't expect much" },
-        { "name": "East Avenue", "note": "likeliest of the speed horses if I had to back one" },
-        { "name": "Neoequos", "note": "expect him near the top all the way til last turn" },
-        { "name": "Citizen Bull", "note": "regressed each race. Distance is an issue" }
+        {
+          "name": "Rodriguez",
+          "note": "took step up in the Wood, tougher trip this go"
+        },
+        {
+          "name": "American Promise",
+          "note": "looked great against bad competition. Don't expect much"
+        },
+        {
+          "name": "East Avenue",
+          "note": "likeliest of the speed horses if I had to back one"
+        },
+        {
+          "name": "Neoequos",
+          "note": "expect him near the top all the way til last turn"
+        },
+        {
+          "name": "Citizen Bull",
+          "note": "regressed each race. Distance is an issue"
+        }
       ]
     },
     {
       "tier": "Tier 5 — No chance",
       "horses": [
-        { "name": "Coal Battle", "note": "can't do the distance" },
-        { "name": "Owen Almighty", "note": "will sprint out and float to last" },
-        { "name": "Flying Mohawk", "note": "nonfactor" },
-        { "name": "Render Judgment", "note": "bad horse" },
-        { "name": "Admire Daytona", "note": "Japan #2 horse, pass" }
+        {
+          "name": "Coal Battle",
+          "note": "can't do the distance"
+        },
+        {
+          "name": "Owen Almighty",
+          "note": "will sprint out and float to last"
+        },
+        {
+          "name": "Flying Mohawk",
+          "note": "nonfactor"
+        },
+        {
+          "name": "Render Judgment",
+          "note": "bad horse"
+        },
+        {
+          "name": "Admire Daytona",
+          "note": "Japan #2 horse, pass"
+        }
       ]
+    }
+  ],
+  "horses": [
+    {
+      "horse_name": "Citizen Bull",
+      "post_position": 1,
+      "odds_at_pick": "20-1",
+      "record": "6: 4-0-1",
+      "beyer": "98",
+      "brisnet": "107",
+      "last_race": "4th Santa Anita to Journalism",
+      "style": "Pace setter",
+      "final_take": "He’s a regressing horse in a tough post position who also will have trouble with the distance. Pass",
+      "writeup": "Bob Baffert Horse. First time he is back allowed to the derby which will be a storyline. This is one of his two horses\nHad a much better 2024 campaign but hasn’t put it together in 2025 yet\nWas on a three-race graded stakes win streak prior to losing Santa Anita\nLooked great in the wins setting the pace and winning a couple of those wire-to-wire\n* Speed figures are overstated out of the California circuit. Take the high brisnet with a grain of salt\nTough draw getting the first post position. Will have to shoot for the front and get a rail run\nThe distance will be the issue here. Has looked great in 1M and 1 1/16 M races but the extra furlong in the santa anita killed him. Adding a full extra ¼ on top of that at Churchill seems unlikely to help"
+    },
+    {
+      "horse_name": "Neoequos",
+      "post_position": 2,
+      "odds_at_pick": "30-1",
+      "record": "7: 2-2-2",
+      "beyer": "91",
+      "brisnet": "101",
+      "last_race": "3rd Florida Derby",
+      "style": "Stalker",
+      "final_take": "I like how he positions himself, I could see him be leading around the final turn prior to fading. May use underneath to help juice up some tickets",
+      "writeup": "Flew to the front in the Florida Derby and each other race. He actually kept his pace well throughout but got beat by a better horse in Tiztastic by a little\nHe will try and jump out to the front along with the other speed horses\nThe expectation is that he won’t be able to keep his pace up throughout the race into the back stretch\nI do like how he positions himself as a stalker which is where I think will yield the best positioning this year\nHe breaks well which is important for the horses trying to get into the lead early\nHasn’t proven he has the distance which is why he is going off as a long shot"
+    },
+    {
+      "horse_name": "Final Gambit",
+      "post_position": 3,
+      "odds_at_pick": "30-1",
+      "record": "4: 2-1-1",
+      "beyer": "90",
+      "brisnet": "101",
+      "last_race": "Won Jeff Ruby Stakes",
+      "style": "Closer",
+      "final_take": "Wild card here. I do like this horse so I will sprinkle some on him to win, but mostly just include in exotics",
+      "writeup": "Started racing on grass and most recently won the Jeff Ruby on synthetic dirt. This will be his first race on actual dirt which is the main question mark\nHe went from last to an easy first in the Jeff Ruby in an impressive final stretch\nWill be a wild card\nRookie jockey is concerning\nPosted the fasted MPH (37) over the final stretch of any prep race\nThe extra distance will only benefit him as his best speed is at the end\nIf he can translate to dirt with ease he may have a live chance"
+    },
+    {
+      "horse_name": "Rodriguez",
+      "post_position": 4,
+      "odds_at_pick": "12-1",
+      "record": "5: 2-2-1",
+      "beyer": "101",
+      "brisnet": "105",
+      "last_race": "Won Wood Memorial",
+      "style": "Pushes the pace",
+      "final_take": "Don’t buy the Bob Baffert Kool-Aid but may include him far underneath in some superfectas",
+      "writeup": "Bob Baffert Horse\nHasn’t looked impressive at all until leaving the west coast circuit and winning at the Wood\nGot dogged by Journalism in prior race, and beat easy by Citizen Bull in race before that\nHis prior races looking meh might discount everything from the Wood memorial, including Grande who he beat\nI tried to like this horse, but can’t get to the point where I would place anything on him\nDrew post 3 and will be forced to gun for the lead from the start. He either breaks well and gets out front and will use up too much energy and falter, or breaks poorly and never recover\nMaybe because I hate Bob Baffert that I’m staying away from him but I don’t think he’s the best horse"
+    },
+    {
+      "horse_name": "American Promise",
+      "post_position": 5,
+      "odds_at_pick": "30-1",
+      "record": "9: 2-1-1",
+      "beyer": "95",
+      "brisnet": "105",
+      "last_race": "Won Virginia Derby? Idk what this is",
+      "style": "Stalks pace",
+      "final_take": "simple stay away from this horse. Only races he did well in were against bad fields",
+      "writeup": "Looked fast in this, but had no traffic issues at all and just ran away from the field, which was not an impressive stakes race. Highly doubt it’ll be as easy in the Derby\nAny time a horse comes in with 7+ races it feels like he’s not an absolute dawg and the owner is just desperate for derby qualifying points and prize money\nComing into the Derby with over 6 weeks of rest also historically hinders momentum from prior racing"
+    },
+    {
+      "horse_name": "Admire Daytona",
+      "post_position": 6,
+      "odds_at_pick": "30-1",
+      "record": "6: 4-1-0",
+      "beyer": "n/a",
+      "last_race": "Won Fukuryu Stakes convincingly by 10 lengths and extending lead. Not sure about the quality of competition but this horse looked strong and in control",
+      "style": "Stalker",
+      "final_take": "Not going to bet a Japanese Horse and will make him beat me",
+      "writeup": "Has lost to other Japanese Horse Luxor Café twice\nThis horse is not going to get any looks so will probably go off closer to 50-1. I also will not waste time on him, don’t waste any of your money on him either.\nLuxor Café (15-1)\nAlso beat the other Japan horse, Admire Daytona.\nI actually am tempted to include him in some of my plays. The biggest concern I have is that he is not receiving a ton of hype like the top Japanese horse has garnered each of the past couple of years. People usually are dying to say that Japan will eventually win one and prop up expectations for their top contender, although I haven’t heard much Luxor Café chatter which might be telling\nPasses every eye test from his past races with closing speed"
+    },
+    {
+      "horse_name": "Journalism",
+      "post_position": 7,
+      "odds_at_pick": "3-1",
+      "record": "5: 4-0-1",
+      "beyer": "108",
+      "brisnet": "108",
+      "last_race": "Won Santa Anita Derby, half length over Baeza",
+      "style": "Stalker",
+      "final_take": "Will go off as heavy favorite because of no blemishes on his resume. Will use him on top of some exacta and trifectas",
+      "writeup": "Will be betting favorite at Post time\nLooked impressive winning on the west coast circuit\nThere is a lot to like when watching this horse. He stays just off the pace and always looks in control. Comes from behind and surges past the leader every time\nMy concerns stack up (grading him toughly since he’s the betting favorite)\nInexperienced Trainer (0-1 at Derby)\nInexperienced Jockey (only two starts with 9th as best finish)\nSpeed figures are over-inflated since on California speed tracks (not saying hes not fast. Just saying he’s not that fast)\nHasn’t raced against a large field like many of the east-coast prep races get experience from. Hasn’t faced true traffic\nHe very well could be the best horse and win. But I wouldn’t bet him outright to win"
+    },
+    {
+      "horse_name": "Burnham Square",
+      "post_position": 8,
+      "odds_at_pick": "12-1",
+      "record": "6: 3-1-1",
+      "beyer": "96",
+      "brisnet": "101",
+      "last_race": "Won Blue Grass Stakes by a nose",
+      "style": "Closer",
+      "final_take": "Good not great horse, expecting him to finish 5-7 range",
+      "writeup": "Experienced jockey in Brian Hernandez Jr\nMost Derby Leaderboard qualifying points\nJust means he placed in the most prep races, but still is noteworthy\nBreaks well, but always checks quick to the back. It’s encouraging that he doesn’t start in the back because solely because of bad breaks. In the Derby I could see him break well and check to the exact spot he wants to be to run his race.\nI don’t know if he has the quality to complete the comebacks against a larger Derby field, but he certainly will run a good race and will finish top 10\nCompared to the other closers in the field, he doesn’t look like he was a takeover closer who – if there was the extra 1/8th mile – would have continued to blow past the field. I usually want my closers taking over and extending leads"
+    },
+    {
+      "horse_name": "Grande",
+      "post_position": 9,
+      "odds_at_pick": "20-1",
+      "record": "3: 2-1-0",
+      "beyer": "97",
+      "brisnet": "101",
+      "last_race": "2nd Wood Memorial to Rodriguez",
+      "style": "Stalker",
+      "final_take": "Lightly raced makes him a wild card. Could hit the board for sure. Maybe will sprinkle him into exotics",
+      "writeup": "Won two allowance races before stepping up in class in the Wood Memorial\nLightly raced and still has room for improvement after doing so each time\nHad a much tougher trip than Rodriguez in the Wood but still looked just as strong in the last stretch\nIf you like Rodriguez you should also be betting Grande\nHe will be a popular mid-tier long shot pick"
+    },
+    {
+      "horse_name": "Flying Mohawk",
+      "post_position": 10,
+      "odds_at_pick": "30-1",
+      "record": "6:2-2-0",
+      "beyer": "85",
+      "brisnet": "97",
+      "last_race": "2nd Jeff Ruby Stakes to Final Gambit. Got beat by 4 lengths in last stretch",
+      "style": "Closer",
+      "final_take": "Pass",
+      "writeup": "Jason Worth’s horse\nNot much to look into here – won’t hit the board\nAlso a synthetic dirt only horse\nRookie Jockey"
+    },
+    {
+      "horse_name": "East Avenue",
+      "post_position": 11,
+      "odds_at_pick": "20-1",
+      "record": "5: 2-1-0",
+      "beyer": "96",
+      "brisnet": "97",
+      "last_race": "2nd Blue Grass to Burnham Square by a nose after leading the entire race",
+      "style": "Needs the lead",
+      "final_take": "He drew a good post position to break and dive towards the front if he needs to, but the two races he got killed in feel more likely to repeat themselves than him holding up in the front. Will still use underneath",
+      "writeup": "Held pace entire Blue Grass until getting caught at very end\nEarned a lot of early hype at the end of the 2024 racing year by rolling early in the Breeder’s Futurity\nIssue for East Avenue is that his best three races in his career he was in first from the very beginning and did not have to chase anyone down. In one of the two races he broke horribly and could not find any momentum to get back in the race. This was not inspiring, but isn’t the end of the world, bad breaks happen\nThe issue is his second to last race where he actually broke well but sat down early in 2nd place and still couldn’t figure out how to chase down a 40-1 horse (albeit that horse ended up winning by a lot). Not only could he not chase down the pace setting horse, but he seemed like he gave up near the end and has no winning mentality"
+    },
+    {
+      "horse_name": "Publisher",
+      "post_position": 12,
+      "odds_at_pick": "20-1",
+      "record": "7: 0-2-3",
+      "beyer": "95",
+      "brisnet": "98",
+      "last_race": "2nd Arkansas Derby to Sandman",
+      "style": "Closer",
+      "final_take": "Absolutely will bet on him. Betting him to show may pay out about 3 or 4 to 1 and feels my favorite play in the derby. Will sprinkle him to win as well. Will also look for some good H2H prop bets for him against a speed horse like Coal Battle or Citizen Bull. Must use in exotics as well",
+      "writeup": "2nd straight race racing just behind Sandman\nHonestly didn’t look much worse than Sandman. Just broke around the turn after him and then kept pace as they both ran past the rest of the field\nAnother interesting note is he has never won a race and broke his maiden… one such horse hasn’t won since 1938ish.\nNonetheless, you might be able to get a really good price on this horse who is only improving\nWould suggest taking him in Head-to-Head matchups if can find that somewhere and also using underneath\nEach race I watch of him I easily find something to like and a reason he could outrun his past performances. Got squeezed in the rebel stakes or else would have been tied with Sandman.\nIn the race prior (southwest stakes) he was making the best rail run of anyone and got blatantly cut off which stuck him in 6th. Otherwise may have won. Could have catapulted him into being a top 5 horse favorite\nSon of American Pharoah\nGood trainer in Steve Asmussan and Vet jockey in Irad Ortiz"
+    },
+    {
+      "horse_name": "Tiztastic",
+      "post_position": 13,
+      "odds_at_pick": "20-1",
+      "record": "8: 3-1-2",
+      "beyer": "95",
+      "brisnet": "100",
+      "last_race": "Won Louisiana Derby",
+      "style": "Closer",
+      "final_take": "I want to like him but he is just another good not great horse. Going to pass",
+      "writeup": "Has a good amount of experience racing against strong fields\nWinning the Louisiana is always a strong indicator because it is the longest of the Derby prep races (1 3/16 mile) prior the Derby (1 ¼). Tiztastic came from behind against an early fast pace which played into his favor\nIn other prep races, he has raced strongly side by side to Sandman\nHas dealt with large fields and a good amount of traffic well"
+    },
+    {
+      "horse_name": "Render Judgment",
+      "post_position": 14,
+      "odds_at_pick": "30-1",
+      "record": "7: 1-2-1",
+      "beyer": "90",
+      "brisnet": "96",
+      "last_race": "4th at Blue Grass",
+      "final_take": "not worth a look. Pass",
+      "writeup": "Also got beat easy by American Promise in a weak field\nOnly is in the derby due to three horses scratching"
+    },
+    {
+      "horse_name": "Coal Battle",
+      "post_position": 15,
+      "odds_at_pick": "30-1",
+      "record": "8: 5-0-1",
+      "beyer": "91",
+      "brisnet": "98",
+      "last_race": "3rd Arkansas Derby to Sandman. Race got out to a blazing pace but he ran his race how he wanted and made his move to take the lead at final turn, but got outrun by Sandman and Publisher at the last stretch. I don’t see why he would all of a sudden flip that on them in the Derby",
+      "style": "Presser",
+      "final_take": "Does not have the distance in him, pass",
+      "writeup": "Doesn’t have the distance in him. I do think he is a strong horse and could win if this race was a furlong shorter, but the last 1/8th is going to keep him off my board\nHas won a lot of races in his career, but all shorter in length\nRookie jockey on him is the icing on the cake to not take him"
+    },
+    {
+      "horse_name": "Sandman",
+      "post_position": 16,
+      "odds_at_pick": "6-1",
+      "record": "8: 3-1-2",
+      "beyer": "99",
+      "brisnet": "101",
+      "last_race": "Won Arkansas Derby running down the pace setters who set out a blistering pace. Made for a perfect scenario for his closing style",
+      "style": "Closer",
+      "final_take": "Very likeable horse, will only include in exotics underneath. Runs too green and loses momentum easy down final stretches when it counts most.",
+      "writeup": "Jockey: Jose Ortiz\nGoing to go off as one of the favorites. Has looked like the strongest closer in every race recently\nRuns a little green though and has a history of bad breaks\nIf he can make his move to push the lead at the last turn he could win\nDrew the forbidden post 17 which miraculously has never generated a winner\nI actually like the outside post position for him since he usually makes his move around the outside lanes\nIf he can sit down in the middle of the pack after the first turn I think he could absolutely win"
+    },
+    {
+      "horse_name": "Sovereignty",
+      "post_position": 17,
+      "odds_at_pick": "5-1",
+      "record": "5: 2-2-0 (3: 2-1-0 in graded stakes)",
+      "beyer": "95",
+      "brisnet": "99",
+      "last_race": "2nd Florida Derby to Tappan Street",
+      "style": "Closer",
+      "final_take": "This horse does not run bad races – will also use up top on exotics",
+      "writeup": "Tappan Street moved first and Sovereignty ran out of room in the chase. If track had the extra 1/8th like the Derby will, I think Sovereignty would have passed him as the better horse\nDidn’t break his maiden until jumping up in class in a graded stakes and hit the board in each of the three graded races\nHas been hot in his last couple races this year. Lost the Florida Derby slightly to a horse who already scratched from the Kentucky Derby. Sounds familiar to Mage winning the Derby after Forte scratched…\nHas a big win at the end of 2024 at Churchill Downs with an extending lead down the stretch over Sandman\nBeat Burnham Square in Fountain of Youth with impressive last furlong\nHe feels like a safe bet to hit the board\nI like how he positions himself. If can get to mid pack at the first turn I like him"
+    },
+    {
+      "horse_name": "Chunk of Gold",
+      "post_position": 18,
+      "odds_at_pick": "30-1",
+      "record": "4: 1-3-0",
+      "beyer": "92",
+      "brisnet": "98",
+      "last_race": "2nd Louisiana Derby to Tiztastic",
+      "style": "Closer",
+      "final_take": "Not going to win unless has a major step forward. Pass",
+      "writeup": "Lightly raced, has come in 2nd in past three races after breaking his maiden\nI don’t think he will flop. Could see him outrunning his odds and finishing top 10"
+    },
+    {
+      "horse_name": "Owen Almighty",
+      "post_position": 19,
+      "odds_at_pick": "30-1",
+      "record": "4: 1-2-0",
+      "beyer": "101",
+      "brisnet": "107",
+      "last_race": "Neck behind Journalism in Santa Anita",
+      "style": "Early lead presser",
+      "final_take": "Use underneath..  also has an outside chance to win. If goes off at 10-1 or higher I will take to win",
+      "writeup": "Pretty heavily raced horse including three YTD already which I don’t love. Doesn’t seem to have the stamina to make the full 1 ¼ Mile race at Churchill\nWill try and press early and fade at the end hard\nOnly is in this race because the Owner is desperate to have a Derby horse. He should be entered in a shorter race.\nBaeza (8-1) ** Also Eligible – Is next into the field if a horse scratches\nI usually don’t include Also Eligible horses in my writeups but this one legit could win if gets into the field. Only didn’t qualify because his 2nd place finish at Santa Anita was docked Derby Prep points because it was a smaller field\nIf you like Journalism you should like this horse too. Ran exact same race as Journalism in last race but just lost\nLightly raced so not much to go off of\nInflated speed figures from California\nHas only run 1M races until 1 1/8 santa anita, although distance didn’t seem like an issue\nThis thing cost like 1.5 Million. Was made and bought for this race.\nRuns green – but is still maturing. Either shows up and places or could fall in pack in 10th"
     }
   ]
 }

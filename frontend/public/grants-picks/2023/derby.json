@@ -13,36 +13,235 @@
     {
       "tier": "Top tier",
       "horses": [
-        { "name": "Forte", "note": "very versatile, post will let him duck mid-pack but use outside late" },
-        { "name": "Angel of Empire", "note": "closer who could break first if positioned well" }
+        {
+          "name": "Forte",
+          "note": "very versatile, post will let him duck mid-pack but use outside late"
+        },
+        {
+          "name": "Angel of Empire",
+          "note": "closer who could break first if positioned well"
+        }
       ]
     },
     {
       "tier": "In the mix",
       "horses": [
-        { "name": "Tapit Trice", "note": "very strong but stalking style won't fare in slower field" },
-        { "name": "Kingsbarns", "note": "perfect post + pace plays in his favor; tricky pick" },
-        { "name": "Derma Sotogake", "note": "Japanese eye-test pick; UAE Derby winner is 0-18 in the Derby though" }
+        {
+          "name": "Tapit Trice",
+          "note": "very strong but stalking style won't fare in slower field"
+        },
+        {
+          "name": "Kingsbarns",
+          "note": "perfect post + pace plays in his favor; tricky pick"
+        },
+        {
+          "name": "Derma Sotogake",
+          "note": "Japanese eye-test pick; UAE Derby winner is 0-18 in the Derby though"
+        }
       ]
     },
     {
       "tier": "Wild cards / live longshots",
       "horses": [
-        { "name": "Mage", "note": "only three races; getting better each time" },
-        { "name": "Two Phil's", "note": "popular bet, but coming off a win against a weak field" },
-        { "name": "Confidence Game", "note": "huge wild card — perfect post; 10-week layoff scares people" }
+        {
+          "name": "Mage",
+          "note": "only three races; getting better each time"
+        },
+        {
+          "name": "Two Phil's",
+          "note": "popular bet, but coming off a win against a weak field"
+        },
+        {
+          "name": "Confidence Game",
+          "note": "huge wild card — perfect post; 10-week layoff scares people"
+        }
       ]
     },
     {
       "tier": "Pass",
       "horses": [
-        { "name": "Hit Show", "note": null },
-        { "name": "Verifying", "note": "fast horse but not the best" },
-        { "name": "Reincarnate", "note": "will press pace, then die mid-race" },
-        { "name": "Disarm", "note": null },
-        { "name": "Jace's Road", "note": null },
-        { "name": "Skinner", "note": null }
+        {
+          "name": "Hit Show",
+          "note": null
+        },
+        {
+          "name": "Verifying",
+          "note": "fast horse but not the best"
+        },
+        {
+          "name": "Reincarnate",
+          "note": "will press pace, then die mid-race"
+        },
+        {
+          "name": "Disarm",
+          "note": null
+        },
+        {
+          "name": "Jace's Road",
+          "note": null
+        },
+        {
+          "name": "Skinner",
+          "note": null
+        }
       ]
+    }
+  ],
+  "horses": [
+    {
+      "horse_name": "Hit Show",
+      "post_position": 1,
+      "odds_at_pick": "34-1",
+      "final_take": "Won’t win don’t bother",
+      "writeup": "3-1-0 of 5 races\nLost Wood Memorial to Lord Miles at the end\nWas in control, was heavy favorite\nHasn’t beat many good horses\nSame barn from Brad Cox in addition to Angel of Empire and Verifying",
+      "beyer": "93",
+      "brisnet": "99"
+    },
+    {
+      "horse_name": "Verifying",
+      "post_position": 2,
+      "odds_at_pick": "22-1",
+      "final_take": "Fast horse, but I don’t think he is the best horse. I like him to be near the front but fade at the end. Could surprise win",
+      "writeup": "2-2-0 of 6 races\nEither barely loses or is blown out\nGot lost behind crowd in Rebel Stakes, didn’t navigate well, but once clear of horses he finished fast\nHad a perfect trip at Blue Grass then barely lost to Tapit Trice\nLooked fast here\nDepends on the trip. I actually like this horse\nDistance could be a concern at the end",
+      "beyer": "97",
+      "brisnet": "102"
+    },
+    {
+      "horse_name": "Two Phil’s",
+      "post_position": 3,
+      "odds_at_pick": "8-1",
+      "final_take": "Two Phil’s will be a popular bet, but I don’t think he is anything special and is coming off a win against a bunch of dorks. Might still included underneath in some exotics. 8-1 is not worth the price for him.",
+      "writeup": "Glorified version of Simplification from last year: extremely strong horse who very well could hit the board\nWon on turf but was bred on dirt and has won at Churchill downs (wet)\nGood speed rating\nCould be good for a price\nNot well known trainer, but is quietly good\nOne of most talked about horses about his price and potential, but also tossed out by many handicappers as not a top tier horse\nLost Risen Star behind Angel of Empire\nHasn’t looked overly impressive in film\nJockey has never ridden in the Derby",
+      "beyer": "101",
+      "brisnet": "107"
+    },
+    {
+      "horse_name": "Confidence Game",
+      "post_position": 4,
+      "odds_at_pick": "19-1",
+      "final_take": "Huge wild card here. Perfect post for this horse. He could be a horse to take a flier on to get a good payout. People will pass him up solely on his 10 week rest. Quietly passing on this horse but I don’t think he’s dead",
+      "writeup": "3-1-2 of 7 races\nWon Rebel Stakes barely over Red Route One\nNavigated big field and came back to extend a big lead and win\nHas won at Churchill over Rocket Can(’t)\nHasn’t raced in over 10 weeks (no horse has ever won after a 7 week layoff)\nBetter in rainy slop\nNot too fast of a horse, big win may have been over easy field (recheck speed)\nBred for distance, yet also likes to get to the front 👀\nGood final splits",
+      "beyer": "94",
+      "brisnet": "95"
+    },
+    {
+      "horse_name": "Tapit Trice",
+      "post_position": 5,
+      "odds_at_pick": "5-1",
+      "final_take": "Very strong horse, will have low odds for a reason. However, his style of racing near back of the pack then closing will not bode well in this slower field. Will be tough getting around a lot of horses. Will play him in 3/4 spots in exotics.",
+      "writeup": "4-0-1 lifetime\nWon bluegrass over Verifying by a neck\nHasn’t blown anyone out\nLikes to stalk the lead which bodes well for his post position\nI like this horse to be in the conversation but not quite win\nInclude on trifecta tickets\nStarts slow\n** Extremely similar horse to Angel of Empire. Between the two I prefer Angel of Empire.",
+      "beyer": "99",
+      "brisnet": "102"
+    },
+    {
+      "horse_name": "Kingsbarns",
+      "post_position": 6,
+      "odds_at_pick": "12-1",
+      "final_take": "Drew a perfect post, pace of race will play in his favor, but might have just beat bad horses in prior races making him seem better. Tricky pick here, but a real win contender",
+      "writeup": "Undefeated 3 wins\nWired Louisiana Derby over Disarm by 3 1/2 lengths\nImpressive and started fast and finished fast\nLouisiana Derby is 1 3/16 miles, which shows Kingsbarns can handle the distance of the Derby\nOther two wins against nobody\nGreat post position for his style\nUnimpressive speed figures\nMaybe because hasn’t been tested\nLooked strong in Louisiana, but field sucked",
+      "beyer": "95",
+      "brisnet": "98"
+    },
+    {
+      "horse_name": "Reincarnate",
+      "post_position": 7,
+      "odds_at_pick": "15-1",
+      "final_take": "Will press pace to start the race and will inevitably die mid race and finish in back. 15th.",
+      "writeup": "2-3-3 of 8 races\n3rd at Arkansas Derby behind Angel of Empire\nFormerly trained by Bob Baffert\nHas two wins (albeit not big races)\nVery okay horse\nConsistent loser to other Derby horses (AoE, Confidence Game)\nFeels like a bottom half finish"
+    },
+    {
+      "horse_name": "Mage",
+      "post_position": 8,
+      "odds_at_pick": "18-1",
+      "final_take": "Was the west coast circuit legit or fraudulent horses this year? Airing on the latter and going to pass",
+      "writeup": "1-1-0 of 3 races\nAlmost beat Forte at Florida Derby\nHad a tough start\nVery inexperienced, lot of question marks here, but has very high ceiling\nSeems just as good as Forte\nSlow starts not ideal\nScratched\nSkinner\n1-0-3 of 6 races\nNothing impressive whatsoever from this guy\nWest coast horse, all west coasts stink\nBeen trending upward however and has speed\nStay away, but for some reason is popular\nScratched\nPractical Move\nHasn’t raced against any good horses\nWill be a good post position for him as he can attack the pace and get to the front early which is his style\nWill be a popular pick by sleezebags and Baffert-type lovers\nWon Santa Anita in one of easiest fields, barely fending off a couple mid to low tier horses\nOne of my favorite Derby insiders, El Hombre, said he would “jump off the Brooklyn Bridge is Practical Move somehow won”\nActually looks impressive on film. Has good speed figures. Byproduct of easy west coast fields?",
+      "beyer": "95",
+      "brisnet": "101"
+    },
+    {
+      "horse_name": "Disarm",
+      "post_position": 9,
+      "odds_at_pick": "32-1",
+      "final_take": "Hard pass",
+      "writeup": "1-1-2 of 5 races\nCame in 3rd at an incredibly easy and disappointing Lexington Derby\nHas not beat any 3 year old\nHas put in great workouts this week\nLost to Kingsbarns in a bad Louisiana Derby"
+    },
+    {
+      "horse_name": "Jace’s Road",
+      "post_position": 10,
+      "odds_at_pick": "38-1",
+      "final_take": "Hard pass",
+      "writeup": "2-0-3 of 6 races\nDon’t give him too much thought, he won’t place\nGot killed by Kingsbarns at Louisiana\nHas only gotten worse each race\nWill come out fast. May affect horses to his right (Forte)"
+    },
+    {
+      "horse_name": "Sun Thunder",
+      "post_position": 11,
+      "odds_at_pick": "35-1",
+      "final_take": "He will almost certainly come in 9th",
+      "writeup": "1-1-1 of 6 races\n4th at Blue Grass\nHuge Closing ability, not a quick starter at all\nClosed big at Louisiana to hit 5th\nHas raced close to Angel of Empire\nClosest comp to Rich Strike from being okay, but a good closer and could pass tired horses at the end\nWill be popular to place underneath on some exotics\nNot as strong a closer as hyped",
+      "beyer": "89",
+      "brisnet": "96"
+    },
+    {
+      "horse_name": "Angel of Empire",
+      "post_position": 12,
+      "odds_at_pick": "5-1",
+      "final_take": "Great horse, could win if he gets up to the front before not too late. Worst case scenario finishes 5th. Wil include in all exotic bets",
+      "writeup": "Won Arkansas Derby decisively, but small field\nCan go the distance, good finisher\nGood value horse\nLooked like a boring easy win at Arkansas\nNot overly impressive\nDistance will be good for him\nCovered last three furlongs in Arkansas derby an entire second clear of the final fraction benchmark, and last furlong very fast in itself too\nNo doubt can close, but unfortunately always starts in the back which may make his trip extra difficult in a slower paced derby. If pace ends up being quick or even average, AoE could definitely win.\nFlavien Prat is his jockey - very successful at Derby",
+      "beyer": "94",
+      "brisnet": "101"
+    },
+    {
+      "horse_name": "Forte",
+      "post_position": 13,
+      "odds_at_pick": "4-1",
+      "final_take": "Safe play here, probably the best chance to win, but depends what his odds are prior to the race.",
+      "writeup": "Has won 4 G1 races which is almost unheard of coming into the derby\nWill be the favorite come race day\nDepends on his price for what is worth the bet\nBarely beat Mage in the Florida Derby and had to come back to do so\nCame from last even after a good break from the gates\nNavigated well through a lot of horses, however there will be even more in Derby\nTurned a switch on in last stretch and looked great\nCan’t rely on this again\nThis could be a slower derby which would not bode well for Forte who likes to make mid to late runs\nUndefeated 6-0\nI try extra hard not to pick favorites in the derby, however, I have not fallen in love with any of the second tier horses, which brings me back here",
+      "beyer": "100",
+      "brisnet": "103"
+    },
+    {
+      "horse_name": "Raise Cain",
+      "post_position": 14,
+      "odds_at_pick": "37-1",
+      "last_race": "came in 5th at Blue Grass",
+      "final_take": "Hurricanes will win the cup this year. This horse will not win the Derby.",
+      "writeup": "2-1-1 of 7 races\nHorse stinks\nNow i want Raisin’ Canes",
+      "beyer": "90",
+      "brisnet": "94"
+    },
+    {
+      "horse_name": "Derma Sotagake",
+      "post_position": 15,
+      "odds_at_pick": "8-1",
+      "final_take": "I will play him to win and up top in some exotics. Hopefully will go off higher than 7-1. Japan betters will hammer him and drive his payout down. Not using underneath in exotics because if he is in fact not the best, he could very well be a mid finishing horse. Feel like its win or bust.",
+      "writeup": "Most hyped Japan horse that I can remember (Mendelssohn was pretty hyped actually and only finished 6th-ish?)\nPossibly strongest/most talented in this field\nHowever, NO horse from UAE derby have ever won the Derby\nWill depend on how his workouts look after shipping to Kentucky\nUnimpressive at Saudi Cup\nDestroyed at AUE Derby\nOne of longer prep races similar to Kentucky Derby length\nGoing to be one of the most debated horses whether to pick him or not\nPost position not ideal for him. If he drew a post closer to the middle I’d have been much more on him\nD.S. will try and get up the the pace, and could have a clear path around the final turn\nHe has had reports of great workouts this week at Churchill Downs, blowing out Continuar for fun\nIf i end up picking him and he drops the ball, I will have no choice but to go put my clown makeup on and wear it out to Gin Mill"
+    },
+    {
+      "horse_name": "Rocket Can",
+      "post_position": 16,
+      "odds_at_pick": "35-1",
+      "final_take": "No chance",
+      "writeup": "2-2-0 of 7 races\nStarted strong in Arkansas Derby then faded quick out to 4th\nThis won’t help in lengthier derby\nLost Fountain of Youth 4 lengths to Forte\nI really don’t hate this horse but he isn’t great, won’t win\nFeels like a 12th place finish\nDrew the formidable first post position which hasn’t produced a winner in like 25 years\nHowever the gate got moved off the rail two years ago and isn’t as much a problem\nScratched\nLord Miles\nWon Wood Memorial as a long shot to get into the Derby\nTook a perfect race\nCloser type horse, similar to Rich Strike\nHasn’t done anything impressive besides Wood Memorial\nNot a great horse\nScratched\nContinuar\n2-1-1 of 5 races\nDecent Japan horse, but not Derma Sotogake\nGot killed by Derma in UAE\nHas no chance\nWill go off at like 125-1\nBad horse in an even worse post position",
+      "beyer": "91",
+      "brisnet": "98"
+    },
+    {
+      "horse_name": "Cyclone Mischief",
+      "post_position": 17,
+      "odds_at_pick": "43-1",
+      "writeup": ""
+    },
+    {
+      "horse_name": "Mandarin Hero",
+      "post_position": 18,
+      "odds_at_pick": "26-1",
+      "writeup": "Only horse of these alternates racing that has a chance\nIf you liked Practical Move, then you should love this horse. He is a Japan horse (has lost close to Derma Sotogake and raced on a lower Japanese circuit than Derma) that came to California for the Santa Ana qualifier and almost rallied to beat Practical Move who just scratched, but people loved and was going to go off at around 10-1. Could be a good value play"
+    },
+    {
+      "horse_name": "King Russel",
+      "post_position": 19,
+      "odds_at_pick": "43-1",
+      "writeup": "Ranking\nForte\nDerma Sotogake\nAngel of Empire\nKingsbarns\nMage\nTapit Trice\nVerifying\nTwo Phils\nConfidence Game\nDisarm\nReincarnate\nSun Thunder\nPractical Move\nLord Miles\nRocket Can\nHit Show\nSkinner\nJace’s Road\nRaise Cain\nContinuar"
     }
   ]
 }

@@ -5,7 +5,6 @@ import { Countdown } from '@/components/Countdown';
 import { SidePanel, SidePanelItem } from '@/components/SidePanel';
 import { WriteupSection } from '@/components/WriteupSection';
 import { useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
-import type { Pick } from '@/lib/types';
 import { CURRENT_YEAR } from '@/lib/year';
 import { GrantPinned } from '@/components/GrantPinned';
 import { PowerRankings } from '@/components/PowerRankings';
@@ -13,6 +12,23 @@ import { StatTile } from '@/components/StatTile';
 import { useResults } from '@/lib/hooks';
 
 type SortKey = 'post' | 'name' | 'odds';
+
+interface DisplayHorse {
+  id: string;
+  horse_name: string;
+  post_position: number | null;
+  odds_at_pick: string | null;
+  jockey: string | null;
+  trainer: string | null;
+  record: string | null;
+  beyer: string | null;
+  brisnet: string | null;
+  equibase_rating: string | null;
+  last_race: string | null;
+  style: string | null;
+  final_take: string | null;
+  writeup: string | null;
+}
 
 const SORTS: { id: SortKey; label: string }[] = [
   { id: 'post', label: 'Post' },
@@ -72,8 +88,50 @@ export function RacePage({
     [picks]
   );
 
+  // For archive years there's no DDB picks — fall back to Grant's static
+  // historical horses if the JSON file ships them.
+  const displayHorses = useMemo<DisplayHorse[]>(() => {
+    if (flatPicks.length > 0) {
+      return flatPicks.map((p) => ({
+        id: p.id,
+        horse_name: p.horse_name,
+        post_position: p.post_position,
+        odds_at_pick: p.odds_at_pick,
+        jockey: p.jockey,
+        trainer: p.trainer,
+        record: p.record,
+        beyer: p.beyer,
+        brisnet: p.brisnet,
+        equibase_rating: p.equibase_rating,
+        last_race: p.last_race,
+        style: p.style,
+        final_take: p.final_take,
+        writeup: p.writeup,
+      }));
+    }
+    if (isArchive && grantPicks?.horses?.length) {
+      return grantPicks.horses.map((h, i) => ({
+        id: `archive-${i}-${(h.horse_name ?? '').toLowerCase().replace(/\s+/g, '-')}`,
+        horse_name: h.horse_name,
+        post_position: h.post_position ?? null,
+        odds_at_pick: h.odds_at_pick ?? null,
+        jockey: h.jockey ?? null,
+        trainer: h.trainer ?? null,
+        record: h.record ?? null,
+        beyer: h.beyer ?? null,
+        brisnet: h.brisnet ?? null,
+        equibase_rating: h.equibase_rating ?? null,
+        last_race: h.last_race ?? null,
+        style: h.style ?? null,
+        final_take: h.final_take ?? null,
+        writeup: h.writeup ?? null,
+      }));
+    }
+    return [];
+  }, [flatPicks, isArchive, grantPicks]);
+
   const sortedPicks = useMemo(() => {
-    const arr = [...flatPicks];
+    const arr = [...displayHorses];
     switch (sortKey) {
       case 'name':
         return arr.sort((a, b) => a.horse_name.localeCompare(b.horse_name));
@@ -83,7 +141,7 @@ export function RacePage({
       default:
         return arr.sort((a, b) => (a.post_position ?? 99) - (b.post_position ?? 99));
     }
-  }, [flatPicks, sortKey]);
+  }, [displayHorses, sortKey]);
 
   const earliestLock = picks?.races.map((r) => r.lock_time).sort()[0];
 
@@ -112,6 +170,8 @@ export function RacePage({
       })),
     [sortedPicks]
   );
+
+  const horsesEmpty = !isLoading && sortedPicks.length === 0;
 
   return (
     <div className="pt-8 lg:grid lg:grid-cols-[1fr_240px] lg:gap-6">
@@ -155,7 +215,7 @@ export function RacePage({
           />
         )}
 
-        {!isArchive && sortedPicks.length > 0 && (
+        {sortedPicks.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
             <label className="text-xs uppercase tracking-wider text-bourbon/70 font-semibold">
               Sort by
@@ -189,19 +249,19 @@ export function RacePage({
           <div className="text-center text-bourbon/70 py-12">Loading…</div>
         )}
 
-        {picks && sortedPicks.length === 0 && !isLoading && !isArchive && (
+        {horsesEmpty && (
           <div className="rounded-lg border border-bourbon/20 bg-white p-8 text-center text-bourbon/70">
-            No horses posted yet for this race.
+            {isArchive
+              ? `No archived horse data for the ${year} ${kind === 'derby' ? 'Derby' : 'Oaks'} yet.`
+              : 'No horses posted yet for this race.'}
           </div>
         )}
 
-        {!isArchive && (
-          <div className="space-y-5">
-            {sortedPicks.map((p) => (
-              <HorseCard key={p.id} pick={p} />
-            ))}
-          </div>
-        )}
+        <div className="space-y-5">
+          {sortedPicks.map((p) => (
+            <HorseCard key={p.id} pick={p} />
+          ))}
+        </div>
 
         {grantPicks?.power_rankings && grantPicks.power_rankings.length > 0 && (
           <PowerRankings tiers={grantPicks.power_rankings} />
@@ -225,7 +285,7 @@ function statTip(label: string): string | undefined {
   return STAT_DESCRIPTIONS[label];
 }
 
-function HorseCard({ pick: p }: { pick: Pick }) {
+function HorseCard({ pick: p }: { pick: DisplayHorse }) {
   const stats: { label: string; value: string }[] = [];
   if (p.record) stats.push({ label: 'Record', value: p.record });
   if (p.beyer) stats.push({ label: 'Beyer', value: p.beyer });

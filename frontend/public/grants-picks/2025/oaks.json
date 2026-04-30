@@ -13,31 +13,159 @@
     {
       "tier": "Yes (in no order)",
       "horses": [
-        { "name": "La Cara", "note": "hot and improving; distance will only help" },
-        { "name": "Take Charge Milady", "note": "good mud experience, closer in a fast race" },
-        { "name": "Good Cheer", "note": "heavy favorite 6-0; brutal odds but has won each race" },
-        { "name": "Quietside", "note": "strong resume; gave Good Cheer her best race in 2024" },
-        { "name": "Simply Joking", "note": "mud experience; tightly raced Quietside" }
+        {
+          "name": "La Cara",
+          "note": "hot and improving; distance will only help"
+        },
+        {
+          "name": "Take Charge Milady",
+          "note": "good mud experience, closer in a fast race"
+        },
+        {
+          "name": "Good Cheer",
+          "note": "heavy favorite 6-0; brutal odds but has won each race"
+        },
+        {
+          "name": "Quietside",
+          "note": "strong resume; gave Good Cheer her best race in 2024"
+        },
+        {
+          "name": "Simply Joking",
+          "note": "mud experience; tightly raced Quietside"
+        }
       ]
     },
     {
       "tier": "Maybe",
       "horses": [
-        { "name": "Drexel Hill", "note": "only a maybe because of the long odds" },
-        { "name": "Quickick", "note": "won't win, but room for improvement" },
-        { "name": "Five G", "note": null },
-        { "name": "Tenma", "note": "great until barely winning last race; if last was a hiccup, win contender at a price" },
-        { "name": "Bless the Broken", "note": "needs a big step up but has experience in a large field" }
+        {
+          "name": "Drexel Hill",
+          "note": "only a maybe because of the long odds"
+        },
+        {
+          "name": "Quickick",
+          "note": "won't win, but room for improvement"
+        },
+        {
+          "name": "Five G",
+          "note": null
+        },
+        {
+          "name": "Tenma",
+          "note": "great until barely winning last race; if last was a hiccup, win contender at a price"
+        },
+        {
+          "name": "Bless the Broken",
+          "note": "needs a big step up but has experience in a large field"
+        }
       ]
     },
     {
       "tier": "No",
       "horses": [
-        { "name": "Early On", "note": null },
-        { "name": "Ballerina d’Oro", "note": null },
-        { "name": "Fondly", "note": null },
-        { "name": "Anna’s Promise", "note": null }
+        {
+          "name": "Early On",
+          "note": null
+        },
+        {
+          "name": "Ballerina d’Oro",
+          "note": null
+        },
+        {
+          "name": "Fondly",
+          "note": null
+        },
+        {
+          "name": "Anna’s Promise",
+          "note": null
+        }
       ]
+    }
+  ],
+  "horses": [
+    {
+      "horse_name": "Early On",
+      "post_position": 1,
+      "odds_at_pick": "30-1",
+      "writeup": ""
+    },
+    {
+      "horse_name": "Ballerina d’Oro",
+      "post_position": 2,
+      "odds_at_pick": "10-1",
+      "writeup": ""
+    },
+    {
+      "horse_name": "Fondly",
+      "post_position": 3,
+      "odds_at_pick": "30-1",
+      "writeup": ""
+    },
+    {
+      "horse_name": "Anna’s Promise",
+      "post_position": 4,
+      "odds_at_pick": "30-1",
+      "writeup": "Maybe"
+    },
+    {
+      "horse_name": "Drexel Hill",
+      "post_position": 5,
+      "odds_at_pick": "30-1",
+      "writeup": "Only a maybe because of the odds\nShe hasn’t been stretched out past 1 Mile, but closes well in the short races\nWill require a big improvement, but would pay well"
+    },
+    {
+      "horse_name": "Quickick",
+      "post_position": 6,
+      "odds_at_pick": "30-1",
+      "writeup": "Again if using her would be because of the long odds\nWill not win, but there was room for improvement from last race\nOnly one race into the 2025 season after a strong 2024 start (bad 2024 finish)\nOnly would use underneath"
+    },
+    {
+      "horse_name": "Five G",
+      "post_position": 7,
+      "odds_at_pick": "12-1",
+      "writeup": ""
+    },
+    {
+      "horse_name": "Tenma",
+      "post_position": 8,
+      "odds_at_pick": "12-1",
+      "writeup": "Has been great until barely winning last race\nIf last race was a hiccup, she’s a win contender at a price\nBob Baffert horse\nVersatile, can press, stalk, and close"
+    },
+    {
+      "horse_name": "Bless the Broken",
+      "post_position": 9,
+      "odds_at_pick": "30-1",
+      "writeup": "Needs a big step up to compete, but has experience in a large field while closing well vs early speed\nYes (in no order)"
+    },
+    {
+      "horse_name": "La Cara",
+      "post_position": 10,
+      "odds_at_pick": "6-1",
+      "writeup": "Has been hot and improving\nDistance will only help her\nGood speed figures"
+    },
+    {
+      "horse_name": "Take Charge Milady",
+      "post_position": 11,
+      "odds_at_pick": "12-1",
+      "writeup": "Good mud experience\nCloser in a fast race"
+    },
+    {
+      "horse_name": "Good Cheer",
+      "post_position": 12,
+      "odds_at_pick": "6-5",
+      "writeup": "Heavy Favorite 6-0\nBrutal odds but has won each race so far"
+    },
+    {
+      "horse_name": "Quietside",
+      "post_position": 13,
+      "odds_at_pick": "8-1",
+      "writeup": "Strong resume\nGave Good Cheer her best race in 2024 and has improved since"
+    },
+    {
+      "horse_name": "Simply Joking",
+      "post_position": 14,
+      "odds_at_pick": "10-1",
+      "writeup": "Mud experience\nTightly raced Quietside\nGood Cheer is definitely the horse to beat – and we are not taking a 6-5 horse straight up. I will try and beat her with either Quietside or Take Charge Milady\nBetting Plays:\nQuietside to Win $\nTake Charge Milady to Win $\nExacta Box\nTake Charge Milady, Quietside, Good Cheer (6 ways)\nSeparate Exacta\nGood Cheer / Take Charge Milady $\nTrifecta\nGood Cheer, Quietside / Take Charge Milady / Good Cheer, Quietside, Simply Joking, La Cara (6 ways"
     }
   ]
 }
