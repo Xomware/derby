@@ -24,7 +24,7 @@ export function usePicks(kind: RaceKind, yearOverride?: number) {
 
 export function useLeaderboard(
   yearOverride?: number,
-  event: 'derby' | 'oaks' | 'all' = 'all'
+  event: 'derby' | 'oaks' = 'derby'
 ) {
   const { year } = useYear();
   const effectiveYear = yearOverride ?? year;
@@ -72,6 +72,12 @@ export interface GrantPicks {
   notes?: string | null;
   analysis?: string | null;
   betting_plays?: string | null;
+  power_rankings?: PowerRankingTier[];
+}
+
+export interface PowerRankingTier {
+  tier: string;
+  horses: { name: string; note: string | null }[];
 }
 
 export function useComments(

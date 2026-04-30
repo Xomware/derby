@@ -36,7 +36,7 @@ h3,
 .ticker-track {
   display: flex;
   width: max-content;
-  animation: derby-ticker-scroll 60s linear infinite;
+  animation: derby-ticker-scroll 120s linear infinite;
 }
 
 .ticker-track.paused {

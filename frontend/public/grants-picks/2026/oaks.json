@@ -8,5 +8,36 @@
   "inferred": false,
   "notes": null,
   "analysis": "This race is big time wide open. Of the three horses I like with the best chance to win, Prom Queen has the least amount of question marks for me so we will ride with her. Counting Stars is a volatile horse but if we get her best she could win too. The only issue I have with Zany is her not keeping her head down at the start of the final stretch which hurts her momentum.",
-  "betting_plays": "Win — Prom Queen\nPlace — Counting Stars\n\nExacta box and Trifecta box Prom Queen, Counting Stars, and Zany (6 ways)\n\nSuperfecta:\nProm Queen, Counting Stars, Zany / Explora, Meaning / Prom Queen, Counting Stars, Zany / Explora, Meaning (12 ways I think)"
+  "betting_plays": "Win — Prom Queen\nPlace — Counting Stars\n\nExacta box and Trifecta box Prom Queen, Counting Stars, and Zany (6 ways)\n\nSuperfecta:\nProm Queen, Counting Stars, Zany / Explora, Meaning / Prom Queen, Counting Stars, Zany / Explora, Meaning (12 ways I think)",
+  "power_rankings": [
+    {
+      "tier": "My favorites",
+      "horses": [
+        { "name": "Prom Queen", "note": null },
+        { "name": "Counting Stars", "note": null },
+        { "name": "Zany", "note": null }
+      ]
+    },
+    {
+      "tier": "Could hit the board or even win",
+      "horses": [
+        { "name": "Percy’s Bar", "note": null },
+        { "name": "Meaning", "note": null },
+        { "name": "Explora", "note": null }
+      ]
+    },
+    {
+      "tier": "Will not consider betting",
+      "horses": [
+        { "name": "Always a Runner", "note": null },
+        { "name": "Brooklyn Blonde", "note": null },
+        { "name": "Bella Ballerina", "note": null },
+        { "name": "Pashmina", "note": null },
+        { "name": "Lovely Grey", "note": null },
+        { "name": "Search Party", "note": null },
+        { "name": "Dazzling Dame", "note": null },
+        { "name": "Nycon", "note": null }
+      ]
+    }
+  ]
 }

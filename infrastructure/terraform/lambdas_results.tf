@@ -6,6 +6,7 @@ locals {
   admin_results_lambdas = [
     { name = "admin_results_set", description = "POST /admin-results/set — manual race entry (admin_token in body)", path_part = "set", http_method = "POST", authorization = "NONE" },
     { name = "admin_check", description = "POST /admin-results/check — verify admin password", path_part = "check", http_method = "POST", authorization = "NONE" },
+    { name = "admin_odds_update", description = "POST /admin-results/odds — bulk update horse odds", path_part = "odds", http_method = "POST", authorization = "NONE" },
   ]
 }
 

@@ -43,7 +43,7 @@ export const api = {
     request<PicksGrouped>(`/picks/list?event_id=${encodeURIComponent(eventId)}`),
   pick: (id: string) => request<Pick>(`/picks/${encodeURIComponent(id)}`),
 
-  leaderboard: (year: number, event: 'derby' | 'oaks' | 'all' = 'all') =>
+  leaderboard: (year: number, event: 'derby' | 'oaks' = 'derby') =>
     request<Leaderboard>(`/leaderboard/rank?year=${year}&event=${event}`),
 
   results: (year: number) =>
@@ -87,6 +87,12 @@ export const api = {
     }),
   adminSetRaceResult: (body: AdminRaceResultInput) =>
     request('/admin-results/set', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  adminUpdateOdds: (body: { admin_token: string; odds: { pick_id: string; odds_at_pick: string }[] }) =>
+    request<{ updated: number }>('/admin-results/odds', {
       method: 'POST',
       body: JSON.stringify(body),
     }),

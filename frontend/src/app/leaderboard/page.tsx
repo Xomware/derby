@@ -30,24 +30,31 @@ export default function LeaderboardPage() {
   } = useComments(kind);
   const isArchive = year !== CURRENT_YEAR;
 
+  const hidePicks = !leaderboard?.locked;
+  const showScores = !!leaderboard?.finished;
+
   return (
-    <section className="pt-8 max-w-3xl mx-auto space-y-6">
+    <section className="pt-8 max-w-4xl mx-auto space-y-6">
       <header>
         <h1 className="font-display text-3xl text-rose-dark">
           {isArchive ? `${year} Leaderboard` : 'Leaderboard'}
         </h1>
         <p className="text-bourbon/80 text-sm mt-1">
-          Pool standings — picks scored after each race goes official.
+          {hidePicks
+            ? "Other players' picks are hidden until the race goes off."
+            : showScores
+            ? 'Final scoring — picks judged by Grant’s odds rules.'
+            : 'Picks revealed — locked in. Scoring lights up once the race goes official.'}
         </p>
         <details className="mt-2">
           <summary className="text-xs text-bourbon/70 cursor-pointer hover:text-rose-red select-none">
             Scoring rules
           </summary>
           <ul className="mt-2 text-xs text-bourbon/70 space-y-0.5 pl-4 list-disc">
-            <li>Win pick at 1st: <strong>5 pts</strong> · any other top-3: 1 pt</li>
-            <li>Place pick at 2nd: <strong>3 pts</strong> · any other top-3: 1 pt</li>
-            <li>Show pick at 3rd: <strong>2 pts</strong> · any other top-3: 1 pt</li>
-            <li>Long shot wins: <strong>5 pts</strong> · long shot top-3: 3 pts</li>
+            <li><strong>Win:</strong> if pick wins → <strong>odds</strong> in points (5-1 → 5)</li>
+            <li><strong>Place:</strong> if pick finishes 1st or 2nd → <strong>odds ÷ 2</strong></li>
+            <li><strong>Show:</strong> if pick finishes top 3 → <strong>odds ÷ 3</strong></li>
+            <li><strong>Long shot:</strong> 1 pt if your long shot finishes top 4</li>
           </ul>
         </details>
       </header>
@@ -83,6 +90,8 @@ export default function LeaderboardPage() {
         <LeaderboardTable
           rows={leaderboard.rows}
           highlightUsername={username}
+          hidePicks={hidePicks}
+          showScores={showScores}
         />
       )}
 

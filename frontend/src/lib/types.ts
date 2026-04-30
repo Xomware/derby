@@ -48,12 +48,21 @@ export interface LeaderboardRow {
   rank: number;
   username: string;
   score: number;
-  picks_made: number;
+  win_pick: string | null;
+  place_pick: string | null;
+  show_pick: string | null;
+  long_shot_pick: string | null;
+  win_score: number;
+  place_score: number;
+  show_score: number;
+  long_shot_score: number;
 }
 
 export interface Leaderboard {
   year: number;
-  event: 'derby' | 'oaks' | 'all';
+  event: 'derby' | 'oaks';
+  locked: boolean;
+  finished: boolean;
   rows: LeaderboardRow[];
 }
 

@@ -1,28 +1,42 @@
-"""GET /leaderboard/rank?year=YYYY — predictions × race-results scoring.
+"""GET /leaderboard/rank?year=YYYY&event=derby|oaks — per-event leaderboard.
 
-Aggregates each user's points across both events of the year (Derby + Oaks).
-Returns rows ordered by total score, ties broken by name.
+For the requested event, returns one row per user with:
+  - their picks (or null fields if the event hasn't locked yet)
+  - per-slot points + total
+  - finished flag (true once race_results land)
+  - locked flag (true once post-time has passed)
+
+Sorted by total points (then name).
 """
 
 from __future__ import annotations
 
-from collections import defaultdict
 from decimal import Decimal
 
 from boto3.dynamodb.conditions import Key
 
 from lambdas.common.dynamo_helpers import (
+    picks_table,
     predictions_table,
     query_all,
     race_results_table,
 )
 from lambdas.common.errors import handle_errors
-from lambdas.common.scoring import score_prediction
+from lambdas.common.predictions_data import event_locked
+from lambdas.common.scoring import score_breakdown
 from lambdas.common.utility_helpers import get_query_params, success_response
 
 HANDLER = "leaderboard_get"
 
 DEFAULT_YEAR = 2026
+SUPPORTED_EVENTS = ("derby", "oaks")
+PICKS_EVENT_INDEX = "event-index"
+
+
+def _normalize_name(s: str | None) -> str:
+    if not s:
+        return ""
+    return s.strip().lower().replace("’", "'")
 
 
 def _norm_finishers(raw: list | None) -> list[dict]:
@@ -53,6 +67,22 @@ def _predictions_for(event_id: str) -> list[dict]:
     )
 
 
+def _odds_index(event_id: str) -> dict[str, str | None]:
+    """horse_name (normalized) -> odds_at_pick string."""
+    items = query_all(
+        picks_table,
+        IndexName=PICKS_EVENT_INDEX,
+        KeyConditionExpression=Key("event_id").eq(event_id),
+    )
+    out: dict[str, str | None] = {}
+    for p in items:
+        name = p.get("horse_name")
+        if not name:
+            continue
+        out[_normalize_name(str(name))] = p.get("odds_at_pick")
+    return out
+
+
 @handle_errors(HANDLER)
 def handler(event, context):
     qp = get_query_params(event)
@@ -62,44 +92,43 @@ def handler(event, context):
     except ValueError:
         year = DEFAULT_YEAR
 
-    event_filter = (qp.get("event") or "all").lower()
-    sources: list[tuple[str, list[dict]]] = []
-    if event_filter in ("all", "derby"):
-        ev_id = f"{year}-kentucky-derby"
-        sources.append((ev_id, _finishers_for(ev_id, 12)))
-    if event_filter in ("all", "oaks"):
-        ev_id = f"{year}-kentucky-oaks"
-        sources.append((ev_id, _finishers_for(ev_id, 11)))
+    event_kind = (qp.get("event") or "derby").lower()
+    if event_kind not in SUPPORTED_EVENTS:
+        event_kind = "derby"
 
-    by_user: dict[str, dict] = defaultdict(lambda: {
-        "username": "",
-        "score": 0,
-        "picks_made": 0,
-    })
+    main_race = 12 if event_kind == "derby" else 11
+    event_id = f"{year}-kentucky-{event_kind}"
 
-    for ev_id, finishers in sources:
-        for p in _predictions_for(ev_id):
-            username = p.get("username") or "?"
-            rec = by_user[username]
-            rec["username"] = username
-            rec["picks_made"] += 1
-            rec["score"] += score_prediction(p, finishers)
+    finishers = _finishers_for(event_id, main_race)
+    locked = event_locked(event_id)
+    finished = len(finishers) > 0
+    odds_by_horse = _odds_index(event_id)
 
-    rows = sorted(
-        by_user.values(),
-        key=lambda r: (-r["score"], r["username"].lower()),
-    )
+    rows = []
+    for p in _predictions_for(event_id):
+        username = p.get("username") or "?"
+        breakdown = score_breakdown(p, finishers, odds_by_horse)
+        rows.append({
+            "username": username,
+            "win_pick": p.get("win"),
+            "place_pick": p.get("place"),
+            "show_pick": p.get("show"),
+            "long_shot_pick": p.get("long_shot"),
+            "win_score": breakdown["win"],
+            "place_score": breakdown["place"],
+            "show_score": breakdown["show"],
+            "long_shot_score": breakdown["long_shot"],
+            "score": breakdown["total"],
+        })
+
+    rows.sort(key=lambda r: (-r["score"], r["username"].lower()))
+    for i, r in enumerate(rows):
+        r["rank"] = i + 1
 
     return success_response({
         "year": year,
-        "event": event_filter,
-        "rows": [
-            {
-                "rank": i + 1,
-                "username": r["username"],
-                "score": r["score"],
-                "picks_made": r["picks_made"],
-            }
-            for i, r in enumerate(rows)
-        ],
+        "event": event_kind,
+        "locked": locked,
+        "finished": finished,
+        "rows": rows,
     })

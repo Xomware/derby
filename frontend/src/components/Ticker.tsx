@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import {
   useGrantPicks,
   usePicks,
@@ -13,10 +13,10 @@ import type { Pick, RaceFinisher } from '@/lib/types';
 import { CURRENT_YEAR } from '@/lib/year';
 
 const SLOT_BADGE: Record<'win' | 'place' | 'show' | 'long_shot', string> = {
-  win: 'Grant: Win',
-  place: 'Grant: Place',
-  show: 'Grant: Show',
-  long_shot: 'Grant: Long shot',
+  win: 'WIN',
+  place: 'PLC',
+  show: 'SHO',
+  long_shot: 'LS',
 };
 
 interface TickerItem {
@@ -65,14 +65,56 @@ function buildItems(
       key: `${kind}-${h.id}`,
       kind,
       horseId: h.id,
-      postLabel: pos ? `#${pos}` : `Post ${h.post_position ?? '?'}`,
+      postLabel: pos ? `#${pos}` : `${h.post_position ?? '?'}`,
       name: h.horse_name,
       odds: h.odds_at_pick,
       finishLabel:
-        pos === 1 ? 'Win' : pos === 2 ? 'Place' : pos === 3 ? 'Show' : null,
+        pos === 1 ? '1st' : pos === 2 ? '2nd' : pos === 3 ? '3rd' : null,
       grantBadge: grantSlot(h.horse_name),
     };
   });
+}
+
+function Divider({ label }: { label: string }) {
+  return (
+    <div className="inline-flex items-center gap-2 px-4 mx-2 shrink-0 border-l border-r border-amber-500/40 text-amber-400 font-mono text-xs uppercase tracking-widest">
+      <span className="text-amber-400">●</span>
+      <span>{label}</span>
+      <span className="text-amber-400">●</span>
+    </div>
+  );
+}
+
+function TickerItemCard({ it }: { it: TickerItem }) {
+  return (
+    <Link
+      href={`/${it.kind}/?event=${it.kind}#horse-${it.horseId}`}
+      className="inline-flex items-center gap-2 px-3 mx-1 h-9 rounded shrink-0 bg-slate-800/70 hover:bg-slate-700 border border-slate-700 hover:border-amber-500/50 transition font-mono text-[11px] text-slate-100"
+    >
+      <span
+        className={`px-1 py-0.5 rounded text-[9px] font-bold tracking-widest ${
+          it.kind === 'derby' ? 'bg-rose-red/80 text-cream' : 'bg-mint-julep/80 text-cream'
+        }`}
+      >
+        {it.kind === 'derby' ? 'DRBY' : 'OAKS'}
+      </span>
+      <span className="text-slate-400">{it.postLabel}</span>
+      <span className="text-amber-300 font-semibold tracking-tight">{it.name}</span>
+      {it.odds && (
+        <span className="text-slate-300 tabular-nums">{it.odds}</span>
+      )}
+      {it.finishLabel && (
+        <span className="px-1 rounded bg-emerald-500/20 text-emerald-300 font-bold text-[10px]">
+          {it.finishLabel}
+        </span>
+      )}
+      {it.grantBadge && (
+        <span className="px-1 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px]">
+          G:{it.grantBadge}
+        </span>
+      )}
+    </Link>
+  );
 }
 
 export function Ticker() {
@@ -101,58 +143,44 @@ export function Ticker() {
     );
   };
 
-  const items = useMemo<TickerItem[]>(() => {
-    return [
-      ...buildItems('derby', derbyHorses, finishersFor('derby'), derbyGrant),
-      ...buildItems('oaks', oaksHorses, finishersFor('oaks'), oaksGrant),
-    ];
+  const derbyItems = useMemo(
+    () => buildItems('derby', derbyHorses, finishersFor('derby'), derbyGrant),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [derbyHorses, oaksHorses, results, derbyGrant, oaksGrant]);
+    [derbyHorses, results, derbyGrant]
+  );
+  const oaksItems = useMemo(
+    () => buildItems('oaks', oaksHorses, finishersFor('oaks'), oaksGrant),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [oaksHorses, results, oaksGrant]
+  );
 
-  if (!isCurrent || items.length === 0) return null;
+  if (!isCurrent || (derbyItems.length === 0 && oaksItems.length === 0)) {
+    return null;
+  }
 
-  // Duplicate for seamless infinite scroll.
-  const doubled = [...items, ...items];
+  const renderTrack = (keySuffix: string) => (
+    <Fragment key={keySuffix}>
+      <Divider label="Kentucky Derby" />
+      {derbyItems.map((it) => (
+        <TickerItemCard key={`${it.key}-${keySuffix}`} it={it} />
+      ))}
+      <Divider label="Kentucky Oaks" />
+      {oaksItems.map((it) => (
+        <TickerItemCard key={`${it.key}-${keySuffix}`} it={it} />
+      ))}
+    </Fragment>
+  );
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-20 flex items-center bg-cream/95 backdrop-blur border-t border-rose-red/15 h-12 sm:h-14 overflow-hidden"
+      className="fixed bottom-0 left-0 right-0 z-20 flex items-center bg-slate-950 border-t border-amber-500/30 h-12 sm:h-12 overflow-hidden shadow-[0_-2px_8px_rgba(0,0,0,0.3)]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       <div className="flex-1 overflow-hidden ticker-mask">
-        <div
-          className={`ticker-track ${paused ? 'paused' : ''}`}
-          aria-label="Derby + Oaks ticker"
-        >
-          {doubled.map((it, i) => (
-            <Link
-              key={`${it.key}-${i}`}
-              href={`/${it.kind}/?event=${it.kind}#horse-${it.horseId}`}
-              className="inline-flex items-center gap-2 px-3 py-1 mx-1 rounded-full border border-bourbon/15 bg-white text-xs whitespace-nowrap shrink-0 hover:bg-rose-red/5 hover:border-rose-red/30 transition"
-            >
-              <span
-                className={`px-1.5 rounded text-[9px] uppercase font-bold tracking-wider text-cream ${
-                  it.kind === 'derby' ? 'bg-rose-red' : 'bg-mint-julep'
-                }`}
-              >
-                {it.kind}
-              </span>
-              <span className="font-mono text-bourbon/60">{it.postLabel}</span>
-              <span className="font-semibold text-rose-dark">{it.name}</span>
-              {it.odds && <span className="text-bourbon/70">{it.odds}</span>}
-              {it.finishLabel && (
-                <span className="px-1.5 rounded bg-rose-red/15 text-rose-dark font-bold text-[10px]">
-                  {it.finishLabel}
-                </span>
-              )}
-              {it.grantBadge && (
-                <span className="px-1.5 rounded bg-mint-julep/15 text-mint-julep font-bold text-[10px]">
-                  {it.grantBadge}
-                </span>
-              )}
-            </Link>
-          ))}
+        <div className={`ticker-track ${paused ? 'paused' : ''}`} aria-label="Derby + Oaks ticker">
+          {renderTrack('a')}
+          {renderTrack('b')}
         </div>
       </div>
     </div>

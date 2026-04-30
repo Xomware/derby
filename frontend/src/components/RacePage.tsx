@@ -7,7 +7,7 @@ import { WriteupSection } from '@/components/WriteupSection';
 import { useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
 import type { Pick } from '@/lib/types';
 import { CURRENT_YEAR } from '@/lib/year';
-import { HorseComments } from '@/components/HorseComments';
+import { PowerRankings } from '@/components/PowerRankings';
 import { StatTile } from '@/components/StatTile';
 
 type SortKey = 'post' | 'name' | 'odds';
@@ -178,14 +178,13 @@ export function RacePage({
 
         <div className="space-y-5">
           {sortedPicks.map((p) => (
-            <HorseCard
-              key={p.id}
-              pick={p}
-              kind={kind}
-              showComments={!isArchive}
-            />
+            <HorseCard key={p.id} pick={p} />
           ))}
         </div>
+
+        {grantPicks?.power_rankings && grantPicks.power_rankings.length > 0 && (
+          <PowerRankings tiers={grantPicks.power_rankings} />
+        )}
 
         {grantPicks?.betting_plays && (
           <WriteupSection
@@ -205,15 +204,7 @@ function statTip(label: string): string | undefined {
   return STAT_DESCRIPTIONS[label];
 }
 
-function HorseCard({
-  pick: p,
-  kind,
-  showComments,
-}: {
-  pick: Pick;
-  kind: RaceKind;
-  showComments: boolean;
-}) {
+function HorseCard({ pick: p }: { pick: Pick }) {
   const stats: { label: string; value: string }[] = [];
   if (p.record) stats.push({ label: 'Record', value: p.record });
   if (p.beyer) stats.push({ label: 'Beyer', value: p.beyer });
@@ -282,7 +273,6 @@ function HorseCard({
         </div>
       )}
 
-      {showComments && <HorseComments kind={kind} horseId={p.id} />}
     </article>
   );
 }
