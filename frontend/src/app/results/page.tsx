@@ -50,6 +50,7 @@ interface DisplayHorse {
   name: string;
   post_position: number | null;
   odds: string | null;
+  scratched: boolean;
 }
 
 interface SlotTally {
@@ -103,6 +104,7 @@ export default function ResultsPage() {
         name: p.horse_name,
         post_position: p.post_position,
         odds: p.odds_at_pick,
+        scratched: p.scratched,
       }));
     }
     if (isArchive && grantPicks?.horses?.length) {
@@ -111,9 +113,9 @@ export default function ResultsPage() {
         name: h.horse_name,
         post_position: h.post_position ?? null,
         odds: h.odds_at_pick ?? null,
+        scratched: false,
       }));
     }
-    // Last fallback: just render finishers as horses.
     if (finishers.length > 0) {
       return [...finishers]
         .sort((a, b) => a.position - b.position)
@@ -122,6 +124,7 @@ export default function ResultsPage() {
           name: f.horse_name,
           post_position: null,
           odds: null,
+          scratched: false,
         }));
     }
     return [];
@@ -414,12 +417,34 @@ function HorseTallyRow({
   }
 
   return (
-    <li className={`px-3 sm:px-4 py-3 ${tone}`}>
+    <li
+      className={`relative px-3 sm:px-4 py-3 ${tone} ${
+        horse.scratched ? 'bg-rose-red/5' : ''
+      }`}
+    >
+      {horse.scratched && (
+        <span
+          aria-label="Scratched"
+          className="absolute top-2 right-3 -rotate-6 px-2 py-0.5 rounded border-2 border-rose-red bg-rose-red/10 text-rose-red font-bold tracking-[0.18em] text-[10px] uppercase shadow-sm select-none pointer-events-none"
+        >
+          Scratched
+        </span>
+      )}
       <div className="sm:grid sm:grid-cols-[11rem_1fr_1fr_1fr_1fr] sm:gap-2 sm:items-start">
-        <div className="flex items-center gap-2 min-w-0 mb-2 sm:mb-0">
+        <div
+          className={`flex items-center gap-2 min-w-0 mb-2 sm:mb-0 ${
+            horse.scratched ? 'opacity-60' : ''
+          }`}
+        >
           {badge}
           <div className="min-w-0 flex-1">
-            <div className="font-semibold text-bourbon truncate">{horse.name}</div>
+            <div
+              className={`font-semibold text-bourbon truncate ${
+                horse.scratched ? 'line-through decoration-rose-red/70' : ''
+              }`}
+            >
+              {horse.name}
+            </div>
             {horse.odds && (
               <div className="text-[11px] text-bourbon/60 tabular-nums">{horse.odds}</div>
             )}
