@@ -4,7 +4,7 @@ import { useState } from 'react';
 import useSWR from 'swr';
 
 const ARCHIVE_YEARS: { year: number; hasDocx: boolean }[] = [
-  { year: 2026, hasDocx: false },
+  { year: 2026, hasDocx: true },
   { year: 2025, hasDocx: true },
   { year: 2024, hasDocx: true },
   { year: 2023, hasDocx: true },
