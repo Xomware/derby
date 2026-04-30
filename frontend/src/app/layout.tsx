@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { Suspense } from 'react';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Ticker } from '@/components/Ticker';
 import { UsernameGate } from '@/components/UsernameGate';
+import { VisitTracker } from '@/components/VisitTracker';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://derby.xomware.com'),
@@ -31,6 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
         <SiteFooter />
         <Ticker />
+        <Suspense fallback={null}>
+          <VisitTracker />
+        </Suspense>
       </body>
     </html>
   );

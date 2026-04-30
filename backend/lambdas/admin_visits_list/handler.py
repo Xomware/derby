@@ -1,8 +1,9 @@
-"""GET /admin-visits/stats — page-view analytics for admins.
+"""POST /admin-visits/stats — page-view analytics for admins.
 
-Query params:
-- days (default 7) — how many days of history to summarise
-- limit (default 50) — recent-visits cap
+Body:
+  admin_token: "derbytime"
+  days: int (default 7, capped to 30)
+  limit: int (default 50, capped to 500)
 """
 
 from __future__ import annotations
@@ -12,27 +13,22 @@ from datetime import datetime, timedelta, timezone
 
 from boto3.dynamodb.conditions import Key
 
-from lambdas.common.constants import VISITS_DAY_INDEX
+from lambdas.common.constants import ADMIN_TOKEN, VISITS_DAY_INDEX
 from lambdas.common.dynamo_helpers import query_all, visits_table
 from lambdas.common.errors import ForbiddenError, handle_errors
-from lambdas.common.utility_helpers import (
-    get_authorizer_context,
-    get_query_params,
-    success_response,
-)
+from lambdas.common.utility_helpers import parse_body, success_response
 
 HANDLER = "admin_visits_list"
 
 
 @handle_errors(HANDLER)
 def handler(event, context):
-    ctx = get_authorizer_context(event)
-    if ctx.get("isAdmin") != "true":
-        raise ForbiddenError("Admin only")
+    body = parse_body(event)
+    if not ADMIN_TOKEN or body.get("admin_token") != ADMIN_TOKEN:
+        raise ForbiddenError("Bad admin password")
 
-    qp = get_query_params(event)
-    days = max(1, min(int(qp.get("days") or 7), 30))
-    limit = max(1, min(int(qp.get("limit") or 50), 500))
+    days = max(1, min(int(body.get("days") or 7), 30))
+    limit = max(1, min(int(body.get("limit") or 50), 500))
 
     today = datetime.now(timezone.utc).date()
     rows: list[dict] = []
@@ -52,7 +48,6 @@ def handler(event, context):
     page_counts = Counter(r.get("page", "/") for r in rows).most_common(20)
     user_counts = Counter(r.get("username", "?") for r in rows).most_common(20)
 
-    # Per-user × page matrix: for each user, count visits AND breakdown by page.
     per_user: dict[str, dict] = defaultdict(
         lambda: {"username": "", "total": 0, "pages": Counter(), "last_seen": ""}
     )
@@ -88,7 +83,7 @@ def handler(event, context):
 
     return success_response({
         "total_visits": len(rows),
-        "unique_visitors": len({r.get("user_id") for r in rows}),
+        "unique_visitors": len({r.get("username") for r in rows}),
         "by_day": [{"day": d, "count": c} for d, c in sorted(by_day.items(), reverse=True)],
         "top_pages": [{"page": p, "count": c} for p, c in page_counts],
         "top_users": [{"username": u, "count": c} for u, c in user_counts],

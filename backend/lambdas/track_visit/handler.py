@@ -1,4 +1,7 @@
-"""POST /track/visit — log a page view from an authed visitor."""
+"""POST /track/visit — log an anonymous page view.
+
+Body: {"username": "DOM", "page": "/derby"}
+"""
 
 from __future__ import annotations
 
@@ -6,26 +9,18 @@ import uuid
 from datetime import datetime, timezone
 
 from lambdas.common.dynamo_helpers import visits_table
-from lambdas.common.errors import UnauthorizedError, handle_errors
-from lambdas.common.utility_helpers import (
-    get_authorizer_context,
-    iso_now,
-    no_content,
-    parse_body,
-)
+from lambdas.common.errors import handle_errors
+from lambdas.common.identity import canonicalize_username
+from lambdas.common.utility_helpers import no_content, parse_body
 
 HANDLER = "track_visit"
 
 
 @handle_errors(HANDLER)
 def handler(event, context):
-    ctx = get_authorizer_context(event)
-    user_id = ctx.get("userId")
-    username = ctx.get("username") or "?"
-    if not user_id:
-        raise UnauthorizedError()
-
     body = parse_body(event)
+    username = canonicalize_username(body.get("username"))
+
     page = str(body.get("page") or "/").strip()[:120]
     referrer = str(body.get("referrer") or "")[:200] or None
 
@@ -33,7 +28,7 @@ def handler(event, context):
     visits_table.put_item(
         Item={
             "visit_id": str(uuid.uuid4()),
-            "user_id": user_id,
+            "user_id": username,  # anon-by-username; legacy field name kept for the GSI
             "username": username,
             "page": page,
             "referrer": referrer,
@@ -41,5 +36,4 @@ def handler(event, context):
             "ts": now.isoformat(),
         }
     )
-    _ = iso_now  # quiet
     return no_content()

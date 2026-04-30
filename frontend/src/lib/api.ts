@@ -96,7 +96,46 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+
+  adminCronRuns: (body: { admin_token: string; type?: string; limit?: number }) =>
+    request<AdminCronRunsResponse>('/admin-results/cron-runs', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  adminVisits: (body: { admin_token: string; days?: number; limit?: number }) =>
+    request<AdminVisitsResponse>('/admin-visits/stats', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
 };
+
+export interface AdminCronRun {
+  id: string;
+  ran_at: string;
+  type: string;
+  summary: Record<string, { field_size?: number; matched?: number; updated?: number; skipped?: string }>;
+}
+
+export interface AdminCronRunsResponse {
+  type: string;
+  rows: AdminCronRun[];
+}
+
+export interface AdminVisitsResponse {
+  total_visits: number;
+  unique_visitors: number;
+  by_day: { day: string; count: number }[];
+  top_pages: { page: string; count: number }[];
+  top_users: { username: string; count: number }[];
+  user_breakdown: {
+    username: string;
+    total: number;
+    last_seen: string | null;
+    pages: { page: string; count: number }[];
+  }[];
+  recent: { username: string | null; page: string; ts: string; referrer: string | null }[];
+}
 
 export interface Prediction {
   event_id: string;

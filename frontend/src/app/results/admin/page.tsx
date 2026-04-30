@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { AdminCronRuns } from '@/components/AdminCronRuns';
 import { AdminGate } from '@/components/AdminGate';
 import { AdminOddsForm } from '@/components/AdminOddsForm';
 import { AdminResultsForm } from '@/components/AdminResultsForm';
+import { AdminVisits } from '@/components/AdminVisits';
 import { useAdminToken } from '@/lib/admin';
 import type { RaceKind } from '@/lib/hooks';
 
@@ -12,11 +14,13 @@ const TABS: { id: RaceKind; label: string }[] = [
   { id: 'oaks', label: 'Oaks' },
 ];
 
-type Section = 'results' | 'odds';
+type Section = 'results' | 'odds' | 'cron' | 'visits';
 
 const SECTIONS: { id: Section; label: string }[] = [
   { id: 'results', label: 'Set results' },
   { id: 'odds', label: 'Update odds' },
+  { id: 'cron', label: 'Cron history' },
+  { id: 'visits', label: 'Page views' },
 ];
 
 export default function AdminResultsPage() {
@@ -29,7 +33,9 @@ export default function AdminResultsPage() {
     const e = params.get('event');
     if (e === 'oaks' || e === 'derby') setKind(e);
     const s = params.get('section');
-    if (s === 'odds' || s === 'results') setSection(s);
+    if (s === 'odds' || s === 'results' || s === 'cron' || s === 'visits') {
+      setSection(s);
+    }
   }, []);
 
   function pushUrl(nextKind: RaceKind, nextSection: Section) {
@@ -54,7 +60,11 @@ export default function AdminResultsPage() {
         <p className="text-bourbon/80 text-sm mt-1">
           {section === 'results'
             ? 'Enter race finishers manually. Saving publishes immediately and stamps user picks across the site.'
-            : 'Edit per-horse odds. Predictions saved earlier are scored against the odds at the time of the race.'}
+            : section === 'odds'
+            ? 'Edit per-horse odds. Predictions saved earlier are scored against the odds at the time of the race.'
+            : section === 'cron'
+            ? 'Hourly odds-scraper history. Each row is one cron run.'
+            : 'Page-view analytics for everyone with a username.'}
         </p>
       </header>
 
@@ -82,32 +92,36 @@ export default function AdminResultsPage() {
         })}
       </div>
 
-      <nav className="flex gap-1 border-b border-bourbon/20" aria-label="Event">
-        {TABS.map((t) => {
-          const active = kind === t.id;
-          return (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => {
-                setKind(t.id);
-                pushUrl(t.id, section);
-              }}
-              className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition ${
-                active
-                  ? 'border-rose-red text-rose-dark'
-                  : 'border-transparent text-bourbon/70 hover:text-rose-red'
-              }`}
-              aria-pressed={active}
-            >
-              {t.label}
-            </button>
-          );
-        })}
-      </nav>
+      {(section === 'results' || section === 'odds') && (
+        <nav className="flex gap-1 border-b border-bourbon/20" aria-label="Event">
+          {TABS.map((t) => {
+            const active = kind === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => {
+                  setKind(t.id);
+                  pushUrl(t.id, section);
+                }}
+                className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition ${
+                  active
+                    ? 'border-rose-red text-rose-dark'
+                    : 'border-transparent text-bourbon/70 hover:text-rose-red'
+                }`}
+                aria-pressed={active}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </nav>
+      )}
 
       {section === 'results' && <AdminResultsForm kind={kind} adminToken={token} />}
       {section === 'odds' && <AdminOddsForm kind={kind} adminToken={token} />}
+      {section === 'cron' && <AdminCronRuns adminToken={token} />}
+      {section === 'visits' && <AdminVisits adminToken={token} />}
     </section>
   );
 }

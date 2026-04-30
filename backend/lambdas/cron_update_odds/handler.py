@@ -25,8 +25,12 @@ import requests
 from boto3.dynamodb.conditions import Key
 from bs4 import BeautifulSoup
 
+import json
+import uuid
+
 from lambdas.common.dynamo_helpers import (
     picks_table,
+    poll_runs_table,
     query_all,
     race_results_table,
 )
@@ -201,6 +205,21 @@ def handler(event, context):  # pragma: no cover — exercised in AWS
         }
 
     log.info("odds_cron_run", extra={"started": started, "summary": summary})
+
+    # Persist run summary so admins can audit cron history without digging
+    # through CloudWatch.
+    try:
+        poll_runs_table.put_item(
+            Item={
+                "id": str(uuid.uuid4()),
+                "type": "odds_cron",
+                "ran_at": started,
+                "summary": json.dumps(summary),
+            }
+        )
+    except Exception as exc:  # pragma: no cover
+        log.warning("odds_cron_history_write_failed", extra={"error": str(exc)})
+
     return {
         "statusCode": 200,
         "body": str({"started": started, "summary": summary}),

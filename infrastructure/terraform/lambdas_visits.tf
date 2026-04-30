@@ -1,10 +1,10 @@
 locals {
   visit_lambdas = [
-    { name = "track_visit", description = "POST /track/visit — log a page view", path_part = "visit", http_method = "POST", authorization = "CUSTOM" },
+    { name = "track_visit", description = "POST /track/visit — anonymous page view (username from body)", path_part = "visit", http_method = "POST", authorization = "NONE" },
   ]
 
   admin_visit_lambdas = [
-    { name = "admin_visits_list", description = "GET /admin-visits/stats — analytics", path_part = "stats", http_method = "GET", authorization = "CUSTOM" },
+    { name = "admin_visits_list", description = "POST /admin-visits/stats — analytics (admin_token in body)", path_part = "stats", http_method = "POST", authorization = "NONE" },
   ]
 }
 
