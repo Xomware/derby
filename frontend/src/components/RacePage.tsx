@@ -389,13 +389,13 @@ function HorseCard({ pick: p, kind }: { pick: DisplayHorse; kind: RaceKind }) {
   // Per-kind stat tiles. Derby drops Equibase; Oaks drops Beyer + Brisnet —
   // Grant doesn't track those for those races, so they were always blank.
   const allStats: { label: string; value: string }[] = [
-    { label: 'Odds', value: p.odds_at_pick ?? 'unknown' },
-    { label: 'Record', value: p.record ?? 'unknown' },
-    { label: 'Beyer', value: p.beyer ?? 'unknown' },
-    { label: 'Brisnet', value: p.brisnet ?? 'unknown' },
-    { label: 'Equibase', value: p.equibase_rating ?? 'unknown' },
-    { label: 'Style', value: p.style ?? 'unknown' },
-    { label: 'Last race', value: p.last_race ?? 'unknown' },
+    { label: 'Odds', value: p.odds_at_pick ?? 'N/A' },
+    { label: 'Record', value: p.record ?? 'N/A' },
+    { label: 'Beyer', value: p.beyer ?? 'N/A' },
+    { label: 'Brisnet', value: p.brisnet ?? 'N/A' },
+    { label: 'Equibase', value: p.equibase_rating ?? 'N/A' },
+    { label: 'Style', value: p.style ?? 'N/A' },
+    { label: 'Last race', value: p.last_race ?? 'N/A' },
   ];
   const hidden = kind === 'derby'
     ? new Set(['Equibase'])
