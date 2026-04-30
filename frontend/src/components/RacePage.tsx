@@ -7,7 +7,6 @@ import { WriteupSection } from '@/components/WriteupSection';
 import { useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
 import { CURRENT_YEAR } from '@/lib/year';
 import { GrantPinned } from '@/components/GrantPinned';
-import { GrantsPlays } from '@/components/GrantsPlays';
 import { StatTile } from '@/components/StatTile';
 import { useResults } from '@/lib/hooks';
 
@@ -161,9 +160,6 @@ export function RacePage({
   const tocItems: SidePanelItem[] = useMemo(() => {
     const items: SidePanelItem[] = [];
     if (grantPicks?.analysis) items.push({ id: 'race-outlook', label: 'Race outlook' });
-    if (grantPicks?.power_rankings?.length || grantPicks?.betting_plays) {
-      items.push({ id: 'grants-plays', label: "Grant's plays" });
-    }
     items.push(
       ...sortedPicks.map((p) => ({
         id: `horse-${p.id}`,
@@ -268,14 +264,6 @@ export function RacePage({
           ))}
         </div>
 
-        {(grantPicks?.power_rankings?.length || grantPicks?.betting_plays) && (
-          <div id="grants-plays" className="scroll-mt-24">
-            <GrantsPlays
-              powerRankings={grantPicks?.power_rankings ?? null}
-              bettingPlays={grantPicks?.betting_plays ?? null}
-            />
-          </div>
-        )}
       </section>
 
       <SidePanel title="Jump to" items={tocItems} />
