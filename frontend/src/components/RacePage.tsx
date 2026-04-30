@@ -7,10 +7,17 @@ import { WriteupSection } from '@/components/WriteupSection';
 import { useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
 import { CURRENT_YEAR } from '@/lib/year';
 import { GrantPinned } from '@/components/GrantPinned';
+import { PowerRankings } from '@/components/PowerRankings';
 import { StatTile } from '@/components/StatTile';
 import { useResults } from '@/lib/hooks';
 
 type SortKey = 'post' | 'name' | 'odds';
+
+const SUB_TABS: { id: 'overview' | 'plays' | 'rankings'; label: string }[] = [
+  { id: 'overview', label: 'Race & horses' },
+  { id: 'plays', label: 'Betting plays' },
+  { id: 'rankings', label: 'Power rankings' },
+];
 
 interface DisplayHorse {
   id: string;
@@ -78,7 +85,23 @@ export function RacePage({
   const { grantPicks } = useGrantPicks(kind);
   const { results } = useResults(year);
   const [sortKey, setSortKey] = useState<SortKey>('post');
+  const [tab, setTab] = useState<'overview' | 'plays' | 'rankings'>('overview');
   const isArchive = year !== CURRENT_YEAR;
+
+  // ?tab=plays|rankings deep-link.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get('tab');
+    if (t === 'plays' || t === 'rankings' || t === 'overview') setTab(t);
+  }, []);
+
+  function pushTab(next: 'overview' | 'plays' | 'rankings') {
+    setTab(next);
+    const url = new URL(window.location.href);
+    if (next === 'overview') url.searchParams.delete('tab');
+    else url.searchParams.set('tab', next);
+    window.history.replaceState(null, '', url.toString());
+  }
   const mainRaceNumber = kind === 'derby' ? 12 : 11;
   const finishers =
     (results?.races ?? []).find((r) => r.day === kind && r.race_number === mainRaceNumber)
@@ -197,76 +220,124 @@ export function RacePage({
           )}
         </header>
 
-        {isArchive && grantPicks && (
-          <GrantPinned
-            picks={grantPicks}
-            kind={kind}
-            year={year}
-            isArchive={isArchive}
-            finishers={finishers}
-          />
-        )}
+        <nav className="flex gap-1 border-b border-bourbon/20" aria-label="Section">
+          {SUB_TABS.map((t) => {
+            const active = tab === t.id;
+            const enabled =
+              t.id === 'overview' ||
+              (t.id === 'plays' && !!grantPicks?.betting_plays) ||
+              (t.id === 'rankings' && !!grantPicks?.power_rankings?.length);
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => enabled && pushTab(t.id)}
+                disabled={!enabled}
+                className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition ${
+                  active
+                    ? 'border-rose-red text-rose-dark'
+                    : enabled
+                    ? 'border-transparent text-bourbon/70 hover:text-rose-red'
+                    : 'border-transparent text-bourbon/30 cursor-not-allowed'
+                }`}
+                aria-pressed={active}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </nav>
 
-        {grantPicks?.analysis && (
-          <div id="race-outlook" className="scroll-mt-24">
-            <WriteupSection
-              title={`Grant's race outlook`}
-              body={grantPicks.analysis}
-            />
-          </div>
-        )}
+        {tab === 'overview' && (
+          <>
+            {isArchive && grantPicks && (
+              <GrantPinned
+                picks={grantPicks}
+                kind={kind}
+                year={year}
+                isArchive={isArchive}
+                finishers={finishers}
+              />
+            )}
 
-        {sortedPicks.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <label className="text-xs uppercase tracking-wider text-bourbon/70 font-semibold">
-              Sort by
-            </label>
-            <div className="flex gap-1 flex-wrap">
-              {SORTS.map((s) => {
-                const active = sortKey === s.id;
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setSortKey(s.id)}
-                    className={`px-2.5 py-1 rounded text-xs font-semibold transition border ${
-                      active
-                        ? 'bg-rose-red/10 text-rose-dark border-rose-red/30'
-                        : 'border-bourbon/20 text-bourbon hover:border-rose-red'
-                    }`}
-                  >
-                    {s.label}
-                  </button>
-                );
-              })}
+            {grantPicks?.analysis && (
+              <div id="race-outlook" className="scroll-mt-24">
+                <WriteupSection
+                  title={`Grant's race outlook`}
+                  body={grantPicks.analysis}
+                />
+              </div>
+            )}
+
+            {sortedPicks.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <label className="text-xs uppercase tracking-wider text-bourbon/70 font-semibold">
+                  Sort by
+                </label>
+                <div className="flex gap-1 flex-wrap">
+                  {SORTS.map((s) => {
+                    const active = sortKey === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setSortKey(s.id)}
+                        className={`px-2.5 py-1 rounded text-xs font-semibold transition border ${
+                          active
+                            ? 'bg-rose-red/10 text-rose-dark border-rose-red/30'
+                            : 'border-bourbon/20 text-bourbon hover:border-rose-red'
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <span className="text-xs text-bourbon/60 ml-auto">
+                  {sortedPicks.length} horses
+                </span>
+              </div>
+            )}
+
+            {isLoading && (
+              <div className="text-center text-bourbon/70 py-12">Loading…</div>
+            )}
+
+            {horsesEmpty && (
+              <div className="rounded-lg border border-bourbon/20 bg-white p-8 text-center text-bourbon/70">
+                {isArchive
+                  ? `No archived horse data for the ${year} ${kind === 'derby' ? 'Derby' : 'Oaks'} yet.`
+                  : 'No horses posted yet for this race.'}
+              </div>
+            )}
+
+            <div className="space-y-5">
+              {sortedPicks.map((p) => (
+                <HorseCard key={p.id} pick={p} />
+              ))}
             </div>
-            <span className="text-xs text-bourbon/60 ml-auto">
-              {sortedPicks.length} horses
-            </span>
-          </div>
+          </>
         )}
 
-        {isLoading && (
-          <div className="text-center text-bourbon/70 py-12">Loading…</div>
+        {tab === 'plays' && (
+          grantPicks?.betting_plays ? (
+            <WriteupSection title="" body={grantPicks.betting_plays} />
+          ) : (
+            <p className="text-bourbon/70 text-sm">No betting plays for this event.</p>
+          )
         )}
 
-        {horsesEmpty && (
-          <div className="rounded-lg border border-bourbon/20 bg-white p-8 text-center text-bourbon/70">
-            {isArchive
-              ? `No archived horse data for the ${year} ${kind === 'derby' ? 'Derby' : 'Oaks'} yet.`
-              : 'No horses posted yet for this race.'}
-          </div>
+        {tab === 'rankings' && (
+          grantPicks?.power_rankings?.length ? (
+            <PowerRankings tiers={grantPicks.power_rankings} />
+          ) : (
+            <p className="text-bourbon/70 text-sm">No power rankings for this event.</p>
+          )
         )}
-
-        <div className="space-y-5">
-          {sortedPicks.map((p) => (
-            <HorseCard key={p.id} pick={p} />
-          ))}
-        </div>
 
       </section>
 
-      <SidePanel title="Jump to" items={tocItems} />
+      {tab === 'overview' && <SidePanel title="Jump to" items={tocItems} />}
     </div>
   );
 }

@@ -13,7 +13,6 @@ const NAV_ITEMS: { href: string; label: string }[] = [
   { href: '/derby', label: 'Derby' },
   { href: '/oaks', label: 'Oaks' },
   { href: '/picks', label: 'Picks' },
-  { href: '/plays', label: "Grant's Plays" },
   { href: '/results', label: 'Live Results' },
   { href: '/leaderboard', label: 'Leaderboard' },
   { href: '/archive', label: 'Archive' },
