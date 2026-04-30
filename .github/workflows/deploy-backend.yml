@@ -226,13 +226,24 @@ jobs:
 
           aws lambda wait function-updated --function-name $FN --region $AWS_REGION
 
-          if [ -n "${{ needs.deploy-layer.outputs.layer_arn }}" ]; then
+          # Layer attachment. Use the freshly-published layer when common
+          # changed; otherwise fall back to the latest published version so
+          # new lambdas (which Terraform creates with layer:1) get the real
+          # one. Without this, a new lambda added in a commit that doesn't
+          # touch lambdas/common/ ends up stuck on the empty stub layer.
+          LAYER="${{ needs.deploy-layer.outputs.layer_arn }}"
+          if [ -z "$LAYER" ]; then
+            LAYER=$(aws lambda list-layer-versions \
+              --layer-name ${APP_NAME}-shared-packages \
+              --max-items 1 --region $AWS_REGION \
+              --query 'LayerVersions[0].LayerVersionArn' --output text)
+          fi
+          if [ -n "$LAYER" ] && [ "$LAYER" != "None" ]; then
             aws lambda update-function-configuration --function-name $FN \
-              --layers ${{ needs.deploy-layer.outputs.layer_arn }} \
-              --region $AWS_REGION
+              --layers "$LAYER" --region $AWS_REGION
             aws lambda wait function-updated --function-name $FN --region $AWS_REGION
           fi
-          echo "✅ $FN deployed"
+          echo "✅ $FN deployed (layer=$LAYER)"
 
   summary:
     needs: [detect-changes, deploy-layer, update-all-lambdas-layer, deploy-changed-lambdas]
