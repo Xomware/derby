@@ -1,0 +1,261 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import { Countdown } from '@/components/Countdown';
+import { SidePanel, SidePanelItem } from '@/components/SidePanel';
+import { usePicks } from '@/lib/hooks';
+import type { Pick } from '@/lib/types';
+
+type SortKey = 'post' | 'name' | 'odds' | 'confidence' | 'style';
+
+const SORTS: { id: SortKey; label: string }[] = [
+  { id: 'post', label: 'Post' },
+  { id: 'name', label: 'Name' },
+  { id: 'odds', label: 'Odds' },
+  { id: 'confidence', label: 'Confidence' },
+  { id: 'style', label: 'Style' },
+];
+
+const STAT_DESCRIPTIONS: Record<string, string> = {
+  Record:
+    'Career record: starts: wins-places-shows. "5: 2-2-1" = 5 starts, 2 wins, 2 places (2nd), 1 show (3rd).',
+  Beyer:
+    'Beyer Speed Figure — performance rating from Daily Racing Form. Higher is faster. ~100 is competitive Derby quality.',
+  Brisnet:
+    'Brisnet Speed Rating — same idea as Beyer but from a different shop. Higher is faster.',
+  Equibase:
+    'Equibase Speed Figure — third major speed rating. Higher is faster, similar scale to Beyer.',
+  Style:
+    'Running style. Pace setter = early lead. Presser/Stalker = just behind pace. Closer = rallies late from off the pace.',
+  'Last race':
+    'Most recent finish + race name.',
+};
+
+/**
+ * "5-1" → 5.0,  "8-1" → 8.0,  "1/2" → 0.5,  null → +Infinity
+ * Lower number = lower (better) odds = favorite.
+ */
+function oddsToNumber(odds: string | null): number {
+  if (!odds) return Number.POSITIVE_INFINITY;
+  const m = odds.match(/^(\d+)[-/](\d+)$/);
+  if (!m) return Number.POSITIVE_INFINITY;
+  const n = Number(m[1]);
+  const d = Number(m[2]);
+  return d === 0 ? Number.POSITIVE_INFINITY : n / d;
+}
+
+export function RacePage({
+  eventId,
+  title,
+  eyebrow,
+}: {
+  eventId: string;
+  title: string;
+  eyebrow: string;
+}) {
+  const { picks, isLoading } = usePicks(eventId);
+  const [sortKey, setSortKey] = useState<SortKey>('post');
+
+  const flatPicks = useMemo(
+    () => (picks?.races ?? []).flatMap((r) => r.picks),
+    [picks]
+  );
+
+  const sortedPicks = useMemo(() => {
+    const arr = [...flatPicks];
+    switch (sortKey) {
+      case 'name':
+        return arr.sort((a, b) => a.horse_name.localeCompare(b.horse_name));
+      case 'odds':
+        return arr.sort((a, b) => oddsToNumber(a.odds_at_pick) - oddsToNumber(b.odds_at_pick));
+      case 'confidence':
+        return arr.sort(
+          (a, b) =>
+            b.confidence - a.confidence ||
+            (a.post_position ?? 99) - (b.post_position ?? 99)
+        );
+      case 'style':
+        return arr.sort((a, b) =>
+          (a.style ?? 'zzz').localeCompare(b.style ?? 'zzz')
+        );
+      case 'post':
+      default:
+        return arr.sort((a, b) => (a.post_position ?? 99) - (b.post_position ?? 99));
+    }
+  }, [flatPicks, sortKey]);
+
+  const earliestLock = picks?.races.map((r) => r.lock_time).sort()[0];
+
+  const tocItems: SidePanelItem[] = useMemo(
+    () =>
+      sortedPicks.map((p) => ({
+        id: `horse-${p.id}`,
+        label: p.horse_name,
+        meta: [
+          p.post_position != null ? `Post ${p.post_position}` : null,
+          p.odds_at_pick,
+          '★'.repeat(p.confidence) + '☆'.repeat(5 - p.confidence),
+        ]
+          .filter(Boolean)
+          .join(' · '),
+      })),
+    [sortedPicks]
+  );
+
+  return (
+    <div className="pt-8 lg:grid lg:grid-cols-[1fr_240px] lg:gap-6">
+      <section className="space-y-6 min-w-0">
+        <header>
+          <p className="font-display italic text-mint-julep text-xs uppercase tracking-[0.3em]">
+            {eyebrow}
+          </p>
+          <div className="mt-1 flex flex-wrap items-baseline justify-between gap-3">
+            <h1 className="font-display text-3xl text-rose-dark">{title}</h1>
+            {earliestLock && (
+              <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-full border border-rose-red/20 bg-white">
+                <Countdown target={earliestLock} label="Lock" />
+              </div>
+            )}
+          </div>
+        </header>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <label className="text-xs uppercase tracking-wider text-bourbon/70 font-semibold">
+            Sort by
+          </label>
+          <div className="flex gap-1 flex-wrap">
+            {SORTS.map((s) => {
+              const active = sortKey === s.id;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setSortKey(s.id)}
+                  className={`px-2.5 py-1 rounded text-xs font-semibold transition border ${
+                    active
+                      ? 'bg-rose-red/10 text-rose-dark border-rose-red/30'
+                      : 'border-bourbon/20 text-bourbon hover:border-rose-red'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              );
+            })}
+          </div>
+          <span className="text-xs text-bourbon/60 ml-auto">
+            {sortedPicks.length} horses
+          </span>
+        </div>
+
+        {isLoading && (
+          <div className="text-center text-bourbon/70 py-12">Loading…</div>
+        )}
+
+        {picks && sortedPicks.length === 0 && !isLoading && (
+          <div className="rounded-lg border border-bourbon/20 bg-white p-8 text-center text-bourbon/70">
+            No horses posted yet for this race.
+          </div>
+        )}
+
+        <div className="space-y-5">
+          {sortedPicks.map((p) => (
+            <HorseCard key={p.id} pick={p} />
+          ))}
+        </div>
+      </section>
+
+      <SidePanel title="Jump to" items={tocItems} />
+    </div>
+  );
+}
+
+function statTip(label: string): string | undefined {
+  return STAT_DESCRIPTIONS[label];
+}
+
+function HorseCard({ pick: p }: { pick: Pick }) {
+  const stats: { label: string; value: string }[] = [];
+  if (p.record) stats.push({ label: 'Record', value: p.record });
+  if (p.beyer) stats.push({ label: 'Beyer', value: p.beyer });
+  if (p.brisnet) stats.push({ label: 'Brisnet', value: p.brisnet });
+  if (p.equibase_rating) stats.push({ label: 'Equibase', value: p.equibase_rating });
+  if (p.style) stats.push({ label: 'Style', value: p.style });
+  if (p.last_race) stats.push({ label: 'Last race', value: p.last_race });
+
+  // Split writeup into bullets — Grant's lines exactly as he wrote them.
+  const bullets = (p.writeup ?? '')
+    .split(/\r?\n/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  return (
+    <article
+      id={`horse-${p.id}`}
+      className="scroll-mt-24 rounded-xl border border-bourbon/15 bg-white p-5 shadow-sm"
+    >
+      <header className="flex flex-wrap items-baseline justify-between gap-2">
+        <div>
+          <div className="text-[11px] uppercase tracking-wider text-bourbon/60">
+            {p.post_position != null && <>Post {p.post_position}</>}
+            {p.odds_at_pick && <> · {p.odds_at_pick}</>}
+          </div>
+          <h3 className="font-display text-2xl text-rose-dark leading-tight">
+            {p.horse_name}
+          </h3>
+        </div>
+        <span aria-label={`${p.confidence} of 5 stars`} className="text-rose-red leading-none">
+          {'★'.repeat(p.confidence)}
+          <span className="text-rose-red/30">{'★'.repeat(5 - p.confidence)}</span>
+        </span>
+      </header>
+
+      {(p.jockey || p.trainer) && (
+        <div className="text-xs text-bourbon/70 mt-0.5">
+          {p.jockey ?? 'Jockey TBD'}
+          {p.trainer && ` · ${p.trainer}`}
+        </div>
+      )}
+
+      {stats.length > 0 && (
+        <dl className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {stats.map((s) => (
+            <div
+              key={s.label}
+              title={statTip(s.label)}
+              className="rounded-md border border-bourbon/15 bg-cream/40 px-3 py-2 cursor-help"
+            >
+              <dt className="text-[10px] uppercase tracking-wider text-bourbon/60 font-semibold flex items-center gap-1">
+                {s.label}
+                {statTip(s.label) && <span className="text-bourbon/40">?</span>}
+              </dt>
+              <dd className="text-sm text-bourbon font-semibold mt-0.5">{s.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
+      {bullets.length > 0 && (
+        <ul className="mt-4 space-y-1.5 text-sm text-ink/85 leading-relaxed">
+          {bullets.map((b, i) => (
+            <li key={i} className="pl-4 relative before:content-['•'] before:absolute before:left-0 before:text-rose-red">
+              {b}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {p.final_take && (
+        <div className="mt-4 rounded-md border-l-4 border-rose-red bg-rose-red/5 px-4 py-3">
+          <div className="text-[10px] uppercase tracking-wider text-rose-red font-semibold mb-1">
+            Final take
+          </div>
+          <div className="text-sm text-ink/90 leading-relaxed">{p.final_take}</div>
+        </div>
+      )}
+
+      <div className="mt-4 pt-3 border-t border-bourbon/10 text-xs text-bourbon/60 italic">
+        Comments coming soon.
+      </div>
+    </article>
+  );
+}

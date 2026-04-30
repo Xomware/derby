@@ -10,8 +10,8 @@ import { ProfileMenu } from './ProfileMenu';
 
 const NAV_ITEMS: { href: string; label: string }[] = [
   { href: '/', label: 'Home' },
-  { href: '/picks', label: 'Picks' },
-  { href: '/rationale', label: 'Rationale' },
+  { href: '/derby', label: 'Kentucky Derby' },
+  { href: '/oaks', label: 'Kentucky Oaks' },
   { href: '/results', label: 'Live Results' },
   { href: '/leaderboard', label: 'Leaderboard' },
 ];

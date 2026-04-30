@@ -2,33 +2,33 @@
 
 import Link from 'next/link';
 import { Countdown } from '@/components/Countdown';
-import { usePicks } from '@/lib/hooks';
+import { EVENT_DERBY, usePicks } from '@/lib/hooks';
 
 const SECTIONS: { href: string; title: string; copy: string }[] = [
   {
-    href: '/picks',
-    title: 'Picks',
-    copy: 'See Grant’s picks for every race. Tail him, fade him, or pass.',
+    href: '/derby',
+    title: 'Kentucky Derby',
+    copy: "Saturday, May 2. Grant's full breakdown on every Derby horse — stats, style, and his take.",
   },
   {
-    href: '/rationale',
-    title: 'Rationale',
-    copy: 'The thinking. Pace, post position, jockey, training notes — race by race.',
+    href: '/oaks',
+    title: 'Kentucky Oaks',
+    copy: 'Friday, May 1. Same treatment for the Oaks field.',
   },
   {
     href: '/results',
     title: 'Live Results',
-    copy: 'Finishers + payouts updated as the day unfolds.',
+    copy: 'Win / Place / Show as each race goes official.',
   },
   {
     href: '/leaderboard',
     title: 'Leaderboard',
-    copy: 'Who’s outsmarting Grant. +1 for every correct tail or fade.',
+    copy: 'Pool standings — finish-order picks scored after the race.',
   },
 ];
 
 export default function Home() {
-  const { picks } = usePicks();
+  const { picks } = usePicks(EVENT_DERBY);
   const earliest = picks?.races.map((r) => r.lock_time).sort()[0];
 
   return (
@@ -44,12 +44,12 @@ export default function Home() {
         className="w-full max-w-xs sm:max-w-sm rounded-xl border border-rose-red/15 shadow-sm bg-cream"
       />
       <p className="mt-6 text-bourbon/80 max-w-xl">
-        Grant&apos;s annual Derby pool. Pick a side on every horse he likes,
-        then watch the leaderboard sort itself out as the races run.
+        Grant&apos;s annual Derby pool. Read his full take on every horse,
+        pick your finish order, and see how you rank.
       </p>
       {earliest && (
         <div className="mt-5 inline-flex items-center gap-3 px-3 py-1.5 rounded-full border border-rose-red/20 bg-white">
-          <Countdown target={earliest} label="First lock" />
+          <Countdown target={earliest} label="Derby lock" />
         </div>
       )}
 

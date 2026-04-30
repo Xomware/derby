@@ -1,8 +1,18 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useResults } from '@/lib/hooks';
-import type { RaceResult } from '@/lib/types';
+import { Countdown } from '@/components/Countdown';
+import { EVENT_DERBY, EVENT_OAKS, usePicks } from '@/lib/hooks';
+import type { Pick, ResultValue } from '@/lib/types';
+
+const RESULT_TO_POSITION: Record<ResultValue, number | null> = {
+  won: 1,
+  placed: 2,
+  showed: 3,
+  finished: null,
+  scratched: null,
+  pending: null,
+};
 
 const POSITION_LABEL: Record<number, string> = {
   1: 'Win',
@@ -10,156 +20,146 @@ const POSITION_LABEL: Record<number, string> = {
   3: 'Show',
 };
 
-export default function ResultsPage() {
-  const { results, isLoading, error } = useResults();
+const POSITION_TONE: Record<number, string> = {
+  1: 'bg-rose-red/15 text-rose-dark border-rose-red/30',
+  2: 'bg-mint-julep/15 text-mint-julep border-mint-julep/30',
+  3: 'bg-bourbon/10 text-bourbon border-bourbon/20',
+};
 
-  const grouped = useMemo(() => {
-    const races = results?.races ?? [];
-    return {
-      oaks: races.filter((r) => r.day === 'oaks'),
-      derby: races.filter((r) => r.day === 'derby'),
-    };
-  }, [results]);
+function sortForResults(picks: Pick[]): Pick[] {
+  const arr = [...picks];
+  const positioned = arr.filter((p) => RESULT_TO_POSITION[p.result] !== null);
+  const others = arr.filter((p) => RESULT_TO_POSITION[p.result] === null);
+
+  positioned.sort((a, b) => {
+    const ap = RESULT_TO_POSITION[a.result] ?? 99;
+    const bp = RESULT_TO_POSITION[b.result] ?? 99;
+    return ap - bp;
+  });
+  others.sort((a, b) => (a.post_position ?? 99) - (b.post_position ?? 99));
+  return [...positioned, ...others];
+}
+
+export default function ResultsPage() {
+  const { picks: derby, isLoading: derbyLoading } = usePicks(EVENT_DERBY);
+  const { picks: oaks, isLoading: oaksLoading } = usePicks(EVENT_OAKS);
 
   return (
-    <section className="pt-8 max-w-3xl mx-auto">
-      <header className="mb-6">
+    <section className="pt-8 max-w-3xl mx-auto space-y-10">
+      <header>
         <h1 className="font-display text-3xl text-rose-dark">Live Results</h1>
         <p className="text-bourbon/80 text-sm mt-1">
-          Every race on the Oaks + Derby card. Win / Place / Show fills in as
-          races go official. Auto-refreshes every minute.
+          Oaks and Derby. Horses sit in post-position order until the race goes
+          official, then re-sort to Win / Place / Show on top.
         </p>
       </header>
 
-      {error && (
-        <div className="rounded border border-rose-red/40 bg-rose-red/10 p-3 text-sm text-rose-dark mb-4">
-          Could not load results.
-        </div>
-      )}
-
-      {isLoading && (
-        <div className="text-center text-bourbon/70 py-12">Loading results…</div>
-      )}
-
-      <DaySection
-        title="Friday — Oaks Day"
-        date="May 1, 2026"
-        races={grouped.oaks}
+      <RaceSection
+        title="Kentucky Oaks"
+        eyebrow="Friday, May 1, 2026"
+        picks={oaks?.races.flatMap((r) => r.picks) ?? []}
+        lockTime={oaks?.races[0]?.lock_time}
+        loading={oaksLoading}
       />
-      <DaySection
-        title="Saturday — Derby Day"
-        date="May 2, 2026"
-        races={grouped.derby}
+
+      <RaceSection
+        title="Kentucky Derby"
+        eyebrow="Saturday, May 2, 2026"
+        picks={derby?.races.flatMap((r) => r.picks) ?? []}
+        lockTime={derby?.races[0]?.lock_time}
+        loading={derbyLoading}
       />
     </section>
   );
 }
 
-function DaySection({
+function RaceSection({
   title,
-  date,
-  races,
+  eyebrow,
+  picks,
+  lockTime,
+  loading,
 }: {
   title: string;
-  date: string;
-  races: RaceResult[];
+  eyebrow: string;
+  picks: Pick[];
+  lockTime?: string;
+  loading: boolean;
 }) {
-  if (races.length === 0) return null;
+  const sorted = useMemo(() => sortForResults(picks), [picks]);
+  const anyOfficial = sorted.some((p) => RESULT_TO_POSITION[p.result] !== null);
+
   return (
-    <section className="mb-10">
-      <header className="mb-3 flex items-baseline justify-between">
-        <h2 className="font-display text-2xl text-bourbon">{title}</h2>
-        <span className="text-xs text-bourbon/70">{date}</span>
+    <section>
+      <header className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+        <div>
+          <p className="font-display italic text-mint-julep text-xs uppercase tracking-[0.3em]">
+            {eyebrow}
+          </p>
+          <h2 className="font-display text-2xl text-bourbon">{title}</h2>
+        </div>
+        {lockTime && !anyOfficial && <Countdown target={lockTime} label="Lock" />}
+        {anyOfficial && (
+          <span className="text-xs uppercase tracking-wider font-semibold text-rose-dark">
+            Official
+          </span>
+        )}
       </header>
-      <div className="space-y-3">
-        {races.map((r) => (
-          <RaceRow key={`${r.day}-${r.race_number}`} race={r} />
+
+      {loading && (
+        <div className="text-bourbon/70 py-6 text-center text-sm">Loading…</div>
+      )}
+
+      {!loading && sorted.length === 0 && (
+        <div className="rounded-lg border border-bourbon/20 bg-white p-6 text-center text-bourbon/70 text-sm">
+          No horses posted yet.
+        </div>
+      )}
+
+      <ol className="space-y-2">
+        {sorted.map((p) => (
+          <HorseRow key={p.id} pick={p} />
         ))}
-      </div>
+      </ol>
     </section>
   );
 }
 
-function RaceRow({ race }: { race: RaceResult }) {
-  const post = new Date(race.post_time);
-  const isOfficial = race.finishers.length > 0;
-  const isFeature = !!race.name;
+function HorseRow({ pick: p }: { pick: Pick }) {
+  const position = RESULT_TO_POSITION[p.result];
+  const isScratched = p.result === 'scratched';
+  const isOut = p.result === 'finished';
+  const isPending = p.result === 'pending';
+
   return (
-    <article
-      className={`rounded-xl border bg-white shadow-sm overflow-hidden ${
-        isFeature ? 'border-rose-red/30' : 'border-bourbon/15'
+    <li
+      className={`rounded-lg border bg-white px-4 py-2.5 flex items-center gap-3 ${
+        position
+          ? POSITION_TONE[position]
+          : 'border-bourbon/15 ' + (isScratched ? 'opacity-50 line-through' : '')
       }`}
     >
-      <header
-        className={`px-4 py-2 flex items-baseline justify-between gap-2 ${
-          isFeature ? 'bg-rose-red/10' : 'bg-cream/40'
-        }`}
-      >
-        <div className="flex items-baseline gap-2">
-          <span className="font-display text-lg text-rose-dark">
-            Race {race.race_number}
-          </span>
-          {race.name && (
-            <span className="text-xs uppercase tracking-wider font-semibold text-rose-dark">
-              {race.name}
-            </span>
-          )}
-        </div>
-        <span className="text-xs text-bourbon/70 whitespace-nowrap">
-          Post{' '}
-          {post.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
-        </span>
-      </header>
-
-      {isOfficial ? (
-        <div className="divide-y divide-bourbon/10">
-          {race.finishers.slice(0, 3).map((f) => (
-            <div
-              key={f.position}
-              className="px-4 py-2 flex items-baseline gap-3"
-            >
-              <span className="text-[11px] uppercase tracking-wider text-bourbon/70 w-12 shrink-0">
-                {POSITION_LABEL[f.position] ?? `${f.position}th`}
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="text-bourbon font-semibold truncate">
-                  {f.horse_name}
-                </div>
-                {f.jockey && (
-                  <div className="text-[11px] text-bourbon/70">{f.jockey}</div>
-                )}
-              </div>
-              {(f.win_payout || f.place_payout || f.show_payout) && (
-                <div className="text-[11px] font-mono text-bourbon/80 text-right whitespace-nowrap">
-                  {f.win_payout && <div>W ${f.win_payout}</div>}
-                  {f.place_payout && <div>P ${f.place_payout}</div>}
-                  {f.show_payout && <div>S ${f.show_payout}</div>}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="px-4 py-3 grid grid-cols-3 gap-2 text-xs">
-          {[1, 2, 3].map((pos) => (
-            <div
-              key={pos}
-              className="rounded border border-dashed border-bourbon/20 px-2 py-1.5 text-center text-bourbon/40"
-            >
-              <div className="text-[10px] uppercase tracking-wider">
-                {POSITION_LABEL[pos]}
-              </div>
-              <div className="text-sm">—</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {race.notes && (
-        <footer className="px-4 py-1.5 text-[11px] text-bourbon/70 bg-cream/40 border-t border-bourbon/10">
-          {race.notes}
-        </footer>
-      )}
-    </article>
+      <span className="text-xs uppercase tracking-wider w-12 shrink-0 font-semibold">
+        {position ? POSITION_LABEL[position] : `#${p.post_position ?? '?'}`}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold text-bourbon truncate">{p.horse_name}</div>
+        {(p.jockey || p.trainer) && (
+          <div className="text-[11px] text-bourbon/70 truncate">
+            {p.jockey ?? 'Jockey TBD'}
+            {p.trainer && ` · ${p.trainer}`}
+          </div>
+        )}
+      </div>
+      <span className="text-[11px] text-bourbon/60 whitespace-nowrap">
+        {p.odds_at_pick ?? '—'}
+      </span>
+      <span className="text-[11px] text-bourbon/70 w-16 text-right whitespace-nowrap">
+        {isPending && 'Pending'}
+        {isScratched && 'Scratched'}
+        {isOut && 'Out'}
+        {position && 'Official'}
+      </span>
+    </li>
   );
 }
