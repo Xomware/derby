@@ -12,7 +12,12 @@
       "confidence": 4,
       "trainer": "Bob Baffert",
       "jockey": "Flavien Pratt",
-      "writeup": "**Record: 7: 4-3-0**\n**Equibase Rating: 108**\n**Last race: Won Honeybee G3**\n**Style: Presser**\n\n- Decently heavily raced horse with 7, but hasn\u2019t finished worse than 2nd all across some highly graded races\n- She took off the major prep races to rest for the Oaks\n- She was starting to get caught by Counting Stars at the end of the Honeybee and if it were at the longer Oaks track she would have been caught.\n- Baffert and Flavien Pratt combo is strong. But we must defeat Bob.\n\n**Final Take: Use underneath, not my winner, also there are better horses**"
+      "record": "7: 4-3-0",
+      "equibase_rating": "108",
+      "last_race": "Won Honeybee G3",
+      "style": "Presser",
+      "final_take": "Use underneath, not my winner, also there are better horses",
+      "writeup": "- Decently heavily raced horse with 7, but hasn\u2019t finished worse than 2nd all across some highly graded races\n- She took off the major prep races to rest for the Oaks\n- She was starting to get caught by Counting Stars at the end of the Honeybee and if it were at the longer Oaks track she would have been caught.\n- Baffert and Flavien Pratt combo is strong. But we must defeat Bob."
     },
     {
       "horse_name": "Zany",
@@ -22,7 +27,12 @@
       "race_post_time": "2026-05-01T22:51:00-04:00",
       "odds_at_pick": "6-1",
       "confidence": 5,
-      "writeup": "**Record: 4: 3-1-0**\n**Equibase Rating: 94**\n**Last race: 2nd Ashland G1 to Percy\u2019s Bar**\n**Style: Mid Pack - Closer**\n\n- Many people are high on this horse and I think she is just as good as Percy\u2019s Bar who she just lost to, solely because she had to work through a tougher trip\n- In each of the past couple of races what gives me pause is that she showed green tendencies at the start of the last stretch which takes too long to get her into her impressive downhill momentum\n- Already won a race (Demoiselle) at the 1 1/8 mile distance impressively\n\n**Final Take: Definitely will hit the board. Will be a question if she hits her stride quick enough on the straightaway**"
+      "record": "4: 3-1-0",
+      "equibase_rating": "94",
+      "last_race": "2nd Ashland G1 to Percy\u2019s Bar",
+      "style": "Mid Pack - Closer",
+      "final_take": "Definitely will hit the board. Will be a question if she hits her stride quick enough on the straightaway",
+      "writeup": "- Many people are high on this horse and I think she is just as good as Percy\u2019s Bar who she just lost to, solely because she had to work through a tougher trip\n- In each of the past couple of races what gives me pause is that she showed green tendencies at the start of the last stretch which takes too long to get her into her impressive downhill momentum\n- Already won a race (Demoiselle) at the 1 1/8 mile distance impressively"
     },
     {
       "horse_name": "Search Party",
@@ -33,7 +43,12 @@
       "odds_at_pick": "40-1",
       "confidence": 2,
       "trainer": "Mark Casse",
-      "writeup": "**Record: 8: 2-2-2**\n**Equibase Rating: 107**\n**Last race: 2nd Fantasy G2 to Counting Stars**\n**Style: Mid-Pack**\n\n- Not needing a huge write up. Got beat pretty good by Counting Stars in last prep and doesn\u2019t have many impressive wins\n\n**Final Take: Toss.**"
+      "record": "8: 2-2-2",
+      "equibase_rating": "107",
+      "last_race": "2nd Fantasy G2 to Counting Stars",
+      "style": "Mid-Pack",
+      "final_take": "Toss.",
+      "writeup": "- Not needing a huge write up. Got beat pretty good by Counting Stars in last prep and doesn\u2019t have many impressive wins"
     },
     {
       "horse_name": "Counting Stars",
@@ -44,7 +59,12 @@
       "odds_at_pick": "10-1",
       "confidence": 5,
       "trainer": "Mark Casse",
-      "writeup": "**Record: 7: 4-1-0**\n**Equibase Rating: 115**\n**Last race: Won Fantasy G2**\n**Style: Presser**\n\n- Very visually impressive win in the Fantasy pressing the pace and taking over just to then extend her lead down the stretch\n- Relatively heavily raced horse with 7 under her belt \u2013 she probably was an average horse until the major step up in the Fantasy\n- She lost to Explora in the race prior after trying to chase her down but ran out of real estate and lost by a neck\n- She broke her maiden at Churchill downs and should only do better with the added distance\n\n**Final Take: interesting at this price, may use up top for win contention**"
+      "record": "7: 4-1-0",
+      "equibase_rating": "115",
+      "last_race": "Won Fantasy G2",
+      "style": "Presser",
+      "final_take": "interesting at this price, may use up top for win contention",
+      "writeup": "- Very visually impressive win in the Fantasy pressing the pace and taking over just to then extend her lead down the stretch\n- Relatively heavily raced horse with 7 under her belt \u2013 she probably was an average horse until the major step up in the Fantasy\n- She lost to Explora in the race prior after trying to chase her down but ran out of real estate and lost by a neck\n- She broke her maiden at Churchill downs and should only do better with the added distance"
     },
     {
       "horse_name": "Meaning",
@@ -54,7 +74,12 @@
       "race_post_time": "2026-05-01T22:51:00-04:00",
       "odds_at_pick": "11-1",
       "confidence": 4,
-      "writeup": "**Record: 4: 3-0-0**\n**Equibase Rating: 104**\n**Last race: Won Santa Anita Oaks G2**\n**Style: Presser**\n\n- Very good record across 5 starts with mostly improving ratings each time\n- Didn\u2019t blow competition away at any point but looked strong in each race\n- Great post draw in the 5 hole\n\n**Final Take: Improving horse who keeps winning. She has the potential to win**"
+      "record": "4: 3-0-0",
+      "equibase_rating": "104",
+      "last_race": "Won Santa Anita Oaks G2",
+      "style": "Presser",
+      "final_take": "Improving horse who keeps winning. She has the potential to win",
+      "writeup": "- Very good record across 5 starts with mostly improving ratings each time\n- Didn\u2019t blow competition away at any point but looked strong in each race\n- Great post draw in the 5 hole"
     },
     {
       "horse_name": "Dazzling Dame",
@@ -64,7 +89,12 @@
       "race_post_time": "2026-05-01T22:51:00-04:00",
       "odds_at_pick": "48-1",
       "confidence": 2,
-      "writeup": "**Record: 6: 4-1-0**\n**Equibase Rating: 106**\n**Last race: 2nd Virginia Oaks**\n**Style: Pace setter**\n\n- Led the majority of the race before getting caught in the straightaway in last prep\n- Will likely set the pace in the Oaks\n- Doubtful she will fend off the difficult field coming up\n\n**Final Take: Toss**"
+      "record": "6: 4-1-0",
+      "equibase_rating": "106",
+      "last_race": "2nd Virginia Oaks",
+      "style": "Pace setter",
+      "final_take": "Toss",
+      "writeup": "- Led the majority of the race before getting caught in the straightaway in last prep\n- Will likely set the pace in the Oaks\n- Doubtful she will fend off the difficult field coming up"
     },
     {
       "horse_name": "Always a Runner",
@@ -74,7 +104,12 @@
       "race_post_time": "2026-05-01T22:51:00-04:00",
       "odds_at_pick": "6-1",
       "confidence": 2,
-      "writeup": "**Record: 2: 2-0-0**\n**Equibase Rating: 106**\n**Last race: Won Gazelle G3**\n**Style: Mid pack closer**\n\n- Very lightly raced (twice) but won them both\n- I don\u2019t think she looked very impressive at all last race I don\u2019t know why she would be going off below 10-1\n- She only won the Gazelle because Pashmina couldn\u2019t run any further\n\n**Final Take: not worth a bet. Leave out completely with value in other horses**"
+      "record": "2: 2-0-0",
+      "equibase_rating": "106",
+      "last_race": "Won Gazelle G3",
+      "style": "Mid pack closer",
+      "final_take": "not worth a bet. Leave out completely with value in other horses",
+      "writeup": "- Very lightly raced (twice) but won them both\n- I don\u2019t think she looked very impressive at all last race I don\u2019t know why she would be going off below 10-1\n- She only won the Gazelle because Pashmina couldn\u2019t run any further"
     },
     {
       "horse_name": "Prom Queen",
@@ -86,7 +121,12 @@
       "confidence": 5,
       "trainer": "Brad Cox",
       "jockey": "Javier Castellano",
-      "writeup": "**Record: 3: 2-1-0**\n**Equibase Rating: 111**\n**Last race: Won Gulfstream Park Oaks G2**\n**Style: Stalker**\n\n- Looked strong in the prep race coming around from slightly off the lead and easily winning down the stretch. The distance doesn\u2019t look like it will be an issue\n- Very lightly raced horse with only three outings, all of which in the 2026 campaign \u2013 good results in each, including wins in latest two\n- This does create some unknowns though with how to compare against the field\n- Good trainer x jockey combo with Brad Cox and Javier castellano\n- Improved speed ratings in each outing. Another step up would give real chance\n\n**Final Take: Nothing to not like here.**"
+      "record": "3: 2-1-0",
+      "equibase_rating": "111",
+      "last_race": "Won Gulfstream Park Oaks G2",
+      "style": "Stalker",
+      "final_take": "Nothing to not like here.",
+      "writeup": "- Looked strong in the prep race coming around from slightly off the lead and easily winning down the stretch. The distance doesn\u2019t look like it will be an issue\n- Very lightly raced horse with only three outings, all of which in the 2026 campaign \u2013 good results in each, including wins in latest two\n- This does create some unknowns though with how to compare against the field\n- Good trainer x jockey combo with Brad Cox and Javier castellano\n- Improved speed ratings in each outing. Another step up would give real chance"
     },
     {
       "horse_name": "Percy\u2019s Bar",
@@ -96,7 +136,12 @@
       "race_post_time": "2026-05-01T22:51:00-04:00",
       "odds_at_pick": "5-1",
       "confidence": 4,
-      "writeup": "**Record: 6: 3-2-1**\n**Equibase Rating: 97**\n**Last race: Won Ashland G1**\n**Style: Presser**\n\n- Strong unscathed race riding the rail the entire way in the Ashland, though didn\u2019t have to endure any stress which will inevitably occur in the larger Oaks field\n- Only had this one race in 2026 season so far after coming off of three 2nd/3rds in the fall\n\n**Final Take: Not in love with her. The Bar needs a new bartender. Odds are too high to even use in exotics lets make money elsewhere**"
+      "record": "6: 3-2-1",
+      "equibase_rating": "97",
+      "last_race": "Won Ashland G1",
+      "style": "Presser",
+      "final_take": "Not in love with her. The Bar needs a new bartender. Odds are too high to even use in exotics lets make money elsewhere",
+      "writeup": "- Strong unscathed race riding the rail the entire way in the Ashland, though didn\u2019t have to endure any stress which will inevitably occur in the larger Oaks field\n- Only had this one race in 2026 season so far after coming off of three 2nd/3rds in the fall"
     },
     {
       "horse_name": "Bella Ballerina",
@@ -106,7 +151,12 @@
       "race_post_time": "2026-05-01T22:51:00-04:00",
       "odds_at_pick": "8-1",
       "confidence": 2,
-      "writeup": "**Record: 4: 3-1-0**\n**Equibase Rating: 110**\n**Last race: 2nd Fair Grounds Oaks G2**\n**Style: Presser**\n\n- Was hoping to find an overlooked horse here with Bella B since she lost her prep race with it being to a horse who she wont have to deal with in this Oaks race\n- Bella B took the lead early and looked strong up front the entire race and destroyed everyone but Life of Joy, who looked even better down the stretch\n- Oaks is 1/16 mile futher than the Fair Grounds Oaks which is a tough sell after she just lost the lead in the shorter race\n- Unfortunately for comparison purposes, all other races she pretty much beat the same horses each time so not much variety. And Life of Joy got beat pretty good by Zany in her prior outing. This quick math tells us Zany is a tier above Mrs. B\n\n**Final Take: She took a big step in ratings wise in last prep and will have to do so again, but likely leaving her off tickets.**"
+      "record": "4: 3-1-0",
+      "equibase_rating": "110",
+      "last_race": "2nd Fair Grounds Oaks G2",
+      "style": "Presser",
+      "final_take": "She took a big step in ratings wise in last prep and will have to do so again, but likely leaving her off tickets.",
+      "writeup": "- Was hoping to find an overlooked horse here with Bella B since she lost her prep race with it being to a horse who she wont have to deal with in this Oaks race\n- Bella B took the lead early and looked strong up front the entire race and destroyed everyone but Life of Joy, who looked even better down the stretch\n- Oaks is 1/16 mile futher than the Fair Grounds Oaks which is a tough sell after she just lost the lead in the shorter race\n- Unfortunately for comparison purposes, all other races she pretty much beat the same horses each time so not much variety. And Life of Joy got beat pretty good by Zany in her prior outing. This quick math tells us Zany is a tier above Mrs. B"
     },
     {
       "horse_name": "Pashmina",
@@ -116,7 +166,12 @@
       "race_post_time": "2026-05-01T22:51:00-04:00",
       "odds_at_pick": "24-1",
       "confidence": 2,
-      "writeup": "**Record: 6: 1-1-2**\n**Equibase Rating: 105**\n**Last race: 2nd Gazelle G3 to Always a Runner**\n**Style: Versatile**\n\n- Barely got caught by Always A Runner who is taking a lot of money in the Oaks, although it was because Pashmina ran completely out of gas at the end\n- It will take much more energy in the Oaks to navigate the larger field since coming from the 13 hole and will almost definitely re run out of gas\n\n**Final Take: ran out of gas last race, itll happen again. Toss**"
+      "record": "6: 1-1-2",
+      "equibase_rating": "105",
+      "last_race": "2nd Gazelle G3 to Always a Runner",
+      "style": "Versatile",
+      "final_take": "ran out of gas last race, itll happen again. Toss",
+      "writeup": "- Barely got caught by Always A Runner who is taking a lot of money in the Oaks, although it was because Pashmina ran completely out of gas at the end\n- It will take much more energy in the Oaks to navigate the larger field since coming from the 13 hole and will almost definitely re run out of gas"
     },
     {
       "horse_name": "Brooklyn Blonde",
@@ -126,7 +181,12 @@
       "race_post_time": "2026-05-01T22:51:00-04:00",
       "odds_at_pick": "13-1",
       "confidence": 2,
-      "writeup": "**Record: 4: 1-2-0**\n**Equibase Rating: 101**\n**Last race: 2nd Santa Anita Oaks G2 to Meaning**\n**Style: Presser**\n\n- Didn\u2019t really get that outrun by Meaning who I have as a win contender\n- Lightly raced horse who has improved while adding distance\n- First time traveling outside of Cali\n- There isn\u2019t enough for me to get too excited about Miss Blondie but I don\u2019t see any real red flags\n- Issue will be trying to get to the lead from the far out post which I don\u2019t see her doing\n\n**Final Take: Aside from her Blondness I have to draw the line on the bad post draw**"
+      "record": "4: 1-2-0",
+      "equibase_rating": "101",
+      "last_race": "2nd Santa Anita Oaks G2 to Meaning",
+      "style": "Presser",
+      "final_take": "Aside from her Blondness I have to draw the line on the bad post draw",
+      "writeup": "- Didn\u2019t really get that outrun by Meaning who I have as a win contender\n- Lightly raced horse who has improved while adding distance\n- First time traveling outside of Cali\n- There isn\u2019t enough for me to get too excited about Miss Blondie but I don\u2019t see any real red flags\n- Issue will be trying to get to the lead from the far out post which I don\u2019t see her doing"
     },
     {
       "horse_name": "Lovely Grey",
@@ -136,7 +196,12 @@
       "race_post_time": "2026-05-01T22:51:00-04:00",
       "odds_at_pick": "7-1",
       "confidence": 2,
-      "writeup": "**Record: 7: 1-2-1**\n**Equibase Rating: 107**\n**Last race: 2nd Bourbonette Oaks LS**\n**Style: Mid-Pack Closer**\n\n- Almost overcame a difficult trip in last race having to run way out wide to get around traffic and still almost ran down the leader\n- Will have to transition from synthetic dirt though for the Oaks which provides a question mark\n- Hasn\u2019t won since breaking her maiden in August\n- Has improved figures each time but she\u2019s only raced on grass or synthetic dirt each time\n- She isn\u2019t always be closing. A 2nd or 3rd place merchant.\n\n**Final Take: No reason why her first win in 8 months would be in the Kentucky Oaks. Only use in the 4-spot underneath in a trifecta if you want to juice a return**"
+      "record": "7: 1-2-1",
+      "equibase_rating": "107",
+      "last_race": "2nd Bourbonette Oaks LS",
+      "style": "Mid-Pack Closer",
+      "final_take": "No reason why her first win in 8 months would be in the Kentucky Oaks. Only use in the 4-spot underneath in a trifecta if you want to juice a return",
+      "writeup": "- Almost overcame a difficult trip in last race having to run way out wide to get around traffic and still almost ran down the leader\n- Will have to transition from synthetic dirt though for the Oaks which provides a question mark\n- Hasn\u2019t won since breaking her maiden in August\n- Has improved figures each time but she\u2019s only raced on grass or synthetic dirt each time\n- She isn\u2019t always be closing. A 2nd or 3rd place merchant."
     }
   ]
 }

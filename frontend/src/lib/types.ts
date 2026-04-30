@@ -36,6 +36,13 @@ export interface Pick {
   odds_at_pick: string | null;
   confidence: number;
   writeup: string | null;
+  final_take: string | null;
+  record: string | null;
+  beyer: string | null;
+  brisnet: string | null;
+  equibase_rating: string | null;
+  last_race: string | null;
+  style: string | null;
   result: ResultValue;
   display_order: number;
   locked: boolean;
@@ -102,11 +109,14 @@ export interface RaceFinisher {
 
 export interface RaceResult {
   race_number: number;
+  day: 'oaks' | 'derby';
+  post_time: string;
+  name: string | null;
   finishers: RaceFinisher[];
   official_at: string | null;
   notes: string | null;
-  updated_at: string | null;
-  updated_by: string | null;
+  updated_at?: string | null;
+  updated_by?: string | null;
   source: string | null;
 }
 

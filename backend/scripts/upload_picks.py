@@ -113,7 +113,19 @@ def validate(pick: dict, idx: int) -> dict:
     for field in ("post_position",):
         if pick.get(field) not in (None, ""):
             out[field] = int(pick[field])
-    for field in ("jockey", "trainer", "odds_at_pick", "writeup"):
+    for field in (
+        "jockey",
+        "trainer",
+        "odds_at_pick",
+        "writeup",
+        "final_take",
+        "record",
+        "beyer",
+        "brisnet",
+        "equibase_rating",
+        "last_race",
+        "style",
+    ):
         if pick.get(field) not in (None, ""):
             out[field] = str(pick[field])
     return out

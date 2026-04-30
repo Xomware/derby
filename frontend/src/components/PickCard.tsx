@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { api } from '@/lib/api';
 import { usePicks } from '@/lib/hooks';
@@ -8,9 +9,9 @@ import type { Pick, ResultValue, VoteValue } from '@/lib/types';
 const RESULT_LABEL: Record<ResultValue, string> = {
   pending: 'Pending',
   won: 'Won',
-  placed: 'Placed (2nd)',
-  showed: 'Showed (3rd)',
-  finished: 'Out of money',
+  placed: '2nd',
+  showed: '3rd',
+  finished: 'Out',
   scratched: 'Scratched',
 };
 
@@ -27,10 +28,12 @@ interface PickCardProps {
   pick: Pick;
   isAuthed: boolean;
   onRequireAuth: () => void;
+  /** href for the "View rationale →" link, e.g. `/rationale#horse-<id>` */
+  rationaleHref?: string;
 }
 
-export function PickCard({ pick, isAuthed, onRequireAuth }: PickCardProps) {
-  const { refresh } = usePicks();
+export function PickCard({ pick, isAuthed, onRequireAuth, rationaleHref }: PickCardProps) {
+  const { refresh } = usePicks(pick.event_id);
   const [pending, setPending] = useState<VoteValue | null>(null);
 
   async function vote(v: VoteValue) {
@@ -45,52 +48,57 @@ export function PickCard({ pick, isAuthed, onRequireAuth }: PickCardProps) {
     }
   }
 
-  const total = pick.counts.tail + pick.counts.fade + pick.counts.pass;
+  const tailFadeTotal = pick.counts.tail + pick.counts.fade;
 
   return (
-    <article className="rounded-xl border border-rose-red/20 bg-white shadow-sm p-5">
-      <header className="flex items-start justify-between gap-4">
-        <div>
-          <div className="text-xs uppercase tracking-wider text-bourbon/60 mb-1">
-            Race {pick.race_number}
-            {pick.post_position != null && (
-              <span> · Post {pick.post_position}</span>
-            )}
-            {pick.odds_at_pick && <span> · {pick.odds_at_pick}</span>}
+    <article
+      id={`pick-${pick.id}`}
+      className="rounded-xl border border-rose-red/20 bg-white shadow-sm p-4 sm:p-5"
+    >
+      <header className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-[11px] uppercase tracking-wider text-bourbon/60">
+            {pick.post_position != null && <>Post {pick.post_position}</>}
+            {pick.odds_at_pick && <> · {pick.odds_at_pick}</>}
+            {pick.style && <> · {pick.style}</>}
           </div>
-          <h3 className="font-display text-2xl text-rose-dark leading-tight">
+          <h3 className="font-display text-2xl text-rose-dark leading-tight truncate">
             {pick.horse_name}
           </h3>
-          <div className="text-xs text-bourbon/70 mt-0.5">
-            {pick.jockey ?? 'Jockey TBD'}
-            {pick.trainer && ` · ${pick.trainer}`}
+          <div
+            className="mt-0.5 text-rose-red leading-none"
+            aria-label={`${pick.confidence} of 5 stars`}
+          >
+            {'★'.repeat(pick.confidence)}
+            <span className="text-rose-red/30">{'★'.repeat(5 - pick.confidence)}</span>
           </div>
         </div>
         <span
-          className={`text-xs font-semibold px-2 py-1 rounded ${RESULT_TONE[pick.result]}`}
+          className={`text-[11px] font-semibold px-2 py-1 rounded shrink-0 ${RESULT_TONE[pick.result]}`}
         >
           {RESULT_LABEL[pick.result]}
         </span>
       </header>
 
-      {pick.writeup && (
-        <p className="mt-3 text-sm text-ink/85 leading-relaxed italic">
-          {pick.writeup}
-        </p>
+      {(pick.last_race || pick.beyer || pick.brisnet) && (
+        <div className="mt-2 text-xs text-bourbon/80 leading-snug">
+          {pick.last_race && (
+            <span>
+              <span className="text-bourbon/60">Last:</span> {pick.last_race}
+            </span>
+          )}
+          {(pick.beyer || pick.brisnet) && (
+            <span className="ml-3 text-bourbon/60">
+              {pick.beyer && <>Beyer {pick.beyer}</>}
+              {pick.beyer && pick.brisnet && ' · '}
+              {pick.brisnet && <>Brisnet {pick.brisnet}</>}
+            </span>
+          )}
+        </div>
       )}
 
-      <div className="mt-3 flex items-center gap-2">
-        <span className="text-xs text-bourbon/70">Confidence</span>
-        <span aria-hidden className="text-rose-red">
-          {'★'.repeat(pick.confidence)}
-          <span className="text-rose-red/30">
-            {'★'.repeat(5 - pick.confidence)}
-          </span>
-        </span>
-      </div>
-
-      <div className="mt-4 grid grid-cols-3 gap-2">
-        {(['tail', 'fade', 'pass'] as VoteValue[]).map((v) => {
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {(['tail', 'fade'] as VoteValue[]).map((v) => {
           const active = pick.my_vote === v;
           const count = pick.counts[v];
           const disabled = pick.locked || pending !== null || pick.result === 'scratched';
@@ -99,9 +107,7 @@ export function PickCard({ pick, isAuthed, onRequireAuth }: PickCardProps) {
           const tone = active
             ? v === 'tail'
               ? 'bg-mint-julep text-cream border-mint-julep'
-              : v === 'fade'
-                ? 'bg-rose-red text-cream border-rose-red'
-                : 'bg-bourbon text-cream border-bourbon'
+              : 'bg-rose-red text-cream border-rose-red'
             : 'bg-cream border-bourbon/20 hover:border-rose-red';
           return (
             <button
@@ -124,27 +130,21 @@ export function PickCard({ pick, isAuthed, onRequireAuth }: PickCardProps) {
         </p>
       )}
 
-      {total > 0 && (
-        <details className="mt-3">
-          <summary className="text-xs text-bourbon/70 cursor-pointer select-none">
-            Who voted ({total})
-          </summary>
-          <div className="mt-2 grid sm:grid-cols-3 gap-2 text-xs">
-            {(['tail', 'fade', 'pass'] as VoteValue[]).map((v) => (
-              <div key={v}>
-                <div className="font-semibold capitalize text-bourbon">
-                  {v} ({pick.counts[v]})
-                </div>
-                <ul className="text-bourbon/80">
-                  {pick.voters[v].map((voter) => (
-                    <li key={`${v}-${voter.username}`}>@{voter.username}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </details>
-      )}
+      <div className="mt-3 flex items-center justify-between text-xs">
+        {rationaleHref ? (
+          <Link
+            href={rationaleHref}
+            className="text-rose-red hover:underline font-semibold"
+          >
+            View rationale →
+          </Link>
+        ) : <span />}
+        {tailFadeTotal > 0 && (
+          <span className="text-bourbon/60">
+            {tailFadeTotal} {tailFadeTotal === 1 ? 'vote' : 'votes'}
+          </span>
+        )}
+      </div>
     </article>
   );
 }
