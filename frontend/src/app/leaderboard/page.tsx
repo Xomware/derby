@@ -70,12 +70,15 @@ export default function LeaderboardPage() {
 
   const rowsWithGrant = useMemo(() => {
     const userRows = leaderboard?.rows ?? [];
-    if (!grantPicks) return userRows;
+    // Suppress any user account Grant himself signed up with — his picks are
+    // already shown as the synthetic top "Grant" row, so showing his
+    // pool entry as a second row would just duplicate.
+    const isGrantAlias = (u: string) =>
+      ['GRANT', 'GTATICH'].includes(u.toUpperCase());
+    const filteredUsers = userRows.filter((r) => !isGrantAlias(r.username));
+    if (!grantPicks) return filteredUsers;
     const grantRow = scoreGrantRow(grantPicks, finishers, oddsByHorse);
-    const combined: LeaderboardRow[] = [
-      grantRow,
-      ...userRows.filter((r) => r.username !== 'GRANT'),
-    ];
+    const combined: LeaderboardRow[] = [grantRow, ...filteredUsers];
     combined.sort((a, b) => b.score - a.score || a.username.localeCompare(b.username));
     return combined.map((r, i) => ({ ...r, rank: i + 1 }));
   }, [leaderboard, grantPicks, finishers, oddsByHorse]);
