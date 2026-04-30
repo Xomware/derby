@@ -51,6 +51,12 @@ variable "poll_enabled" {
   default = false
 }
 
+variable "odds_cron_enabled" {
+  description = "Hourly cron that scrapes Derby + Oaks odds. Auto-skips a race once it's been run."
+  type        = bool
+  default     = true
+}
+
 variable "poll_window_start_utc" {
   type    = string
   default = "2026-05-02T16:00:00Z"

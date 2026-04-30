@@ -29,6 +29,7 @@ locals {
     COMMENTS_TABLE        = aws_dynamodb_table.comments.id
     ADMIN_TOKEN           = var.admin_token
     POLL_ENABLED          = var.poll_enabled ? "true" : "false"
+    ODDS_CRON_YEAR        = "2026"
     POLL_WINDOW_START_UTC = var.poll_window_start_utc
     POLL_WINDOW_END_UTC   = var.poll_window_end_utc
     POLL_PROVIDER         = var.poll_provider
