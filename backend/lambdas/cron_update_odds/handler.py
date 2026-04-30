@@ -28,6 +28,9 @@ from bs4 import BeautifulSoup
 import json
 import uuid
 
+import boto3
+
+from lambdas.common.constants import APP_NAME, AWS_DEFAULT_REGION
 from lambdas.common.dynamo_helpers import (
     picks_table,
     poll_runs_table,
@@ -203,6 +206,20 @@ def handler(event, context):  # pragma: no cover — exercised in AWS
             "matched": len(odds_map),
             "updated": updated,
         }
+
+    # If both events are over the cron has nothing left to do — flip the
+    # EventBridge rule off so we stop firing every 15 minutes for nothing.
+    derby_done = bool(summary.get("derby", {}).get("skipped"))
+    oaks_done = bool(summary.get("oaks", {}).get("skipped"))
+    if derby_done and oaks_done:
+        try:
+            events = boto3.client("events", region_name=AWS_DEFAULT_REGION)
+            rule_name = f"{APP_NAME}-odds-schedule"
+            events.disable_rule(Name=rule_name)
+            summary["_self"] = {"disabled_rule": rule_name}
+            log.info("odds_cron_self_disabled", extra={"rule": rule_name})
+        except Exception as exc:  # pragma: no cover
+            log.warning("odds_cron_self_disable_failed", extra={"error": str(exc)})
 
     log.info("odds_cron_run", extra={"started": started, "summary": summary})
 

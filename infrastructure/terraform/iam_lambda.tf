@@ -106,6 +106,18 @@ data "aws_iam_policy_document" "lambda_role_policy" {
     actions   = ["xray:PutTraceSegments", "xray:PutTelemetryRecords"]
     resources = ["*"]
   }
+
+  # Odds cron self-disables once both races finish.
+  statement {
+    effect = "Allow"
+    actions = [
+      "events:DisableRule",
+      "events:DescribeRule",
+    ]
+    resources = [
+      "arn:aws:events:${var.aws_region}:${local.web_app_account_id}:rule/${var.app_name}-odds-schedule",
+    ]
+  }
 }
 
 resource "aws_iam_role_policy" "lambda_role_policy" {

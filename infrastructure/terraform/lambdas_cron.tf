@@ -72,10 +72,14 @@ resource "aws_lambda_function" "cron_update_odds" {
 
 resource "aws_cloudwatch_event_rule" "odds_schedule" {
   name                = "${var.app_name}-odds-schedule"
-  description         = "Hourly odds refresh for ${var.app_name}"
-  schedule_expression = "rate(1 hour)"
+  description         = "Quarter-hour odds refresh for ${var.app_name}; lambda auto-disables this rule once both races are official."
+  schedule_expression = "rate(15 minutes)"
   is_enabled          = var.odds_cron_enabled
   tags                = local.standard_tags
+
+  # Lambda flips this rule off once both Derby + Oaks results post; let
+  # Terraform stay out of its way after creation.
+  lifecycle { ignore_changes = [is_enabled] }
 }
 
 resource "aws_cloudwatch_event_target" "odds_target" {
