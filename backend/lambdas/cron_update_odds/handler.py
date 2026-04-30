@@ -74,6 +74,7 @@ SOURCES: dict[str, list[str]] = {
 LOOKAHEAD_CHARS = 1800
 
 ODDS_RE = re.compile(r"\b(\d{1,3})\s*[-/]\s*(\d{1,3})\b")
+SCR_RE = re.compile(r"\bSCR\b")
 
 
 def _normalize(name: str) -> str:
@@ -107,15 +108,19 @@ def _looks_like_odds(num: int, denom: int) -> bool:
     return True
 
 
-def _scrape_page(url: str, field: list[str]) -> dict[str, str]:
-    """Try to extract horse → odds map from one URL.
+def _scrape_page(url: str, field: list[str]) -> dict[str, dict]:
+    """Try to extract horse → status map from one URL.
+
+    Each entry is one of:
+      {"odds": "5-1"}   - horse is in the field with a live odds line
+      {"scratched": True} - kentuckyderby.com marks SCR in the odds column
 
     Strategy: fetch HTML, strip tags, then for each horse name we know is
-    in the field, look in a small window of text after each occurrence for
-    an odds-shaped token. Robust to CSS reshuffles since we don't depend
-    on selectors.
+    in the field, look in a small window of text after each occurrence
+    for either an SCR token or an odds-shaped token. Whichever appears
+    first wins.
     """
-    out: dict[str, str] = {}
+    out: dict[str, dict] = {}
     try:
         resp = requests.get(url, timeout=10, headers={"User-Agent": USER_AGENT})
         resp.raise_for_status()
@@ -135,17 +140,27 @@ def _scrape_page(url: str, field: list[str]) -> dict[str, str]:
         if idx == -1:
             continue
         window = text[idx + len(target) : idx + len(target) + LOOKAHEAD_CHARS]
+
+        scr = SCR_RE.search(window)
+        odds = None
         for m in ODDS_RE.finditer(window):
             n, d = int(m.group(1)), int(m.group(2))
             if _looks_like_odds(n, d):
-                out[horse] = f"{n}-{d}"
+                odds = (m.start(), f"{n}-{d}")
                 break
+
+        # If SCR appears before any plausible odds token, the horse is
+        # scratched. Otherwise take the odds.
+        if scr and (odds is None or scr.start() < odds[0]):
+            out[horse] = {"scratched": True}
+        elif odds is not None:
+            out[horse] = {"odds": odds[1]}
 
     return out
 
 
-def _scrape_event_odds(field: list[str], urls: list[str]) -> dict[str, str]:
-    merged: dict[str, str] = {}
+def _scrape_event_status(field: list[str], urls: list[str]) -> dict[str, dict]:
+    merged: dict[str, dict] = {}
     for url in urls:
         if len(merged) >= len(field):
             break
@@ -155,37 +170,61 @@ def _scrape_event_odds(field: list[str], urls: list[str]) -> dict[str, str]:
     return merged
 
 
-def _update_picks(picks: list[dict], odds_map: dict[str, str]) -> int:
-    updated = 0
+def _update_picks(picks: list[dict], status_map: dict[str, dict]) -> dict[str, int]:
+    """Returns counters: {'odds_updated': n, 'newly_scratched': n}."""
+    odds_updated = 0
+    newly_scratched = 0
     now = iso_now()
+
     for p in picks:
-        # Don't refresh odds for scratched horses — their odds line should
-        # stay frozen at whatever it was when they got pulled.
+        status = status_map.get(p.get("horse_name", ""))
+        if not status:
+            continue
+
+        # Auto-scratch detection.
+        if status.get("scratched"):
+            if p.get("scratched"):
+                continue  # already known
+            try:
+                picks_table.update_item(
+                    Key={"id": p["id"]},
+                    UpdateExpression="SET scratched = :t, scratched_at = :n",
+                    ExpressionAttributeValues={":t": True, ":n": now},
+                    ConditionExpression="attribute_exists(id)",
+                )
+                newly_scratched += 1
+                log.info(
+                    "odds_cron_auto_scratched",
+                    extra={"pick_id": p["id"], "horse_name": p.get("horse_name")},
+                )
+            except Exception as exc:  # pragma: no cover
+                log.warning(
+                    "odds_cron_scratch_failed",
+                    extra={"pick_id": p["id"], "error": str(exc)},
+                )
+            continue
+
+        # Odds update for non-scratched horses.
         if p.get("scratched"):
             continue
-        new_odds = odds_map.get(p.get("horse_name", ""))
-        if not new_odds:
-            continue
-        if new_odds == p.get("odds_at_pick"):
+        new_odds = status.get("odds")
+        if not new_odds or new_odds == p.get("odds_at_pick"):
             continue
         try:
             picks_table.update_item(
                 Key={"id": p["id"]},
                 UpdateExpression="SET odds_at_pick = :o, odds_updated_at = :n, odds_source = :s",
-                ExpressionAttributeValues={
-                    ":o": new_odds,
-                    ":n": now,
-                    ":s": "cron",
-                },
+                ExpressionAttributeValues={":o": new_odds, ":n": now, ":s": "cron"},
                 ConditionExpression="attribute_exists(id)",
             )
-            updated += 1
+            odds_updated += 1
         except Exception as exc:  # pragma: no cover
             log.warning(
                 "odds_cron_update_failed",
                 extra={"pick_id": p["id"], "error": str(exc)},
             )
-    return updated
+
+    return {"odds_updated": odds_updated, "newly_scratched": newly_scratched}
 
 
 @handle_errors(HANDLER)
@@ -207,13 +246,16 @@ def handler(event, context):  # pragma: no cover — exercised in AWS
             continue
 
         field = sorted({p["horse_name"] for p in picks if p.get("horse_name")})
-        odds_map = _scrape_event_odds(field, urls)
-        updated = _update_picks(picks, odds_map)
+        status_map = _scrape_event_status(field, urls)
+        counts = _update_picks(picks, status_map)
 
+        scratched_seen = sum(1 for v in status_map.values() if v.get("scratched"))
         summary[kind] = {
             "field_size": len(field),
-            "matched": len(odds_map),
-            "updated": updated,
+            "matched": len(status_map),
+            "updated": counts["odds_updated"],
+            "scratched_seen": scratched_seen,
+            "newly_scratched": counts["newly_scratched"],
         }
 
     # If both events are over the cron has nothing left to do — flip the
