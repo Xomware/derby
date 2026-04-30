@@ -47,6 +47,11 @@ log = get_logger(__name__)
 CURRENT_YEAR = int(os.environ.get("ODDS_CRON_YEAR", "2026"))
 PICKS_EVENT_INDEX = "event-index"
 
+# Safety net: even if admin never enters official results, the cron stops
+# firing after this UTC timestamp. 2026-05-02 8:00 PM ET == 2026-05-03
+# 00:00 UTC.
+SAFE_KILL_AT = os.environ.get("ODDS_CRON_KILL_AT", "2026-05-03T00:00:00+00:00")
+
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/120.0 Safari/537.36 SunGodDerbyBot"
@@ -209,9 +214,20 @@ def handler(event, context):  # pragma: no cover — exercised in AWS
 
     # If both events are over the cron has nothing left to do — flip the
     # EventBridge rule off so we stop firing every 15 minutes for nothing.
+    # Also flip it off if we're past the hard safety cutoff (defaults to
+    # 8 PM ET on Derby Saturday) regardless of result-entry state.
     derby_done = bool(summary.get("derby", {}).get("skipped"))
     oaks_done = bool(summary.get("oaks", {}).get("skipped"))
-    if derby_done and oaks_done:
+    past_kill_time = False
+    try:
+        kill_at = datetime.fromisoformat(SAFE_KILL_AT)
+        past_kill_time = datetime.now(timezone.utc) >= kill_at
+        if past_kill_time:
+            summary["_kill_switch"] = f"past safety cutoff {SAFE_KILL_AT}"
+    except Exception:  # pragma: no cover
+        pass
+
+    if (derby_done and oaks_done) or past_kill_time:
         try:
             events = boto3.client("events", region_name=AWS_DEFAULT_REGION)
             rule_name = f"{APP_NAME}-odds-schedule"

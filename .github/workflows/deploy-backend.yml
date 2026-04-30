@@ -229,13 +229,14 @@ jobs:
           # Layer attachment. Use the freshly-published layer when common
           # changed; otherwise fall back to the latest published version so
           # new lambdas (which Terraform creates with layer:1) get the real
-          # one. Without this, a new lambda added in a commit that doesn't
-          # touch lambdas/common/ ends up stuck on the empty stub layer.
+          # one. (--no-paginate keeps the AWS CLI from emitting a NextToken
+          # on a second line when there are more layer versions than the
+          # default page size.)
           LAYER="${{ needs.deploy-layer.outputs.layer_arn }}"
           if [ -z "$LAYER" ]; then
             LAYER=$(aws lambda list-layer-versions \
               --layer-name ${APP_NAME}-shared-packages \
-              --max-items 1 --region $AWS_REGION \
+              --region $AWS_REGION --no-paginate \
               --query 'LayerVersions[0].LayerVersionArn' --output text)
           fi
           if [ -n "$LAYER" ] && [ "$LAYER" != "None" ]; then
