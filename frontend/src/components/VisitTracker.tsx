@@ -17,7 +17,7 @@ export function VisitTracker() {
 
   useEffect(() => {
     if (!username || !pathname) return;
-    if (pathname.startsWith('/results/admin')) return;
+    if (pathname.startsWith('/results/admin') || pathname.startsWith('/admin')) return;
 
     const pageKey = `${pathname}${params?.toString() ? `?${params}` : ''}`;
     const fingerprint = `${username}::${pageKey}`;

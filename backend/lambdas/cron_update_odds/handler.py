@@ -168,7 +168,7 @@ def _fetch_twinspires(kind: str) -> dict[str, dict]:
         post = (entry.get("ProgramNumber") or "").strip() or None
 
         if _is_scratched_entry(entry):
-            out[key] = {"scratched": True, "post_position": post}
+            out[key] = {"scratched": True, "post_position": post, "name": name}
             continue
 
         text_odds = (entry.get("mtp") or {}).get("TextOdds")
@@ -181,6 +181,7 @@ def _fetch_twinspires(kind: str) -> dict[str, dict]:
             continue
 
         out[key] = {
+            "name": name,
             "odds": odds,
             "jockey": (entry.get("Jockey") or "").strip() or None,
             "trainer": (entry.get("Trainer") or "").strip() or None,
@@ -302,6 +303,100 @@ def _update_picks(picks: list[dict], status_map: dict[str, dict]) -> dict[str, i
     return counters
 
 
+def _writeup_for_late_add(picks: list[dict]) -> str:
+    """Produce a short, dismissive writeup that names the most recently
+    scratched horse(s). Falls back to a generic line if we can't find any.
+    """
+    scratched = [p for p in picks if p.get("scratched") and p.get("horse_name")]
+    if not scratched:
+        return "Added late after the field shifted. Not worth your time."
+    # Prefer most recently scratched (by scratched_at) so the writeup tracks
+    # the actual trigger when one is available.
+    scratched.sort(key=lambda p: p.get("scratched_at") or "", reverse=True)
+    names = []
+    for p in scratched:
+        name = p["horse_name"]
+        if name not in names:
+            names.append(name)
+        if len(names) == 2:
+            break
+    if len(names) == 1:
+        return f"Added because {names[0]} got scratched. Not worth your time."
+    return f"Added because {names[0]} and {names[1]} got scratched. Not worth your time."
+
+
+def _add_late_horses(
+    event_id: str,
+    race_number: int,
+    picks: list[dict],
+    status_map: dict[str, dict],
+) -> int:
+    """Insert picks rows for horses TwinSpires lists but we don't track yet.
+
+    Returns count of horses added. Skips entries flagged scratched.
+    """
+    if not picks:
+        return 0
+    # Cron only runs after at least one pick exists for the event, so picks[0]
+    # is guaranteed and gives us the post time we need to copy onto new rows.
+    template = picks[0]
+    race_post_time = template.get("race_post_time")
+    if not race_post_time:
+        log.warning(
+            "odds_cron_no_template_post_time",
+            extra={"event_id": event_id, "template_id": template.get("id")},
+        )
+        return 0
+
+    existing_keys = {_normalize(p["horse_name"]) for p in picks if p.get("horse_name")}
+    writeup = _writeup_for_late_add(picks)
+    now = iso_now()
+    added = 0
+
+    for key, status in status_map.items():
+        if key in existing_keys or status.get("scratched"):
+            continue
+        horse_name = status.get("name")
+        if not horse_name:
+            continue
+        item: dict = {
+            "id": str(uuid.uuid4()),
+            "event_id": event_id,
+            "race_number": race_number,
+            "race_post_time": race_post_time,
+            "horse_name": horse_name,
+            "odds_at_pick": status.get("odds"),
+            "odds_source": "cron",
+            "odds_updated_at": now,
+            "writeup": writeup,
+            "result": "pending",
+            "confidence": 3,
+            "display_order": 0,
+            "scratched": False,
+            "created_at": now,
+            "updated_at": now,
+            "added_by": "cron",
+        }
+        for field in ("jockey", "trainer", "post_position"):
+            v = status.get(field)
+            if v:
+                item[field] = v
+        try:
+            picks_table.put_item(Item=item)
+            added += 1
+            log.info(
+                "odds_cron_added_late_horse",
+                extra={"event_id": event_id, "horse_name": horse_name, "post": item.get("post_position")},
+            )
+        except Exception as exc:  # pragma: no cover
+            log.warning(
+                "odds_cron_add_failed",
+                extra={"horse_name": horse_name, "error": str(exc)},
+            )
+
+    return added
+
+
 @handle_errors(HANDLER)
 def handler(event, context):  # pragma: no cover — exercised in AWS
     summary: dict[str, dict] = {}
@@ -326,6 +421,9 @@ def handler(event, context):  # pragma: no cover — exercised in AWS
             continue
 
         counts = _update_picks(picks, status_map)
+        # Run the scratched-flag updates above first so _writeup_for_late_add
+        # sees the freshest scratched_at timestamps when attributing the add.
+        added = _add_late_horses(event_id, race_number, picks, status_map)
         scratched_seen = sum(1 for v in status_map.values() if v.get("scratched"))
         unique_horses = {p["horse_name"] for p in picks if p.get("horse_name")}
         matched = sum(1 for h in unique_horses if _normalize(h) in status_map)
@@ -334,6 +432,7 @@ def handler(event, context):  # pragma: no cover — exercised in AWS
             "field_size": len(unique_horses),
             "matched": matched,
             "scratched_seen": scratched_seen,
+            "newly_added": added,
             **counts,
         }
 

@@ -95,7 +95,7 @@ export function SiteHeader() {
             {username && <YearSelector className="hidden sm:inline-flex" />}
             {username && ['DOM', 'GRANT', 'GTATICH'].includes(username.toUpperCase()) && (
               <Link
-                href="/results/admin"
+                href="/admin"
                 className="hidden sm:inline-flex text-xs px-2.5 py-1 rounded-full border border-rose-red/40 text-rose-dark bg-rose-red/5 hover:bg-rose-red/10 font-semibold"
                 title="Admin"
               >
