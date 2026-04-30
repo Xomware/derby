@@ -103,7 +103,13 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
-  adminVisits: (body: { admin_token: string; days?: number; limit?: number }) =>
+  adminVisits: (body: {
+    admin_token: string;
+    days?: number;
+    limit?: number;
+    filter_user?: string | null;
+    filter_page?: string | null;
+  }) =>
     request<AdminVisitsResponse>('/admin-visits/stats', {
       method: 'POST',
       body: JSON.stringify(body),
@@ -125,6 +131,7 @@ export interface AdminCronRunsResponse {
 export interface AdminVisitsResponse {
   total_visits: number;
   unique_visitors: number;
+  filtered_count: number;
   by_day: { day: string; count: number }[];
   top_pages: { page: string; count: number }[];
   top_users: { username: string; count: number }[];
@@ -134,7 +141,16 @@ export interface AdminVisitsResponse {
     last_seen: string | null;
     pages: { page: string; count: number }[];
   }[];
-  recent: { username: string | null; page: string; ts: string; referrer: string | null }[];
+  recent: {
+    username: string | null;
+    page: string;
+    ts: string;
+    referrer: string | null;
+    ip: string | null;
+    user_agent: string | null;
+  }[];
+  filter_user: string | null;
+  filter_page: string | null;
 }
 
 export interface Prediction {
