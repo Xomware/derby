@@ -26,10 +26,11 @@ const SLOTS: { key: 'win' | 'place' | 'show' | 'long_shot'; label: string }[] = 
 ];
 
 const POSITION_LABEL: Record<number, string> = { 1: 'Win', 2: 'Place', 3: 'Show' };
+const POSITION_MEDAL: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
 const POSITION_TONE: Record<number, string> = {
-  1: 'bg-rose-red/10 border-rose-red/30',
-  2: 'bg-mint-julep/10 border-mint-julep/30',
-  3: 'bg-bourbon/5 border-bourbon/20',
+  1: 'bg-amber-100/60 border-amber-400/40',
+  2: 'bg-slate-100/70 border-slate-400/40',
+  3: 'bg-orange-100/60 border-orange-500/40',
 };
 
 const GRANT_ALIASES = new Set(['GRANT', 'GTATICH']);
@@ -250,6 +251,13 @@ export default function ResultsPage() {
 
       {sorted.length > 0 && (
         <div className="rounded-xl border border-bourbon/15 bg-white overflow-hidden">
+          <div className="hidden sm:grid grid-cols-[11rem_1fr_1fr_1fr_1fr] gap-2 bg-bourbon/5 border-b border-bourbon/15 px-3 sm:px-4 py-2 text-[10px] uppercase tracking-wider font-semibold text-bourbon/70">
+            <div>Horse</div>
+            <div>Win picks</div>
+            <div>Place picks</div>
+            <div>Show picks</div>
+            <div>Long shot picks</div>
+          </div>
           <ol className="divide-y divide-bourbon/10">
             {sorted.map((h) => (
               <HorseTallyRow
@@ -266,6 +274,30 @@ export default function ResultsPage() {
         </div>
       )}
     </section>
+  );
+}
+
+function VoterIcon({ open }: { open: boolean }) {
+  if (open) {
+    return (
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+        <path
+          d="M4 4l8 8M12 4l-8 8"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          fill="none"
+        />
+      </svg>
+    );
+  }
+  // Three-dots-in-rose-red rosette — picks up the derby motif.
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+      <circle cx="3.5" cy="8" r="1.5" fill="currentColor" />
+      <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+      <circle cx="12.5" cy="8" r="1.5" fill="currentColor" />
+    </svg>
   );
 }
 
@@ -288,28 +320,40 @@ function HorseTallyRow({
     'win' | 'place' | 'show' | 'long_shot' | null
   >(null);
 
-  const tone = position && position <= 3 ? POSITION_TONE[position] : '';
+  const tone = official && position && position <= 3 ? POSITION_TONE[position] : '';
+
+  // Top 3 → medal emoji. Other finishers → "#N". Pre-official horses → just
+  // their post position so it's visually distinct from finish numbers.
+  let badge: React.ReactNode;
+  if (official && position && position <= 3) {
+    badge = (
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full bg-white border border-bourbon/15 px-2 py-0.5 text-xs font-bold tracking-wide shrink-0"
+        title={POSITION_LABEL[position]}
+      >
+        <span className="text-base leading-none" aria-hidden>{POSITION_MEDAL[position]}</span>
+        <span className="text-bourbon">{POSITION_LABEL[position]}</span>
+      </span>
+    );
+  } else if (official && position) {
+    badge = (
+      <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-bourbon/15 text-bourbon shrink-0">
+        {position}th
+      </span>
+    );
+  } else {
+    badge = (
+      <span className="text-[10px] uppercase tracking-wider font-mono px-2 py-0.5 rounded bg-bourbon/10 text-bourbon/70 shrink-0">
+        Post {horse.post_position ?? '?'}
+      </span>
+    );
+  }
 
   return (
     <li className={`p-3 sm:p-4 ${tone}`}>
-      <div className="flex items-start gap-3 flex-wrap sm:flex-nowrap">
-        <div className="flex items-center gap-2 sm:w-44 shrink-0">
-          {official && position ? (
-            <span
-              className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded ${
-                position <= 3
-                  ? 'bg-rose-red text-cream'
-                  : 'bg-bourbon/20 text-bourbon'
-              }`}
-              title={position <= 3 ? POSITION_LABEL[position] : `Finished ${position}`}
-            >
-              {position <= 3 ? POSITION_LABEL[position] : `#${position}`}
-            </span>
-          ) : (
-            <span className="font-mono text-bourbon/60 text-xs w-8 shrink-0">
-              {horse.post_position != null ? `#${horse.post_position}` : '—'}
-            </span>
-          )}
+      <div className="grid sm:grid-cols-[11rem_1fr_1fr_1fr_1fr] gap-2 sm:gap-2 items-start">
+        <div className="flex items-center gap-2 min-w-0">
+          {badge}
           <div className="min-w-0">
             <div className="font-semibold text-bourbon truncate">{horse.name}</div>
             {horse.odds && (
@@ -318,43 +362,45 @@ function HorseTallyRow({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 flex-1 min-w-0">
-          {SLOTS.map((s) => {
-            const slot = tally?.[s.key];
-            const count = showCounts ? slot?.count ?? 0 : null;
-            const expanded = expandedSlot === s.key;
-            const canExpand = showVoters && (slot?.voters?.length ?? 0) > 0;
-            return (
-              <div key={s.key} className="rounded-md border border-bourbon/15 bg-cream/40 px-2 py-1.5">
-                <div className="text-[10px] uppercase tracking-wider text-bourbon/60 font-semibold">
-                  {s.label}
-                </div>
-                <div className="flex items-center justify-between gap-1 mt-0.5">
-                  <span className="text-sm font-bold text-bourbon">
-                    {count === null ? '?' : count}
-                  </span>
-                  {canExpand && (
-                    <button
-                      type="button"
-                      onClick={() => setExpandedSlot(expanded ? null : s.key)}
-                      aria-label={`Show voters for ${s.label}`}
-                      className="text-[11px] text-bourbon/60 hover:text-rose-red"
-                    >
-                      {expanded ? '×' : '👥'}
-                    </button>
-                  )}
-                </div>
-                {expanded && slot && slot.voters.length > 0 && (
-                  <ul className="mt-1.5 text-[11px] text-bourbon/80 space-y-0.5">
-                    {slot.voters.map((v) => (
-                      <li key={v} className="truncate">{v}</li>
-                    ))}
-                  </ul>
+        {SLOTS.map((s) => {
+          const slot = tally?.[s.key];
+          const count = showCounts ? slot?.count ?? 0 : null;
+          const expanded = expandedSlot === s.key;
+          const canExpand = showVoters && (slot?.voters?.length ?? 0) > 0;
+          return (
+            <div
+              key={s.key}
+              className="rounded-md border border-bourbon/15 bg-cream/40 px-2 py-1.5"
+            >
+              <div className="sm:hidden text-[10px] uppercase tracking-wider text-bourbon/60 font-semibold">
+                {s.label}
+              </div>
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-sm font-bold text-bourbon tabular-nums">
+                  {count === null ? '?' : count}
+                </span>
+                {canExpand && (
+                  <button
+                    type="button"
+                    onClick={() => setExpandedSlot(expanded ? null : s.key)}
+                    aria-label={`${expanded ? 'Hide' : 'Show'} voters for ${s.label}`}
+                    title={expanded ? 'Hide voters' : 'Show voters'}
+                    className="grid place-items-center w-5 h-5 rounded-full text-rose-red hover:bg-rose-red/10 transition"
+                  >
+                    <VoterIcon open={expanded} />
+                  </button>
                 )}
               </div>
-            );
-          })}
-        </div>
+              {expanded && slot && slot.voters.length > 0 && (
+                <ul className="mt-1.5 text-[11px] text-bourbon/80 space-y-0.5">
+                  {slot.voters.map((v) => (
+                    <li key={v} className="truncate">{v}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })}
       </div>
     </li>
   );
