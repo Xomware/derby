@@ -50,6 +50,6 @@ def handler(event, context):
         "post_time": post_time_for_event(event_id),
         "locked": locked,
         "my": my,
-        "others": others if locked else [],
+        "others": others,
         "others_count": len(others),
     })

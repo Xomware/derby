@@ -1,11 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CommentsBlock } from '@/components/CommentsBlock';
-import { Countdown } from '@/components/Countdown';
 import { LeaderboardTable } from '@/components/LeaderboardTable';
 import {
-  useComments,
   useGrantPicks,
   useLeaderboard,
   usePicks,
@@ -33,17 +30,10 @@ export default function LeaderboardPage() {
   }, []);
 
   const { leaderboard, isLoading, year } = useLeaderboard(undefined, kind);
-  const {
-    comments,
-    refresh: refreshComments,
-    eventId: commentsEventId,
-  } = useComments(kind);
   const { picks } = usePicks(kind);
   const { results } = useResults(year);
   const { grantPicks } = useGrantPicks(kind);
   const isArchive = year !== CURRENT_YEAR;
-
-  const hidePicks = !leaderboard?.locked;
   const showScores = !!leaderboard?.finished;
 
   const mainRaceNumber = kind === 'derby' ? 12 : 11;
@@ -54,8 +44,6 @@ export default function LeaderboardPage() {
     [results, kind, mainRaceNumber]
   );
 
-  // Collect odds for every horse in the field — used both to label the pick
-  // cells (`Renegade (5-1)`) and to score Grant's synthetic row.
   const oddsByHorse = useMemo(() => {
     const m = new Map<string, string>();
     for (const r of picks?.races ?? []) {
@@ -70,9 +58,6 @@ export default function LeaderboardPage() {
 
   const rowsWithGrant = useMemo(() => {
     const userRows = leaderboard?.rows ?? [];
-    // Suppress any user account Grant himself signed up with — his picks are
-    // already shown as the synthetic top "Grant" row, so showing his
-    // pool entry as a second row would just duplicate.
     const isGrantAlias = (u: string) =>
       ['GRANT', 'GTATICH'].includes(u.toUpperCase());
     const filteredUsers = userRows.filter((r) => !isGrantAlias(r.username));
@@ -90,11 +75,9 @@ export default function LeaderboardPage() {
           {isArchive ? `${year} Leaderboard` : 'Leaderboard'}
         </h1>
         <p className="text-bourbon/80 text-sm mt-1">
-          {hidePicks
-            ? "Other players' picks are hidden until the race goes off."
-            : showScores
+          {showScores
             ? 'Final scoring — picks judged by Grant’s odds rules.'
-            : 'Picks revealed — locked in. Scoring lights up once the race goes official.'}
+            : 'Everyone’s picks are open. Scoring lights up once the race goes official.'}
         </p>
         <details className="mt-2">
           <summary className="text-xs text-bourbon/70 cursor-pointer hover:text-rose-red select-none">
@@ -135,33 +118,14 @@ export default function LeaderboardPage() {
         })}
       </nav>
 
-      {hidePicks && leaderboard?.post_time && !isArchive && (
-        <div className="rounded-md border border-rose-red/30 bg-rose-red/5 px-3 py-2 flex flex-wrap items-center gap-3 text-sm">
-          <span className="text-bourbon/80">
-            Picks reveal at post time:
-          </span>
-          <Countdown target={leaderboard.post_time} label="Reveal" />
-        </div>
-      )}
-
       {isLoading && <p className="text-bourbon/70">Loading…</p>}
       {leaderboard && (
         <LeaderboardTable
           rows={rowsWithGrant}
           highlightUsername={username}
-          hidePicks={hidePicks}
+          hidePicks={false}
           showScores={showScores}
           oddsByHorse={oddsByHorse}
-        />
-      )}
-
-      {!isArchive && (
-        <CommentsBlock
-          eventId={commentsEventId}
-          comments={comments}
-          username={username}
-          onPosted={() => void refreshComments()}
-          onDeleted={() => void refreshComments()}
         />
       )}
     </section>

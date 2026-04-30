@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Countdown } from '@/components/Countdown';
+import { SunGodDisclaimer } from '@/components/SunGodDisclaimer';
 import { usePicks } from '@/lib/hooks';
 import { CURRENT_YEAR } from '@/lib/year';
 
@@ -40,6 +41,7 @@ export default function Home() {
 
   return (
     <section className="pt-8 pb-12 flex flex-col items-center text-center">
+      <SunGodDisclaimer />
       <video
         src="/sungod.mp4"
         poster="/sungod-poster.jpg"

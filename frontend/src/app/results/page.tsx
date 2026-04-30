@@ -80,10 +80,8 @@ export default function ResultsPage() {
       ?.finishers ?? [];
   const official = finishers.length > 0;
   const lockTime = predictions?.post_time ?? picks?.races[0]?.lock_time ?? null;
-  // Archive years: race is in the past, so counts + voters are always visible
-  // (Grant's row is the only "voter" for archive). Current year: gate on
-  // predictions endpoint's lock signal.
-  const locked = isArchive ? true : predictions?.locked ?? false;
+  // Pool counts + voters are always visible (Grant: no more question marks).
+  const locked = true;
 
   // Derive horse list — DDB picks for current year, archive horses (Grant's
   // static JSON) for historical years.
