@@ -26,10 +26,13 @@ export function useMe() {
   return { me: data ?? null, error, isLoading, refresh: mutate };
 }
 
-export function usePicks() {
+export const EVENT_DERBY = '2026-kentucky-derby';
+export const EVENT_OAKS = '2026-kentucky-oaks';
+
+export function usePicks(eventId: string = EVENT_DERBY) {
   const { data, error, isLoading, mutate } = useSWR<PicksGrouped>(
-    'picks',
-    () => api.picks(),
+    ['picks', eventId],
+    () => api.picks(eventId),
     { refreshInterval: 30_000 }
   );
   return { picks: data, error, isLoading, refresh: mutate };

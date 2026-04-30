@@ -58,7 +58,10 @@ export const api = {
     request<void>('/track/visit', { method: 'POST', body: JSON.stringify({ page }) }),
 
   // picks
-  picks: () => request<PicksGrouped>('/picks/list'),
+  picks: (eventId?: string) => {
+    const qs = eventId ? `?event_id=${encodeURIComponent(eventId)}` : '';
+    return request<PicksGrouped>(`/picks/list${qs}`);
+  },
   pick: (id: string) => request<Pick>(`/picks/${encodeURIComponent(id)}`),
 
   // votes

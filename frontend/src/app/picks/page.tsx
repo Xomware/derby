@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import { Countdown } from '@/components/Countdown';
 import { PickCard } from '@/components/PickCard';
 import { GuestVoteGate } from '@/components/GuestVoteGate';
-import { useMe, usePicks } from '@/lib/hooks';
+import { EventTabs } from '@/components/EventTabs';
+import { EVENT_DERBY, useMe, usePicks } from '@/lib/hooks';
 import { useGuestName } from '@/lib/guest';
 
 export default function PicksPage() {
-  const { picks, isLoading, error } = usePicks();
+  const [eventId, setEventId] = useState<string>(EVENT_DERBY);
+  const { picks, isLoading, error } = usePicks(eventId);
   const { me } = useMe();
   const guestName = useGuestName();
   const router = useRouter();
@@ -27,7 +29,7 @@ export default function PicksPage() {
 
   return (
     <>
-      <section className="pt-8 space-y-8">
+      <section className="pt-8 space-y-6">
         <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div>
             <h1 className="font-display text-3xl text-rose-dark">Picks</h1>
@@ -41,6 +43,8 @@ export default function PicksPage() {
             </div>
           )}
         </header>
+
+        <EventTabs active={eventId} onChange={setEventId} />
 
         {guestName && (
           <div className="rounded-lg border border-mint-julep/40 bg-mint-julep/10 px-4 py-2 text-sm text-bourbon">
@@ -75,7 +79,9 @@ export default function PicksPage() {
           picks.races.map((race) => (
             <section key={race.race_number}>
               <header className="flex items-baseline justify-between mb-3">
-                <h2 className="font-display text-2xl text-rose-dark">Race {race.race_number}</h2>
+                <h2 className="font-display text-2xl text-rose-dark">
+                  {eventId === EVENT_DERBY ? 'Kentucky Derby' : 'Kentucky Oaks'}
+                </h2>
                 <Countdown target={race.lock_time} label="Lock" />
               </header>
               <div className="grid sm:grid-cols-2 gap-4">
