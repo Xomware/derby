@@ -22,7 +22,7 @@ def verify_password(plaintext: str, hashed: str) -> bool:
         return False
 
 
-MIN_PASSWORD_LENGTH = 8
+MIN_PASSWORD_LENGTH = 4
 MAX_PASSWORD_LENGTH = 128
 
 

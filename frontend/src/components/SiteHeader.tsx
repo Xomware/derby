@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useMe } from '@/lib/hooks';
+import { clearGuestName, useGuestName } from '@/lib/guest';
 import { ProfileMenu } from './ProfileMenu';
 
 const NAV_ITEMS: { href: string; label: string }[] = [
@@ -22,10 +23,14 @@ function isActive(pathname: string, href: string): boolean {
 
 export function SiteHeader() {
   const { me } = useMe();
+  const guestName = useGuestName();
   const pathname = usePathname() ?? '/';
   const isAuthScreen = pathname === '/login' || pathname === '/signup';
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
+
+  // True if either a real account or guest mode is active.
+  const showNav = !!me || !!guestName;
 
   // Close the mobile menu on route change.
   useEffect(() => {
@@ -83,7 +88,7 @@ export function SiteHeader() {
         {Brand}
 
         {/* Desktop inline nav (md+) */}
-        {me && (
+        {showNav && (
           <nav className="hidden md:flex flex-1 items-center justify-center gap-1 lg:gap-2">
             {NAV_ITEMS.map((item) => {
               const active = isActive(pathname, item.href);
@@ -107,6 +112,21 @@ export function SiteHeader() {
         <div className="ml-auto flex items-center gap-2 shrink-0">
           {me ? (
             <ProfileMenu me={me} />
+          ) : guestName ? (
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline text-sm text-bourbon/80">
+                Guest: <span className="font-semibold">{guestName}</span>
+              </span>
+              <button
+                onClick={() => {
+                  clearGuestName();
+                  window.location.href = '/login';
+                }}
+                className="text-sm px-3 py-1.5 rounded bg-rose-red text-cream hover:bg-rose-dark"
+              >
+                Sign in
+              </button>
+            </div>
           ) : (
             <Link
               href="/login"
@@ -116,8 +136,8 @@ export function SiteHeader() {
             </Link>
           )}
 
-          {/* Mobile hamburger — only when authed */}
-          {me && (
+          {/* Mobile hamburger — only when nav has anything to show */}
+          {showNav && (
             <button
               type="button"
               onClick={() => setMobileOpen((v) => !v)}
@@ -151,7 +171,7 @@ export function SiteHeader() {
         </div>
 
         {/* Mobile dropdown */}
-        {me && mobileOpen && (
+        {showNav && mobileOpen && (
           <nav
             className="md:hidden absolute left-0 right-0 top-full bg-cream border-b border-bourbon/20 shadow-lg"
             aria-label="Mobile navigation"

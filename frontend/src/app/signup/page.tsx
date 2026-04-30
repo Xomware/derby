@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import { useMe } from '@/lib/hooks';
+import { clearGuestName } from '@/lib/guest';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -25,6 +26,8 @@ export default function SignupPage() {
         username: username.trim(),
         password,
       });
+      // Drop guest mode if they were browsing as one.
+      clearGuestName();
       await refresh();
       router.push('/');
     } catch (err) {
@@ -44,7 +47,11 @@ export default function SignupPage() {
           <p className="font-display italic text-mint-julep text-xs uppercase tracking-[0.3em]">
             Welcome to Sun God Derby
           </p>
-          <h1 className="font-display text-3xl text-rose-dark mt-1">Create account</h1>
+          <h1 className="font-display text-3xl text-rose-dark mt-1">Make an account</h1>
+          <p className="text-sm text-bourbon/80 mt-2">
+            It&apos;s a username for the leaderboard, an email so we can find you,
+            and a password — that&apos;s it.
+          </p>
         </header>
 
         <label className="block">
@@ -82,7 +89,7 @@ export default function SignupPage() {
             />
           </div>
           <span className="text-xs text-bourbon/60 block mt-1.5">
-            Letters, numbers, <code>_ - .</code> — 2 to 20 characters.
+            Just a name to know you by — shown next to your votes.
           </span>
         </label>
 
@@ -93,14 +100,14 @@ export default function SignupPage() {
           <input
             type="password"
             required
-            minLength={8}
+            minLength={4}
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 w-full rounded-lg border border-bourbon/30 bg-cream/40 focus:border-rose-red focus:bg-white px-3 py-2 outline-none transition"
           />
           <span className="text-xs text-bourbon/60 block mt-1.5">
-            At least 8 characters.
+            4 characters or more — keep it simple, this isn&apos;t a bank.
           </span>
         </label>
 
@@ -110,10 +117,10 @@ export default function SignupPage() {
 
         <button
           type="submit"
-          disabled={busy || !email || username.length < 2 || password.length < 8}
+          disabled={busy || !email || username.length < 2 || password.length < 4}
           className="w-full bg-rose-red text-cream font-semibold rounded-lg py-2.5 hover:bg-rose-dark disabled:opacity-60 transition"
         >
-          {busy ? 'Creating account…' : 'Create account'}
+          {busy ? 'Creating account…' : 'Make my account'}
         </button>
 
         <p className="text-center text-sm text-bourbon/80">
