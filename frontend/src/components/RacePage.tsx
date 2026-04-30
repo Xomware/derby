@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react';
 import { Countdown } from '@/components/Countdown';
 import { SidePanel, SidePanelItem } from '@/components/SidePanel';
-import { usePicks, type RaceKind } from '@/lib/hooks';
+import { WriteupSection } from '@/components/WriteupSection';
+import { useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
 import type { Pick } from '@/lib/types';
 import { CURRENT_YEAR } from '@/lib/year';
 
@@ -53,6 +54,7 @@ export function RacePage({
   eyebrow: string;
 }) {
   const { picks, isLoading, year } = usePicks(kind);
+  const { grantPicks } = useGrantPicks(kind);
   const [sortKey, setSortKey] = useState<SortKey>('post');
   const isArchive = year !== CURRENT_YEAR;
 
@@ -116,6 +118,13 @@ export function RacePage({
           )}
         </header>
 
+        {grantPicks?.analysis && (
+          <WriteupSection
+            title={`Grant's race outlook`}
+            body={grantPicks.analysis}
+          />
+        )}
+
         <div className="flex items-center gap-2 flex-wrap">
           <label className="text-xs uppercase tracking-wider text-bourbon/70 font-semibold">
             Sort by
@@ -159,6 +168,14 @@ export function RacePage({
             <HorseCard key={p.id} pick={p} />
           ))}
         </div>
+
+        {grantPicks?.betting_plays && (
+          <WriteupSection
+            title={`Grant's betting plays`}
+            body={grantPicks.betting_plays}
+            tone="rose"
+          />
+        )}
       </section>
 
       <SidePanel title="Jump to" items={tocItems} />

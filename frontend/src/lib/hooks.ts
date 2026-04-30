@@ -67,6 +67,8 @@ export interface GrantPicks {
   long_shot: string | null;
   inferred?: boolean;
   notes?: string | null;
+  analysis?: string | null;
+  betting_plays?: string | null;
 }
 
 export function useComments(kind: RaceKind, yearOverride?: number) {
