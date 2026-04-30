@@ -126,7 +126,7 @@ export interface AdminCronRun {
   id: string;
   ran_at: string;
   type: string;
-  summary: Record<string, { field_size?: number; matched?: number; updated?: number; skipped?: string }>;
+  summary: Record<string, Record<string, unknown>>;
 }
 
 export interface AdminCronRunsResponse {

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import type { LeaderboardRow } from '@/lib/types';
 
 interface Props {
@@ -15,6 +16,8 @@ interface Props {
   scratchedHorses?: Set<string>;
   /** Threshold (n/d) below which a long-shot pick is too short. */
   longShotThreshold?: number;
+  /** When set, render an inline "no picks yet" CTA row only the user sees. */
+  missingPick?: { username: string; href: string } | null;
 }
 
 function isScratched(name: string | null, scratched?: Set<string>): boolean {
@@ -99,19 +102,41 @@ export function LeaderboardTable({
   oddsByHorse,
   scratchedHorses,
   longShotThreshold,
+  missingPick,
 }: Props) {
-  if (rows.length === 0) {
+  if (rows.length === 0 && !missingPick) {
     return (
       <p className="text-sm text-bourbon/70">
         Nobody&apos;s entered yet. Head to /picks to get on the board.
       </p>
     );
   }
+  const slotColCount = SLOTS.length;
 
   return (
     <>
       {/* Mobile: card list. Desktop: table. */}
       <ul className="sm:hidden space-y-2">
+        {missingPick && (
+          <li className="rounded-xl border-2 border-dashed border-rose-red/40 bg-rose-red/5 p-3">
+            <div className="flex items-baseline justify-between gap-2 mb-2">
+              <div className="flex items-baseline gap-2 min-w-0">
+                <span className="font-mono text-bourbon/60 text-sm">#?</span>
+                <span className="font-semibold truncate">@{missingPick.username}</span>
+                <span className="text-[10px] text-mint-julep">(you)</span>
+              </div>
+              <Link
+                href={missingPick.href}
+                className="rounded bg-rose-red px-3 py-1 text-xs font-semibold text-white hover:bg-rose-dark transition"
+              >
+                Enter picks →
+              </Link>
+            </div>
+            <p className="text-xs text-bourbon/70">
+              You&apos;re not on the board yet — get your picks in.
+            </p>
+          </li>
+        )}
         {rows.map((r) => {
           const me = highlightUsername && r.username === highlightUsername;
           const isGrant = r.username === 'GRANT';
@@ -212,6 +237,27 @@ export function LeaderboardTable({
             </tr>
           </thead>
           <tbody>
+            {missingPick && (
+              <tr className="border-b border-bourbon/10 bg-rose-red/5">
+                <td className="py-3 px-2 font-mono text-bourbon/60">?</td>
+                <td className="py-3 px-2 whitespace-nowrap text-left">
+                  <span className="font-semibold">@{missingPick.username}</span>
+                  <span className="ml-1 text-xs text-mint-julep">(you)</span>
+                </td>
+                <td className="py-3 px-2 text-bourbon/60">—</td>
+                <td colSpan={slotColCount} className="py-3 px-2">
+                  <div className="flex items-center justify-center gap-3">
+                    <span className="text-bourbon/70 text-xs">No picks in yet</span>
+                    <Link
+                      href={missingPick.href}
+                      className="rounded bg-rose-red px-3 py-1 text-xs font-semibold text-white hover:bg-rose-dark transition"
+                    >
+                      Enter picks →
+                    </Link>
+                  </div>
+                </td>
+              </tr>
+            )}
             {rows.map((r) => {
               const me = highlightUsername && r.username === highlightUsername;
               const isGrant = r.username === 'GRANT';

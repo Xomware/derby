@@ -78,8 +78,8 @@ export function AdminCronRuns({ adminToken }: { adminToken: string }) {
             </thead>
             <tbody>
               {data.rows.map((r) => {
-                const derby = r.summary.derby ?? {};
-                const oaks = r.summary.oaks ?? {};
+                const derby = (r.summary.derby ?? {}) as CronStat;
+                const oaks = (r.summary.oaks ?? {}) as CronStat;
                 return (
                   <tr key={r.id} className="border-b border-bourbon/10 align-top">
                     <td className="py-2 px-2 sm:pl-0 pl-4 whitespace-nowrap font-mono text-[11px]">
@@ -98,12 +98,33 @@ export function AdminCronRuns({ adminToken }: { adminToken: string }) {
   );
 }
 
-function describe(s: { field_size?: number; matched?: number; updated?: number; skipped?: string }): string {
+interface CronStat {
+  field_size?: number;
+  feed_size?: number;
+  matched?: number;
+  scratched_seen?: number;
+  newly_added?: number;
+  newly_scratched?: number;
+  unscratched?: number;
+  writeups_refreshed?: number;
+  odds_updated?: number;
+  meta_updated?: number;
+  skipped?: string;
+}
+
+function describe(s: CronStat): string {
   if (s.skipped) return `skip: ${s.skipped}`;
-  if (typeof s.matched === 'number' || typeof s.updated === 'number') {
-    return `${s.matched ?? 0}/${s.field_size ?? 0} matched · ${s.updated ?? 0} updated`;
+  const parts: string[] = [];
+  if (typeof s.matched === 'number') {
+    parts.push(`${s.matched}/${s.field_size ?? 0} matched`);
   }
-  return '—';
+  if (s.odds_updated) parts.push(`${s.odds_updated} odds`);
+  if (s.meta_updated) parts.push(`${s.meta_updated} meta`);
+  if (s.newly_scratched) parts.push(`+${s.newly_scratched} scratched`);
+  if (s.unscratched) parts.push(`-${s.unscratched} unscratched`);
+  if (s.newly_added) parts.push(`+${s.newly_added} added`);
+  if (s.writeups_refreshed) parts.push(`${s.writeups_refreshed} writeups`);
+  return parts.length ? parts.join(' · ') : '—';
 }
 
 function formatTs(iso: string): string {
