@@ -1,23 +1,63 @@
 'use client';
 
+import { useState } from 'react';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
 
 export function AdminCronRuns({ adminToken }: { adminToken: string }) {
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR(
     ['admin-cron-runs', adminToken],
     () => api.adminCronRuns({ admin_token: adminToken, type: 'odds_cron', limit: 50 }),
     { refreshInterval: 60_000 }
   );
 
+  const [running, setRunning] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
+
+  async function runCron() {
+    if (running) return;
+    setRunning(true);
+    setStatus('Triggering…');
+    try {
+      const resp = await api.adminRunCron({ admin_token: adminToken });
+      if (resp.function_error) {
+        setStatus(`Cron returned error: ${resp.function_error}`);
+      } else {
+        setStatus('Cron finished — refreshing history.');
+      }
+      await mutate();
+    } catch (e) {
+      setStatus(`Failed: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setRunning(false);
+      setTimeout(() => setStatus(null), 6_000);
+    }
+  }
+
   return (
     <section className="rounded-xl border border-bourbon/15 bg-white p-4">
-      <header className="mb-3 flex items-baseline justify-between">
+      <header className="mb-3 flex items-baseline justify-between gap-2 flex-wrap">
         <h3 className="font-display text-lg text-bourbon">Cron history — odds scraper</h3>
-        <span className="text-xs text-bourbon/60">
-          last {data?.rows.length ?? 0} run(s)
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-bourbon/60">
+            last {data?.rows.length ?? 0} run(s)
+          </span>
+          <button
+            type="button"
+            onClick={runCron}
+            disabled={running}
+            className="text-xs px-2.5 py-1 rounded border border-rose-red/40 text-rose-dark bg-rose-red/5 hover:bg-rose-red/10 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+          >
+            {running ? 'Running…' : 'Run cron now'}
+          </button>
+        </div>
       </header>
+
+      {status && (
+        <p className="text-xs text-bourbon/80 mb-2" aria-live="polite">
+          {status}
+        </p>
+      )}
 
       {isLoading && <p className="text-bourbon/70 text-sm">Loading…</p>}
       {error && <p className="text-rose-dark text-sm">Failed to load.</p>}

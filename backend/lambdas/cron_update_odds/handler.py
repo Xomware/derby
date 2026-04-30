@@ -317,7 +317,7 @@ def _update_picks(picks: list[dict], status_map: dict[str, dict]) -> dict[str, i
 # entering the field, not 1:1 replacements, and an in-memory staleness bug had
 # us blaming a horse who was already unscratched by the same cron run. The
 # generic line is correct in every case and self-heals via _refresh_late_add_writeups.
-LATE_ADD_WRITEUP = "Added late as also-eligibles joined the field. Not worth your time."
+LATE_ADD_WRITEUP = "Not worth your time."
 
 
 def _refresh_late_add_writeups(picks: list[dict]) -> int:

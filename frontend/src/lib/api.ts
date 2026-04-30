@@ -103,6 +103,12 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  adminRunCron: (body: { admin_token: string }) =>
+    request<AdminRunCronResponse>('/admin-results/run-cron', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
   adminVisits: (body: {
     admin_token: string;
     days?: number;
@@ -126,6 +132,13 @@ export interface AdminCronRun {
 export interface AdminCronRunsResponse {
   type: string;
   rows: AdminCronRun[];
+}
+
+export interface AdminRunCronResponse {
+  function: string;
+  status_code: number;
+  function_error: string | null;
+  result: Record<string, unknown>;
 }
 
 export interface AdminVisitsResponse {

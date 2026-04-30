@@ -118,6 +118,15 @@ data "aws_iam_policy_document" "lambda_role_policy" {
       "arn:aws:events:${var.aws_region}:${local.web_app_account_id}:rule/${var.app_name}-odds-schedule",
     ]
   }
+
+  # admin_run_cron synchronously invokes the odds cron lambda.
+  statement {
+    effect  = "Allow"
+    actions = ["lambda:InvokeFunction"]
+    resources = [
+      "arn:aws:lambda:${var.aws_region}:${local.web_app_account_id}:function:${var.app_name}-cron-update-odds",
+    ]
+  }
 }
 
 resource "aws_iam_role_policy" "lambda_role_policy" {
