@@ -362,14 +362,17 @@ function ScratchedStamp() {
 }
 
 function HorseCard({ pick: p }: { pick: DisplayHorse }) {
-  const stats: { label: string; value: string }[] = [];
-  if (p.odds_at_pick) stats.push({ label: 'Odds', value: p.odds_at_pick });
-  if (p.record) stats.push({ label: 'Record', value: p.record });
-  if (p.beyer) stats.push({ label: 'Beyer', value: p.beyer });
-  if (p.brisnet) stats.push({ label: 'Brisnet', value: p.brisnet });
-  if (p.equibase_rating) stats.push({ label: 'Equibase', value: p.equibase_rating });
-  if (p.style) stats.push({ label: 'Style', value: p.style });
-  if (p.last_race) stats.push({ label: 'Last race', value: p.last_race });
+  // Always render all 7 stat tiles — keeps cron-added horses visually
+  // consistent with Grant's writeups even when his stats columns are blank.
+  const stats: { label: string; value: string }[] = [
+    { label: 'Odds', value: p.odds_at_pick ?? 'unknown' },
+    { label: 'Record', value: p.record ?? 'unknown' },
+    { label: 'Beyer', value: p.beyer ?? 'unknown' },
+    { label: 'Brisnet', value: p.brisnet ?? 'unknown' },
+    { label: 'Equibase', value: p.equibase_rating ?? 'unknown' },
+    { label: 'Style', value: p.style ?? 'unknown' },
+    { label: 'Last race', value: p.last_race ?? 'unknown' },
+  ];
 
   // Split writeup into bullets — Grant's lines exactly as he wrote them.
   const bullets = (p.writeup ?? '')
@@ -401,18 +404,16 @@ function HorseCard({ pick: p }: { pick: DisplayHorse }) {
         </div>
       )}
 
-      {stats.length > 0 && (
-        <dl className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {stats.map((s) => (
-            <StatTile
-              key={s.label}
-              label={s.label}
-              value={s.value}
-              description={statTip(s.label)}
-            />
-          ))}
-        </dl>
-      )}
+      <dl className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {stats.map((s) => (
+          <StatTile
+            key={s.label}
+            label={s.label}
+            value={s.value}
+            description={statTip(s.label)}
+          />
+        ))}
+      </dl>
 
       {bullets.length > 0 && (
         <ul className="mt-4 space-y-1.5 text-sm text-ink/85 leading-relaxed">

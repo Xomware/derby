@@ -171,12 +171,20 @@ def _fetch_twinspires(kind: str) -> dict[str, dict]:
             out[key] = {"scratched": True, "post_position": post, "name": name}
             continue
 
-        text_odds = (entry.get("mtp") or {}).get("TextOdds")
-        odds = _normalize_odds(text_odds)
-        if not odds:
-            # No live tote yet — fall back to morning line so we still capture
-            # jockey/trainer/post even before the first cycle posts.
-            odds = _normalize_odds(entry.get("ML"))
+        # Pick the right odds source. The tote saturates around 99 — when
+        # NumOdds hits the ceiling, TextOdds reads "99" but the actual price
+        # could be anywhere from 50-1 to 300-1, and ML is the cleaner display
+        # in that case. Otherwise prefer live tote, falling back to ML.
+        mtp = entry.get("mtp") or {}
+        text_odds = mtp.get("TextOdds")
+        try:
+            num_odds = float(mtp.get("NumOdds")) if mtp.get("NumOdds") is not None else None
+        except (TypeError, ValueError):
+            num_odds = None
+        if num_odds is not None and num_odds >= 99:
+            odds = _normalize_odds(entry.get("ML")) or _normalize_odds(text_odds)
+        else:
+            odds = _normalize_odds(text_odds) or _normalize_odds(entry.get("ML"))
         if not odds:
             continue
 
@@ -303,26 +311,41 @@ def _update_picks(picks: list[dict], status_map: dict[str, dict]) -> dict[str, i
     return counters
 
 
-def _writeup_for_late_add(picks: list[dict]) -> str:
-    """Produce a short, dismissive writeup that names the most recently
-    scratched horse(s). Falls back to a generic line if we can't find any.
+# Single canonical writeup for cron-added horses. Naming a specific scratched
+# horse turned out to be misleading — late entries are typically also-eligibles
+# entering the field, not 1:1 replacements, and an in-memory staleness bug had
+# us blaming a horse who was already unscratched by the same cron run. The
+# generic line is correct in every case and self-heals via _refresh_late_add_writeups.
+LATE_ADD_WRITEUP = "Added late as also-eligibles joined the field. Not worth your time."
+
+
+def _refresh_late_add_writeups(picks: list[dict]) -> int:
+    """Overwrite stale writeups on previously cron-added rows.
+
+    Idempotent: skips rows that already match LATE_ADD_WRITEUP. Used to fix
+    rows from an earlier cron version that wrote a misleading per-horse line.
     """
-    scratched = [p for p in picks if p.get("scratched") and p.get("horse_name")]
-    if not scratched:
-        return "Added late after the field shifted. Not worth your time."
-    # Prefer most recently scratched (by scratched_at) so the writeup tracks
-    # the actual trigger when one is available.
-    scratched.sort(key=lambda p: p.get("scratched_at") or "", reverse=True)
-    names = []
-    for p in scratched:
-        name = p["horse_name"]
-        if name not in names:
-            names.append(name)
-        if len(names) == 2:
-            break
-    if len(names) == 1:
-        return f"Added because {names[0]} got scratched. Not worth your time."
-    return f"Added because {names[0]} and {names[1]} got scratched. Not worth your time."
+    now = iso_now()
+    refreshed = 0
+    for p in picks:
+        if p.get("added_by") != "cron":
+            continue
+        if p.get("writeup") == LATE_ADD_WRITEUP:
+            continue
+        try:
+            picks_table.update_item(
+                Key={"id": p["id"]},
+                UpdateExpression="SET writeup = :w, updated_at = :n",
+                ExpressionAttributeValues={":w": LATE_ADD_WRITEUP, ":n": now},
+                ConditionExpression="attribute_exists(id)",
+            )
+            refreshed += 1
+        except Exception as exc:  # pragma: no cover
+            log.warning(
+                "odds_cron_writeup_refresh_failed",
+                extra={"pick_id": p["id"], "error": str(exc)},
+            )
+    return refreshed
 
 
 def _add_late_horses(
@@ -349,7 +372,6 @@ def _add_late_horses(
         return 0
 
     existing_keys = {_normalize(p["horse_name"]) for p in picks if p.get("horse_name")}
-    writeup = _writeup_for_late_add(picks)
     now = iso_now()
     added = 0
 
@@ -368,7 +390,7 @@ def _add_late_horses(
             "odds_at_pick": status.get("odds"),
             "odds_source": "cron",
             "odds_updated_at": now,
-            "writeup": writeup,
+            "writeup": LATE_ADD_WRITEUP,
             "result": "pending",
             "confidence": 3,
             "display_order": 0,
@@ -421,9 +443,10 @@ def handler(event, context):  # pragma: no cover — exercised in AWS
             continue
 
         counts = _update_picks(picks, status_map)
-        # Run the scratched-flag updates above first so _writeup_for_late_add
-        # sees the freshest scratched_at timestamps when attributing the add.
         added = _add_late_horses(event_id, race_number, picks, status_map)
+        # Self-heal: overwrite stale writeups on rows added by the prior cron
+        # version that named a (sometimes already-unscratched) horse.
+        refreshed = _refresh_late_add_writeups(picks)
         scratched_seen = sum(1 for v in status_map.values() if v.get("scratched"))
         unique_horses = {p["horse_name"] for p in picks if p.get("horse_name")}
         matched = sum(1 for h in unique_horses if _normalize(h) in status_map)
@@ -433,6 +456,7 @@ def handler(event, context):  # pragma: no cover — exercised in AWS
             "matched": matched,
             "scratched_seen": scratched_seen,
             "newly_added": added,
+            "writeups_refreshed": refreshed,
             **counts,
         }
 
