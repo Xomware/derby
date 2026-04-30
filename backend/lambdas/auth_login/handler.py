@@ -1,4 +1,4 @@
-"""POST /auth/login — sign in with email-or-username + password."""
+"""POST /auth/login — sign in with username + password."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from boto3.dynamodb.conditions import Key
 
 from lambdas.common.auth_helpers import issue_session_jwt
 from lambdas.common.constants import (
-    ADMIN_EMAILS,
+    ADMIN_USERNAMES,
     COOKIE_DOMAIN,
     SESSION_COOKIE,
     SESSION_DAYS,
@@ -29,20 +29,20 @@ HANDLER = "auth_login"
 @handle_errors(HANDLER)
 def handler(event, context):
     body = parse_body(event)
-    require_fields(body, "identifier", "password")
+    # Accept either {username, password} or {identifier, password} — the latter
+    # is the legacy field name from when email login was on the table.
+    password = str(body.get("password") or "")
+    username = str(body.get("username") or body.get("identifier") or "").strip()
+    if not username or not password:
+        raise ValidationError("Missing username or password")
 
-    identifier = str(body["identifier"]).strip()
-    password = str(body["password"])
-    if not identifier or not password:
-        raise ValidationError("Missing email/username or password")
-
-    user = _resolve_user(identifier)
+    user = _resolve_user(username)
     if not user or not verify_password(password, user.get("password_hash") or ""):
         # Same error for either branch — don't leak which one was wrong.
-        raise UnauthorizedError("Invalid email/username or password")
+        raise UnauthorizedError("Invalid username or password")
 
-    updates = {"last_login_at": iso_now()}
-    if user["email"] in ADMIN_EMAILS and not user.get("is_admin"):
+    updates: dict = {"last_login_at": iso_now()}
+    if user["username"].lower() in ADMIN_USERNAMES and not user.get("is_admin"):
         updates["is_admin"] = True
     _patch_user(user["email"], updates)
 
@@ -55,7 +55,6 @@ def handler(event, context):
     return success_response(
         {
             "id": user["id"],
-            "email": user["email"],
             "username": user["username"],
             "is_admin": bool(updates.get("is_admin", user.get("is_admin", False))),
         },
@@ -63,15 +62,11 @@ def handler(event, context):
     )
 
 
-def _resolve_user(identifier: str) -> dict | None:
-    if "@" in identifier:
-        email = identifier.lower()
-        return users_table.get_item(Key={"email": email}).get("Item")
-
+def _resolve_user(username: str) -> dict | None:
     rows = query_all(
         users_table,
         IndexName=USERS_USERNAME_INDEX,
-        KeyConditionExpression=Key("username").eq(identifier),
+        KeyConditionExpression=Key("username").eq(username),
         Limit=1,
     )
     return rows[0] if rows else None

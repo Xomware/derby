@@ -23,10 +23,10 @@ variable "from_email" {
   default = "noreply@derby.xomware.com"
 }
 
-variable "admin_emails" {
-  description = "Comma-separated emails granted is_admin on first login"
+variable "admin_usernames" {
+  description = "Comma-separated usernames auto-promoted to is_admin on signup/login"
   type        = string
-  default     = "dominickj.giordano@gmail.com,gtatich@gmail.com"
+  default     = "Sun_God,domjg"
 }
 
 variable "event_id" {

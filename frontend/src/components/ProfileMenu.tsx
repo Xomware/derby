@@ -45,7 +45,6 @@ export function ProfileMenu({ me }: { me: Me }) {
         <div className="absolute right-0 top-11 w-64 rounded-lg border border-bourbon/20 bg-cream shadow-lg overflow-hidden z-20">
           <div className="px-4 py-3 border-b border-bourbon/15">
             <div className="text-sm font-semibold text-bourbon truncate">@{me.username}</div>
-            <div className="text-xs text-bourbon/70 truncate">{me.email}</div>
             {me.is_admin && (
               <span className="mt-1 inline-block text-[10px] uppercase tracking-wide font-semibold text-mint-julep">
                 Admin

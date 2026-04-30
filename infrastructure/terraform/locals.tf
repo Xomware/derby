@@ -18,7 +18,7 @@ locals {
     EVENT_ID              = var.event_id
     EVENT_NAME            = var.event_name
     FROM_EMAIL            = var.from_email
-    ADMIN_EMAILS          = var.admin_emails
+    ADMIN_USERNAMES       = var.admin_usernames
     USERS_TABLE           = aws_dynamodb_table.users.id
     PICKS_TABLE           = aws_dynamodb_table.picks.id
     VOTES_TABLE           = aws_dynamodb_table.votes.id

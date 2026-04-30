@@ -87,7 +87,7 @@ export function GuestDialog({
             onChange={(e) => setName(e.target.value)}
             maxLength={30}
             className="mt-1 w-full rounded-lg border border-bourbon/30 bg-white px-3 py-2 outline-none focus:border-rose-red transition"
-            placeholder="e.g. Bourbon Bob"
+            placeholder="Sun_God"
           />
           {error && <p className="text-xs text-rose-dark mt-1">{error}</p>}
         </label>

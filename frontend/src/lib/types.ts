@@ -9,7 +9,6 @@ export type ResultValue =
 
 export interface Me {
   id: string;
-  email: string;
   username: string;
   is_admin: boolean;
 }

@@ -9,7 +9,7 @@ import { clearGuestName } from '@/lib/guest';
 import { GuestDialog } from '@/components/GuestDialog';
 
 export default function LoginPage() {
-  const [identifier, setIdentifier] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -22,7 +22,7 @@ export default function LoginPage() {
     setError(null);
     setBusy(true);
     try {
-      await api.login({ identifier: identifier.trim(), password });
+      await api.login({ username: username.trim(), password });
       // Drop guest mode if they were browsing as one.
       clearGuestName();
       await refresh();
@@ -50,17 +50,20 @@ export default function LoginPage() {
 
           <label className="block">
             <span className="text-xs uppercase tracking-wider font-semibold text-bourbon/70">
-              Email or username
+              Username
             </span>
-            <input
-              autoFocus
-              required
-              autoComplete="username"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-bourbon/30 bg-cream/40 focus:border-rose-red focus:bg-white px-3 py-2 outline-none transition"
-              placeholder="you@example.com"
-            />
+            <div className="mt-1 flex items-center rounded-lg border border-bourbon/30 bg-cream/40 focus-within:border-rose-red focus-within:bg-white transition">
+              <span className="pl-3 pr-1 text-bourbon/60">@</span>
+              <input
+                autoFocus
+                required
+                autoComplete="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="flex-1 bg-transparent px-1 py-2 outline-none"
+                placeholder="Sun_God"
+              />
+            </div>
           </label>
 
           <label className="block">
@@ -84,7 +87,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={busy || !identifier || password.length < 4}
+            disabled={busy || !username || password.length < 4}
             className="w-full bg-rose-red text-cream font-semibold rounded-lg py-2.5 hover:bg-rose-dark disabled:opacity-60 transition"
           >
             {busy ? 'Signing in…' : 'Sign in'}

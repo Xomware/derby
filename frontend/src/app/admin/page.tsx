@@ -143,7 +143,6 @@ function UsersPanel() {
           <thead>
             <tr className="text-left text-xs uppercase tracking-wider text-bourbon/70 border-b border-bourbon/20">
               <th className="py-1.5 pr-2">Username</th>
-              <th className="py-1.5 pr-2">Email</th>
               <th className="py-1.5 pr-2">Joined</th>
               <th className="py-1.5 pr-2 text-right">Votes</th>
               <th className="py-1.5 pl-2">Admin</th>
@@ -153,7 +152,6 @@ function UsersPanel() {
             {data.map((u) => (
               <tr key={u.id} className="border-b border-bourbon/10">
                 <td className="py-1.5 pr-2">@{u.username}</td>
-                <td className="py-1.5 pr-2 text-bourbon/80">{u.email}</td>
                 <td className="py-1.5 pr-2">
                   {new Date(u.created_at).toLocaleString()}
                 </td>

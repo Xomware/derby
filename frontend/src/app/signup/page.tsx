@@ -8,7 +8,6 @@ import { useMe } from '@/lib/hooks';
 import { clearGuestName } from '@/lib/guest';
 
 export default function SignupPage() {
-  const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -21,12 +20,7 @@ export default function SignupPage() {
     setError(null);
     setBusy(true);
     try {
-      await api.signup({
-        email: email.trim().toLowerCase(),
-        username: username.trim(),
-        password,
-      });
-      // Drop guest mode if they were browsing as one.
+      await api.signup({ username: username.trim(), password });
       clearGuestName();
       await refresh();
       router.push('/');
@@ -49,26 +43,9 @@ export default function SignupPage() {
           </p>
           <h1 className="font-display text-3xl text-rose-dark mt-1">Make an account</h1>
           <p className="text-sm text-bourbon/80 mt-2">
-            It&apos;s a username for the leaderboard, an email so we can find you,
-            and a password — that&apos;s it.
+            Pick a username, pick a password, you&apos;re in.
           </p>
         </header>
-
-        <label className="block">
-          <span className="text-xs uppercase tracking-wider font-semibold text-bourbon/70">
-            Email
-          </span>
-          <input
-            type="email"
-            autoFocus
-            required
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-bourbon/30 bg-cream/40 focus:border-rose-red focus:bg-white px-3 py-2 outline-none transition"
-            placeholder="you@example.com"
-          />
-        </label>
 
         <label className="block">
           <span className="text-xs uppercase tracking-wider font-semibold text-bourbon/70">
@@ -77,6 +54,7 @@ export default function SignupPage() {
           <div className="mt-1 flex items-center rounded-lg border border-bourbon/30 bg-cream/40 focus-within:border-rose-red focus-within:bg-white transition">
             <span className="pl-3 pr-1 text-bourbon/60">@</span>
             <input
+              autoFocus
               required
               minLength={2}
               maxLength={20}
@@ -85,7 +63,7 @@ export default function SignupPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="flex-1 bg-transparent px-1 py-2 outline-none"
-              placeholder="bourbon_wins"
+              placeholder="Sun_God"
             />
           </div>
           <span className="text-xs text-bourbon/60 block mt-1.5">
@@ -117,7 +95,7 @@ export default function SignupPage() {
 
         <button
           type="submit"
-          disabled={busy || !email || username.length < 2 || password.length < 4}
+          disabled={busy || username.length < 2 || password.length < 4}
           className="w-full bg-rose-red text-cream font-semibold rounded-lg py-2.5 hover:bg-rose-dark disabled:opacity-60 transition"
         >
           {busy ? 'Creating account…' : 'Make my account'}

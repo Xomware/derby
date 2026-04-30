@@ -43,7 +43,10 @@ SCORED_RESULTS = {"won", "placed", "showed", "finished"}
 
 # SES sender + admin bootstrap
 FROM_EMAIL = os.environ.get("FROM_EMAIL", "noreply@derby.xomware.com")
-ADMIN_EMAILS = [e.strip().lower() for e in os.environ.get("ADMIN_EMAILS", "").split(",") if e.strip()]
+# Username-based auth — usernames listed here are auto-flagged is_admin on signup.
+ADMIN_USERNAMES = [u.strip().lower() for u in os.environ.get("ADMIN_USERNAMES", "").split(",") if u.strip()]
+# Internal-only synthetic email domain for the DynamoDB email PK we never expose.
+SYNTHETIC_EMAIL_DOMAIN = os.environ.get("SYNTHETIC_EMAIL_DOMAIN", "sungod.derby")
 
 # Polling window (UTC)
 POLL_ENABLED = os.environ.get("POLL_ENABLED", "false").lower() == "true"
