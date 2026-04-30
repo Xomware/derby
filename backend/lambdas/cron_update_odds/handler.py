@@ -1,18 +1,24 @@
-"""Cron — hourly scraper that refreshes the morning-line / current odds for
-the Kentucky Derby + Oaks fields.
+"""Cron — refreshes live tote odds + jockey/trainer/post for Derby + Oaks.
+
+Pulls from the JSON feed that powers TwinSpires' embedded race-entry widget:
+  https://tscom-content.netlify.app/race-entry/{config_id}.json
+
+config_id 650 = Kentucky Derby, 651 = Kentucky Oaks. The feed gives us:
+  - HorseName, Jockey, Trainer, ProgramNumber (post position)
+  - mtp.TextOdds — the live (current) tote line, e.g. "  5", "9/2", "50/1"
+  - mtp.TextOdds == "SCR" when the horse is scratched
 
 For each event in CURRENT_YEAR:
-  1. If race-results already has finishers for the main race → skip (race is
-     over, no point re-scraping).
-  2. Pull picks for that event from DDB to know the canonical horse list.
-  3. Fetch a few public odds pages and try to extract a horse → odds map.
-  4. For each match, write the new odds_at_pick onto the picks row.
+  1. If race-results already has finishers for the main race → skip.
+  2. Fetch the JSON feed.
+  3. For each pick whose horse_name matches a feed entry (case-insensitive),
+     update odds_at_pick / jockey / trainer / post_position. Apply or clear
+     `scratched` based on whichever side TwinSpires shows.
 
-Failure-tolerant by design: a missing or restructured page logs a warning
-and the cron runs again next hour. Admins can always override manually via
-/admin-results/odds — those values get overwritten on the next cron, so
-flip the schedule off (`odds_cron_enabled=false`) before locking in final
-odds if you need them sticky.
+Failure-tolerant: if the feed is unreachable or malformed, log a warning and
+let the next cron tick try again. Admins can override values manually via
+/admin-results/odds, but the cron will overwrite them next run — disable the
+EventBridge rule (`odds_cron_enabled=false`) if you need overrides sticky.
 """
 
 from __future__ import annotations
@@ -23,7 +29,6 @@ from datetime import datetime, timezone
 
 import requests
 from boto3.dynamodb.conditions import Key
-from bs4 import BeautifulSoup
 
 import json
 import uuid
@@ -57,28 +62,62 @@ USER_AGENT = (
     "(KHTML, like Gecko) Chrome/120.0 Safari/537.36 SunGodDerbyBot"
 )
 
-# Pages we'll try, in order. First page that produces matches wins for that event.
-SOURCES: dict[str, list[str]] = {
-    "derby": [
-        "https://www.kentuckyderby.com/derby-horses/",
-        "https://www.kentuckyderby.com/wager/live-odds/",
-    ],
-    "oaks": [
-        "https://www.kentuckyderby.com/oaks-horses/",
-    ],
+ENTRY_FEED_URL = "https://tscom-content.netlify.app/race-entry/{config_id}.json"
+
+# TwinSpires widget config IDs for the 2026 races. If these change year over
+# year, override via env or update inline.
+TWINSPIRES_CONFIG_IDS: dict[str, int] = {
+    "derby": int(os.environ.get("ODDS_DERBY_CONFIG_ID", "650")),
+    "oaks": int(os.environ.get("ODDS_OAKS_CONFIG_ID", "651")),
 }
 
-# Window we scan after each horse name for the next odds-shaped token. The
-# kentuckyderby.com leaderboard puts the trainer/jockey/odds in a column that
-# can sit ~1.2 KB downstream of the name in the rendered HTML.
-LOOKAHEAD_CHARS = 1800
-
-ODDS_RE = re.compile(r"\b(\d{1,3})\s*[-/]\s*(\d{1,3})\b")
-SCR_RE = re.compile(r"\bSCR\b")
+ODDS_FRACTION_RE = re.compile(r"^(\d{1,3})\s*[-/]\s*(\d{1,3})$")
 
 
 def _normalize(name: str) -> str:
     return name.strip().lower().replace("’", "'")
+
+
+def _normalize_odds(raw: str | None) -> str | None:
+    """TwinSpires odds tokens → our canonical 'N-D' string.
+
+    Examples:
+        '  5'   -> '5-1'
+        '9/2'   -> '9-2'
+        '50/1'  -> '50-1'
+        '5-1'   -> '5-1'
+        'SCR'   -> None (caller handles scratch via _is_scratched)
+        ''      -> None
+    """
+    if raw is None:
+        return None
+    s = str(raw).strip()
+    if not s or s.upper() == "SCR":
+        return None
+    m = ODDS_FRACTION_RE.match(s)
+    if m:
+        return f"{int(m.group(1))}-{int(m.group(2))}"
+    # Bare integer like "5" or decimal like "5.0" (against $1).
+    try:
+        n = float(s)
+    except ValueError:
+        return None
+    if n <= 0:
+        return None
+    return f"{int(n)}-1" if n.is_integer() else f"{n:g}-1"
+
+
+def _is_scratched_entry(entry: dict) -> bool:
+    text = (entry.get("mtp") or {}).get("TextOdds")
+    if isinstance(text, str) and text.strip().upper() == "SCR":
+        return True
+    num = (entry.get("mtp") or {}).get("NumOdds")
+    try:
+        if num is not None and float(num) < 0:
+            return True
+    except (TypeError, ValueError):
+        pass
+    return False
 
 
 def _race_is_over(event_id: str, race_number: int) -> bool:
@@ -100,90 +139,80 @@ def _picks_for_event(event_id: str) -> list[dict]:
     )
 
 
-def _looks_like_odds(num: int, denom: int) -> bool:
-    if denom < 1 or denom > 10:
-        return False
-    if num < 1 or num > 200:
-        return False
-    return True
+def _fetch_twinspires(kind: str) -> dict[str, dict]:
+    """Hit the TwinSpires entry JSON and return a normalized map keyed by
+    lowercase horse name. Each value is one of:
 
-
-def _scrape_page(url: str, field: list[str]) -> dict[str, dict]:
-    """Try to extract horse → status map from one URL.
-
-    Each entry is one of:
-      {"odds": "5-1"}   - horse is in the field with a live odds line
-      {"scratched": True} - kentuckyderby.com marks SCR in the odds column
-
-    Strategy: fetch HTML, strip tags, then for each horse name we know is
-    in the field, look in a small window of text after each occurrence
-    for either an SCR token or an odds-shaped token. Whichever appears
-    first wins.
+        {"scratched": True, "post_position": "6"}
+        {"odds": "5-1", "jockey": "...", "trainer": "...", "post_position": "1"}
     """
+    config_id = TWINSPIRES_CONFIG_IDS[kind]
+    url = ENTRY_FEED_URL.format(config_id=config_id)
     out: dict[str, dict] = {}
     try:
         resp = requests.get(url, timeout=10, headers={"User-Agent": USER_AGENT})
         resp.raise_for_status()
-    except Exception as exc:  # pragma: no cover
-        log.warning("odds_scrape_fetch_failed", extra={"url": url, "error": str(exc)})
+        payload = resp.json()
+    except Exception as exc:
+        log.warning(
+            "odds_feed_fetch_failed",
+            extra={"url": url, "kind": kind, "error": str(exc)},
+        )
         return out
 
-    soup = BeautifulSoup(resp.text, "html.parser")
-    text = soup.get_text(separator="  ", strip=True)
-    text_lower = text.lower()
-
-    for horse in field:
-        target = _normalize(horse)
-        if not target or target in (k.lower() for k in out.keys()):
+    for entry in payload.get("raceData") or []:
+        name = (entry.get("HorseName") or "").strip()
+        if not name:
             continue
-        idx = text_lower.find(target)
-        if idx == -1:
+        key = _normalize(name)
+        post = (entry.get("ProgramNumber") or "").strip() or None
+
+        if _is_scratched_entry(entry):
+            out[key] = {"scratched": True, "post_position": post}
             continue
-        window = text[idx + len(target) : idx + len(target) + LOOKAHEAD_CHARS]
 
-        scr = SCR_RE.search(window)
-        odds = None
-        for m in ODDS_RE.finditer(window):
-            n, d = int(m.group(1)), int(m.group(2))
-            if _looks_like_odds(n, d):
-                odds = (m.start(), f"{n}-{d}")
-                break
+        text_odds = (entry.get("mtp") or {}).get("TextOdds")
+        odds = _normalize_odds(text_odds)
+        if not odds:
+            # No live tote yet — fall back to morning line so we still capture
+            # jockey/trainer/post even before the first cycle posts.
+            odds = _normalize_odds(entry.get("ML"))
+        if not odds:
+            continue
 
-        # If SCR appears before any plausible odds token, the horse is
-        # scratched. Otherwise take the odds.
-        if scr and (odds is None or scr.start() < odds[0]):
-            out[horse] = {"scratched": True}
-        elif odds is not None:
-            out[horse] = {"odds": odds[1]}
+        out[key] = {
+            "odds": odds,
+            "jockey": (entry.get("Jockey") or "").strip() or None,
+            "trainer": (entry.get("Trainer") or "").strip() or None,
+            "post_position": post,
+        }
 
     return out
 
 
-def _scrape_event_status(field: list[str], urls: list[str]) -> dict[str, dict]:
-    merged: dict[str, dict] = {}
-    for url in urls:
-        if len(merged) >= len(field):
-            break
-        page_map = _scrape_page(url, field)
-        for k, v in page_map.items():
-            merged.setdefault(k, v)
-    return merged
-
-
 def _update_picks(picks: list[dict], status_map: dict[str, dict]) -> dict[str, int]:
-    """Returns counters: {'odds_updated': n, 'newly_scratched': n}."""
-    odds_updated = 0
-    newly_scratched = 0
+    """Apply TwinSpires status to picks rows.
+
+    Returns counters for the run summary.
+    """
+    counters = {
+        "odds_updated": 0,
+        "meta_updated": 0,
+        "newly_scratched": 0,
+        "unscratched": 0,
+    }
     now = iso_now()
 
     for p in picks:
-        status = status_map.get(p.get("horse_name", ""))
+        horse = p.get("horse_name") or ""
+        status = status_map.get(_normalize(horse))
         if not status:
             continue
 
-        # Auto-scratch detection.
+        # --- Scratch transitions ---
+        was_scratched = bool(p.get("scratched"))
         if status.get("scratched"):
-            if p.get("scratched"):
+            if was_scratched:
                 continue  # already known
             try:
                 picks_table.update_item(
@@ -192,10 +221,10 @@ def _update_picks(picks: list[dict], status_map: dict[str, dict]) -> dict[str, i
                     ExpressionAttributeValues={":t": True, ":n": now},
                     ConditionExpression="attribute_exists(id)",
                 )
-                newly_scratched += 1
+                counters["newly_scratched"] += 1
                 log.info(
                     "odds_cron_auto_scratched",
-                    extra={"pick_id": p["id"], "horse_name": p.get("horse_name")},
+                    extra={"pick_id": p["id"], "horse_name": horse},
                 )
             except Exception as exc:  # pragma: no cover
                 log.warning(
@@ -204,27 +233,73 @@ def _update_picks(picks: list[dict], status_map: dict[str, dict]) -> dict[str, i
                 )
             continue
 
-        # Odds update for non-scratched horses.
-        if p.get("scratched"):
-            continue
-        new_odds = status.get("odds")
-        if not new_odds or new_odds == p.get("odds_at_pick"):
-            continue
-        try:
-            picks_table.update_item(
-                Key={"id": p["id"]},
-                UpdateExpression="SET odds_at_pick = :o, odds_updated_at = :n, odds_source = :s",
-                ExpressionAttributeValues={":o": new_odds, ":n": now, ":s": "cron"},
-                ConditionExpression="attribute_exists(id)",
-            )
-            odds_updated += 1
-        except Exception as exc:  # pragma: no cover
-            log.warning(
-                "odds_cron_update_failed",
-                extra={"pick_id": p["id"], "error": str(exc)},
-            )
+        # Horse is live in the feed — clear stale scratched flag if set.
+        if was_scratched:
+            try:
+                picks_table.update_item(
+                    Key={"id": p["id"]},
+                    UpdateExpression="SET scratched = :f REMOVE scratched_at",
+                    ExpressionAttributeValues={":f": False},
+                    ConditionExpression="attribute_exists(id)",
+                )
+                counters["unscratched"] += 1
+                log.info(
+                    "odds_cron_unscratched",
+                    extra={"pick_id": p["id"], "horse_name": horse},
+                )
+            except Exception as exc:  # pragma: no cover
+                log.warning(
+                    "odds_cron_unscratch_failed",
+                    extra={"pick_id": p["id"], "error": str(exc)},
+                )
 
-    return {"odds_updated": odds_updated, "newly_scratched": newly_scratched}
+        # --- Odds update ---
+        new_odds = status.get("odds")
+        if new_odds and new_odds != p.get("odds_at_pick"):
+            try:
+                picks_table.update_item(
+                    Key={"id": p["id"]},
+                    UpdateExpression=(
+                        "SET odds_at_pick = :o, odds_updated_at = :n, odds_source = :s"
+                    ),
+                    ExpressionAttributeValues={
+                        ":o": new_odds,
+                        ":n": now,
+                        ":s": "cron",
+                    },
+                    ConditionExpression="attribute_exists(id)",
+                )
+                counters["odds_updated"] += 1
+            except Exception as exc:  # pragma: no cover
+                log.warning(
+                    "odds_cron_update_failed",
+                    extra={"pick_id": p["id"], "error": str(exc)},
+                )
+
+        # --- Jockey / trainer / post_position update ---
+        meta_changes: dict[str, str] = {}
+        for field in ("jockey", "trainer", "post_position"):
+            new_val = status.get(field)
+            if new_val and new_val != p.get(field):
+                meta_changes[field] = new_val
+        if meta_changes:
+            set_clauses = ", ".join(f"{k} = :{k}" for k in meta_changes)
+            values = {f":{k}": v for k, v in meta_changes.items()}
+            try:
+                picks_table.update_item(
+                    Key={"id": p["id"]},
+                    UpdateExpression=f"SET {set_clauses}",
+                    ExpressionAttributeValues=values,
+                    ConditionExpression="attribute_exists(id)",
+                )
+                counters["meta_updated"] += 1
+            except Exception as exc:  # pragma: no cover
+                log.warning(
+                    "odds_cron_meta_failed",
+                    extra={"pick_id": p["id"], "error": str(exc), "fields": list(meta_changes)},
+                )
+
+    return counters
 
 
 @handle_errors(HANDLER)
@@ -232,7 +307,7 @@ def handler(event, context):  # pragma: no cover — exercised in AWS
     summary: dict[str, dict] = {}
     started = datetime.now(timezone.utc).isoformat()
 
-    for kind, urls in SOURCES.items():
+    for kind in TWINSPIRES_CONFIG_IDS:
         race_number = 12 if kind == "derby" else 11
         event_id = f"{CURRENT_YEAR}-kentucky-{kind}"
 
@@ -245,25 +320,31 @@ def handler(event, context):  # pragma: no cover — exercised in AWS
             summary[kind] = {"skipped": "no picks in DDB yet"}
             continue
 
-        field = sorted({p["horse_name"] for p in picks if p.get("horse_name")})
-        status_map = _scrape_event_status(field, urls)
-        counts = _update_picks(picks, status_map)
+        status_map = _fetch_twinspires(kind)
+        if not status_map:
+            summary[kind] = {"skipped": "feed empty / fetch failed"}
+            continue
 
+        counts = _update_picks(picks, status_map)
         scratched_seen = sum(1 for v in status_map.values() if v.get("scratched"))
+        unique_horses = {p["horse_name"] for p in picks if p.get("horse_name")}
+        matched = sum(1 for h in unique_horses if _normalize(h) in status_map)
         summary[kind] = {
-            "field_size": len(field),
-            "matched": len(status_map),
-            "updated": counts["odds_updated"],
+            "feed_size": len(status_map),
+            "field_size": len(unique_horses),
+            "matched": matched,
             "scratched_seen": scratched_seen,
-            "newly_scratched": counts["newly_scratched"],
+            **counts,
         }
 
     # If both events are over the cron has nothing left to do — flip the
     # EventBridge rule off so we stop firing every 15 minutes for nothing.
     # Also flip it off if we're past the hard safety cutoff (defaults to
     # 8 PM ET on Derby Saturday) regardless of result-entry state.
-    derby_done = bool(summary.get("derby", {}).get("skipped"))
-    oaks_done = bool(summary.get("oaks", {}).get("skipped"))
+    # Only "race is over" is durable; transient fetch failures shouldn't
+    # trip the self-disable.
+    derby_done = summary.get("derby", {}).get("skipped") == "race is over"
+    oaks_done = summary.get("oaks", {}).get("skipped") == "race is over"
     past_kill_time = False
     try:
         kill_at = datetime.fromisoformat(SAFE_KILL_AT)
