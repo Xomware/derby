@@ -1,0 +1,38 @@
+{
+  "year": 2023,
+  "event": "oaks",
+  "win": "Southlawn",
+  "place": "Wet Paint",
+  "show": "Wet Paint",
+  "long_shot": "Flying Connection",
+  "inferred": true,
+  "notes": "Inferred from 2023 Oaks 'Plays' section — Southlawn to Win main play; longshot list highlighted Flying Connection.",
+  "analysis": "Two probable winners: Southlawn and Wet Paint. Southlawn closes hard. Wet Paint is the favorite who started way back then steadily passed everyone. Flying Connection wired her last race at a fast pace and held — definite exotic piece.",
+  "betting_plays": "Southlawn to Win\n\nExacta\n7 / 4 (using Wet Paint on top since we didn't use her to win)\n10 / 4,7\nBoxed 8,10\n\nTrifecta\nBoxed 4,7,10 (6 ways)\n4,7 / 4,7,8,10 / 8,10 (14 ways)\n\nSuperfecta\n4,7,10 / 4,7,10 / 4,7,8,10 / 8,10,13 (20 ways)",
+  "power_rankings": [
+    {
+      "tier": "Possible winners",
+      "horses": [
+        { "name": "Southlawn", "note": null },
+        { "name": "Botanical", "note": null },
+        { "name": "Wet Paint", "note": null },
+        { "name": "Flying Connection", "note": null },
+        { "name": "Affirmative Lady", "note": null }
+      ]
+    },
+    {
+      "tier": "Two probable winners",
+      "horses": [
+        { "name": "Southlawn", "note": null },
+        { "name": "Wet Paint", "note": null }
+      ]
+    },
+    {
+      "tier": "Long-shot to hit board",
+      "horses": [
+        { "name": "Promisher America", "note": null },
+        { "name": "Affirmative Lady", "note": null }
+      ]
+    }
+  ]
+}

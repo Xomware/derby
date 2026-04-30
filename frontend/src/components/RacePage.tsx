@@ -7,8 +7,10 @@ import { WriteupSection } from '@/components/WriteupSection';
 import { useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
 import type { Pick } from '@/lib/types';
 import { CURRENT_YEAR } from '@/lib/year';
+import { GrantPinned } from '@/components/GrantPinned';
 import { PowerRankings } from '@/components/PowerRankings';
 import { StatTile } from '@/components/StatTile';
+import { useResults } from '@/lib/hooks';
 
 type SortKey = 'post' | 'name' | 'odds';
 
@@ -57,8 +59,13 @@ export function RacePage({
 }) {
   const { picks, isLoading, year } = usePicks(kind);
   const { grantPicks } = useGrantPicks(kind);
+  const { results } = useResults(year);
   const [sortKey, setSortKey] = useState<SortKey>('post');
   const isArchive = year !== CURRENT_YEAR;
+  const mainRaceNumber = kind === 'derby' ? 12 : 11;
+  const finishers =
+    (results?.races ?? []).find((r) => r.day === kind && r.race_number === mainRaceNumber)
+      ?.finishers ?? [];
 
   const flatPicks = useMemo(
     () => (picks?.races ?? []).flatMap((r) => r.picks),
@@ -131,6 +138,16 @@ export function RacePage({
           )}
         </header>
 
+        {isArchive && grantPicks && (
+          <GrantPinned
+            picks={grantPicks}
+            kind={kind}
+            year={year}
+            isArchive={isArchive}
+            finishers={finishers}
+          />
+        )}
+
         {grantPicks?.analysis && (
           <WriteupSection
             title={`Grant's race outlook`}
@@ -138,49 +155,53 @@ export function RacePage({
           />
         )}
 
-        <div className="flex items-center gap-2 flex-wrap">
-          <label className="text-xs uppercase tracking-wider text-bourbon/70 font-semibold">
-            Sort by
-          </label>
-          <div className="flex gap-1 flex-wrap">
-            {SORTS.map((s) => {
-              const active = sortKey === s.id;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => setSortKey(s.id)}
-                  className={`px-2.5 py-1 rounded text-xs font-semibold transition border ${
-                    active
-                      ? 'bg-rose-red/10 text-rose-dark border-rose-red/30'
-                      : 'border-bourbon/20 text-bourbon hover:border-rose-red'
-                  }`}
-                >
-                  {s.label}
-                </button>
-              );
-            })}
+        {!isArchive && sortedPicks.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <label className="text-xs uppercase tracking-wider text-bourbon/70 font-semibold">
+              Sort by
+            </label>
+            <div className="flex gap-1 flex-wrap">
+              {SORTS.map((s) => {
+                const active = sortKey === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setSortKey(s.id)}
+                    className={`px-2.5 py-1 rounded text-xs font-semibold transition border ${
+                      active
+                        ? 'bg-rose-red/10 text-rose-dark border-rose-red/30'
+                        : 'border-bourbon/20 text-bourbon hover:border-rose-red'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+            <span className="text-xs text-bourbon/60 ml-auto">
+              {sortedPicks.length} horses
+            </span>
           </div>
-          <span className="text-xs text-bourbon/60 ml-auto">
-            {sortedPicks.length} horses
-          </span>
-        </div>
+        )}
 
         {isLoading && (
           <div className="text-center text-bourbon/70 py-12">Loading…</div>
         )}
 
-        {picks && sortedPicks.length === 0 && !isLoading && (
+        {picks && sortedPicks.length === 0 && !isLoading && !isArchive && (
           <div className="rounded-lg border border-bourbon/20 bg-white p-8 text-center text-bourbon/70">
             No horses posted yet for this race.
           </div>
         )}
 
-        <div className="space-y-5">
-          {sortedPicks.map((p) => (
-            <HorseCard key={p.id} pick={p} />
-          ))}
-        </div>
+        {!isArchive && (
+          <div className="space-y-5">
+            {sortedPicks.map((p) => (
+              <HorseCard key={p.id} pick={p} />
+            ))}
+          </div>
+        )}
 
         {grantPicks?.power_rankings && grantPicks.power_rankings.length > 0 && (
           <PowerRankings tiers={grantPicks.power_rankings} />

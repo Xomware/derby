@@ -1,0 +1,61 @@
+{
+  "year": 2025,
+  "event": "derby",
+  "win": "Final Gambit",
+  "place": "Sovereignty",
+  "show": "Publisher",
+  "long_shot": "Final Gambit",
+  "inferred": true,
+  "notes": "Inferred from 2025 betting-plays section: Publisher to Show $$$$$, Sovereignty to Show $$, Final Gambit to Win $.",
+  "analysis": "There are a lot of horses that are not only speed horses, but ones that have to have the lead in order to run their best race. If they push the pace early as expected, it should open up the door for the closers to make a run at the end.\n\nThis is the first Derby I truly don't see any horses that look unbeatable. Whichever of the closing horses is able to sit down closest off the front group will have the advantage. Journalism and Sovereignty historically sit in that point in the field.\n\nValue is in taking Publisher to hit the board and finish top 3 — should pay close to 5-1. Sovereignty to Show would pay about 5-2. At least one of these will cash. Then for fun I'll sprinkle a longshot in Final Gambit to win at about 20-1.",
+  "betting_plays": "Publisher to Show $$$$$\nSovereignty to Show $$\nFinal Gambit to Win $\n\nExacta\nJournalism / Publisher, Sovereignty, Final Gambit (3 ways)\nSandman / Publisher, Sovereignty, Final Gambit (3 ways)\n\nTrifecta\nFinal Gambit, Publisher / Journalism, Sandman, Sovereignty / Journalism, Sandman, Sovereignty (12 ways)\n\nSuperfecta\nJournalism / Publisher / Final Gambit, Baeza, Rodriguez / Final Gambit, Baeza, Rodriguez, Sovereignty, Sandman, East Avenue, Neoequos, Luxor Café, Tiztastic (24 ways)",
+  "power_rankings": [
+    {
+      "tier": "Tier 1",
+      "horses": [
+        { "name": "(none)", "note": "nobody is great this year — wide open which is why I'd rather sprinkle longshots" }
+      ]
+    },
+    {
+      "tier": "Tier 2 — Favorites",
+      "horses": [
+        { "name": "Sovereignty", "note": "most consistent horse, could win with a good trip" },
+        { "name": "Sandman", "note": "looked great in last race, but I trust Sovereignty more" },
+        { "name": "Journalism", "note": "no blemishes on resume and will be bet heavy" }
+      ]
+    },
+    {
+      "tier": "Tier 3 — Closers that should take advantage of the fast pace breaking down",
+      "horses": [
+        { "name": "Publisher", "note": "my underdog. Will 100% outrun his odds" },
+        { "name": "Baeza", "note": "improving and exciting horse who could outrun everyone" },
+        { "name": "Tiztastic", "note": "improved and will handle the distance well" },
+        { "name": "Final Gambit", "note": "wild card. Amazing closing speed" },
+        { "name": "Grande", "note": "lightly raced and keeps improving — capable" },
+        { "name": "Burnham Square", "note": "capable, but of the closers there are better" },
+        { "name": "Luxor Café", "note": "might be the real deal but passing on Japan" },
+        { "name": "Chunk of Gold", "note": "did well in Louisiana, but better proven horses ahead" }
+      ]
+    },
+    {
+      "tier": "Tier 4 — Pace pushers",
+      "horses": [
+        { "name": "Rodriguez", "note": "took step up in the Wood, tougher trip this go" },
+        { "name": "American Promise", "note": "looked great against bad competition. Don't expect much" },
+        { "name": "East Avenue", "note": "likeliest of the speed horses if I had to back one" },
+        { "name": "Neoequos", "note": "expect him near the top all the way til last turn" },
+        { "name": "Citizen Bull", "note": "regressed each race. Distance is an issue" }
+      ]
+    },
+    {
+      "tier": "Tier 5 — No chance",
+      "horses": [
+        { "name": "Coal Battle", "note": "can't do the distance" },
+        { "name": "Owen Almighty", "note": "will sprint out and float to last" },
+        { "name": "Flying Mohawk", "note": "nonfactor" },
+        { "name": "Render Judgment", "note": "bad horse" },
+        { "name": "Admire Daytona", "note": "Japan #2 horse, pass" }
+      ]
+    }
+  ]
+}

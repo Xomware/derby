@@ -1,0 +1,43 @@
+{
+  "year": 2025,
+  "event": "oaks",
+  "win": "Quietside",
+  "place": "Take Charge Milady",
+  "show": "Good Cheer",
+  "long_shot": "Simply Joking",
+  "inferred": true,
+  "notes": "Inferred from 2025 Oaks 'Betting Plays' section.",
+  "analysis": "Good Cheer is definitely the horse to beat — and we are not taking a 6-5 horse straight up. I will try and beat her with either Quietside or Take Charge Milady.",
+  "betting_plays": "Quietside to Win $\nTake Charge Milady to Win $\n\nExacta Box\nTake Charge Milady, Quietside, Good Cheer (6 ways)\n\nSeparate Exacta\nGood Cheer / Take Charge Milady $\n\nTrifecta\nGood Cheer, Quietside / Take Charge Milady / Good Cheer, Quietside, Simply Joking, La Cara (6 ways)",
+  "power_rankings": [
+    {
+      "tier": "Yes (in no order)",
+      "horses": [
+        { "name": "La Cara", "note": "hot and improving; distance will only help" },
+        { "name": "Take Charge Milady", "note": "good mud experience, closer in a fast race" },
+        { "name": "Good Cheer", "note": "heavy favorite 6-0; brutal odds but has won each race" },
+        { "name": "Quietside", "note": "strong resume; gave Good Cheer her best race in 2024" },
+        { "name": "Simply Joking", "note": "mud experience; tightly raced Quietside" }
+      ]
+    },
+    {
+      "tier": "Maybe",
+      "horses": [
+        { "name": "Drexel Hill", "note": "only a maybe because of the long odds" },
+        { "name": "Quickick", "note": "won't win, but room for improvement" },
+        { "name": "Five G", "note": null },
+        { "name": "Tenma", "note": "great until barely winning last race; if last was a hiccup, win contender at a price" },
+        { "name": "Bless the Broken", "note": "needs a big step up but has experience in a large field" }
+      ]
+    },
+    {
+      "tier": "No",
+      "horses": [
+        { "name": "Early On", "note": null },
+        { "name": "Ballerina d’Oro", "note": null },
+        { "name": "Fondly", "note": null },
+        { "name": "Anna’s Promise", "note": null }
+      ]
+    }
+  ]
+}

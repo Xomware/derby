@@ -1,0 +1,31 @@
+{
+  "year": 2024,
+  "event": "oaks",
+  "win": "Thorpedo Anna",
+  "place": "Leslie's Rose",
+  "show": "Just F Y I",
+  "long_shot": "Just Squeeze",
+  "inferred": true,
+  "notes": "Inferred from 2024 Oaks 'Oaks Play' / superfecta lines.",
+  "analysis": "Thorpedo Anna looked outstanding in last race plus drew a great post — favorite to win. Leslie's Rose looked strong with a closing kick. Just FYI had to take a wide turn last out and could bounce back. Power Squeeze has the most impressive closing speed and is a value play.",
+  "betting_plays": "Just Squeeze to Show $$$\n\nExacta\nBoxed Leslie's Rose / Thorpedo Anna\n\nTrifecta\nLeslie's Rose, Thorpedo Anna / Just FYI / Leslie's Rose, Thorpedo Anna\n\nSuperfecta\nKeyed in top three: Leslie's Rose & Just FYI & Thorpedo Anna w/ 4th = Just Squeeze",
+  "power_rankings": [
+    {
+      "tier": "Live to win",
+      "horses": [
+        { "name": "Thorpedo Anna", "note": "outstanding in last race + great post" },
+        { "name": "Leslie's Rose", "note": "strong closing speed; good for distance; beat Just FYI" },
+        { "name": "Just F Y I", "note": "wide turn last out hurt her; outside of last has been the clear best" }
+      ]
+    },
+    {
+      "tier": "Underneath value",
+      "horses": [
+        { "name": "Power Squeeze", "note": "most impressive closing speed of last preps; great value" },
+        { "name": "Just Squeeze", "note": "show-spot key on superfectas" },
+        { "name": "Ways and Means", "note": "looked strong all race and ran wide; cleaner trip = win shot" },
+        { "name": "Our Pretty Woman", "note": "drew far outside again, unfortunate" }
+      ]
+    }
+  ]
+}

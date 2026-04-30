@@ -1,0 +1,51 @@
+{
+  "year": 2021,
+  "event": "derby",
+  "win": "Known Agenda",
+  "place": "Hot Rod Charlie",
+  "show": "Known Agenda",
+  "long_shot": "Sainthood",
+  "inferred": true,
+  "notes": "Inferred from 2021 'My Play' — Known Agenda to win and show, Hot Rod Charlie to win and show, Sainthood/Helium called the best super long-shot horses.",
+  "analysis": "Essential Quality is the best horse, but nowhere near worth the price. Struggling between Known Agenda and Hot Rod Charlie. Like O Besos or King Fury as mid-tier flyers to hit the board. Sainthood and Helium are the best super-long-shot horses.",
+  "betting_plays": "Known Agenda to Win and Show\nHot Rod Charlie to Win and Show\n\nExacta Box: 1/9 – 1/9 (2 lines, $10 each)\nTrifecta: 1/9 – 6/16/5 – 1/9 (6 lines, $2 each)\nSuperfecta: 1/9 – 1/9 – 6/5/16 – 6/5/16 (18 lines, $1 each)\n\nKey numbers\n1 — Known Agenda\n5 — Sainthood\n6 — O Besos\n9 — Hot Rod Charlie\n16 — King Fury",
+  "power_rankings": [
+    {
+      "tier": "Top contenders",
+      "horses": [
+        { "name": "Known Agenda", "note": "drawing the first post will work in his favor — closer who won't burn energy early" },
+        { "name": "Hot Rod Charlie", "note": "really high on him; comes down to the break between speed horses" },
+        { "name": "Essential Quality", "note": "best horse on paper but not worth 2-1" }
+      ]
+    },
+    {
+      "tier": "Live underneath",
+      "horses": [
+        { "name": "O Besos", "note": "closer-type. Could be better than odds suggest. Trifecta-back-end material" },
+        { "name": "King Fury", "note": "strong workouts; surrounded by speed in his post" },
+        { "name": "Highly Motivated", "note": "fast horse, only lost to Essential Quality by a neck" }
+      ]
+    },
+    {
+      "tier": "Long shots",
+      "horses": [
+        { "name": "Sainthood", "note": "by far the best of the long-shot horses" },
+        { "name": "Helium", "note": "has good late speed splits, undefeated, intriguing price" },
+        { "name": "Like the King", "note": "won't hit the board, but won't be last" }
+      ]
+    },
+    {
+      "tier": "Pass",
+      "horses": [
+        { "name": "Medina Spirit", "note": "Bob Baffert horse — doesn't have endurance to close" },
+        { "name": "Mandaloun", "note": "inconsistent — last race shit the bed" },
+        { "name": "Rock Your World", "note": "lightly raced, will need to come from behind" },
+        { "name": "Soup and Sandwich", "note": "speed horse stuck in 19th post; people pick him because of the name" },
+        { "name": "Bourbonic", "note": "won a slow race to qualify" },
+        { "name": "Brooklyn Strong", "note": "not good. Don't entertain" },
+        { "name": "Keepmeinmind", "note": "not good" },
+        { "name": "Hidden Stash", "note": "won't win" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "year": 2023,
+  "event": "derby",
+  "win": "Forte",
+  "place": "Angel of Empire",
+  "show": "Forte",
+  "long_shot": "Two Phil's",
+  "inferred": true,
+  "notes": "Inferred from 2023 betting plays — Forte to win/show favorite, Angel of Empire as the second-best, Two Phil's as the price flier.",
+  "analysis": "One of the most wide-open races (5-6 horses) and one I don't have a clear lean to win. The best horses in this field will start mid-pack to dead last. Without a collective push on pace, look for whichever horse can start well, be around 5th at the first turn and make a move up to first into the second turn. Forte drawing an outside post will help him swing outside to make a move — main bet, will probably pay even odds to show. Angel of Empire is another horse that, if positioned well, could push around the final turn with a shot to win.",
+  "betting_plays": "Forte to Show (main bet)\nH2H Angel of Empire over Tapit Trice (if offered in props)\n\nExactas\nBoxing Kingsbarns, Mage, Angel of Empire, Forte, and Derma Sotogake (20 ways)\n\nTrifectas\nBoxing Mage, Forte, and Angel of Empire while adding Derma Sotogake and Kingsbarns up top (18 ways)\nAdding Two Phil's underneath (30 ways)\n\nSuperfectas\nMixed two-horse keyed lines plus a wider underneath",
+  "power_rankings": [
+    {
+      "tier": "Top tier",
+      "horses": [
+        { "name": "Forte", "note": "very versatile, post will let him duck mid-pack but use outside late" },
+        { "name": "Angel of Empire", "note": "closer who could break first if positioned well" }
+      ]
+    },
+    {
+      "tier": "In the mix",
+      "horses": [
+        { "name": "Tapit Trice", "note": "very strong but stalking style won't fare in slower field" },
+        { "name": "Kingsbarns", "note": "perfect post + pace plays in his favor; tricky pick" },
+        { "name": "Derma Sotogake", "note": "Japanese eye-test pick; UAE Derby winner is 0-18 in the Derby though" }
+      ]
+    },
+    {
+      "tier": "Wild cards / live longshots",
+      "horses": [
+        { "name": "Mage", "note": "only three races; getting better each time" },
+        { "name": "Two Phil's", "note": "popular bet, but coming off a win against a weak field" },
+        { "name": "Confidence Game", "note": "huge wild card — perfect post; 10-week layoff scares people" }
+      ]
+    },
+    {
+      "tier": "Pass",
+      "horses": [
+        { "name": "Hit Show", "note": null },
+        { "name": "Verifying", "note": "fast horse but not the best" },
+        { "name": "Reincarnate", "note": "will press pace, then die mid-race" },
+        { "name": "Disarm", "note": null },
+        { "name": "Jace's Road", "note": null },
+        { "name": "Skinner", "note": null }
+      ]
+    }
+  ]
+}

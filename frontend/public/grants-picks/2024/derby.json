@@ -1,0 +1,39 @@
+{
+  "year": 2024,
+  "event": "derby",
+  "win": "Sierra Leone",
+  "place": "Catching Freedom",
+  "show": "Catching Freedom",
+  "long_shot": "Endlessly",
+  "inferred": true,
+  "notes": "Inferred from 2024 'Betting plays' + Superfecta lines (Endlessly was the long-priced underneath).",
+  "analysis": "Wide-open year. Closers should benefit from a fast pace up front. Sierra Leone is the freight train to take it down with Catching Freedom most likely to round out the board.",
+  "betting_plays": "Sierra Leone to Win\nCatching Freedom to Place\nCatching Freedom to Show\n\nExacta\nSierra Leone, Catching Freedom / Honor Marie, Just a Touch\n$$$ Boxed Sierra Leone & Catching Freedom\n\nTrifecta\nFierceness / Sierra Leone, Catching Freedom / Catching Freedom, Just a Touch\n\nSuperfecta\nSierra Leone / Catching Freedom, Honor Marie / Catching Freedom, Honor Marie, Endlessly, Just a Touch / Honor Marie, Just a Touch, Endlessly, Society Man\n\nGet Rich Quick Superfecta\nCatching Freedom / Honor Marie, Sierra Leone / Endlessly, Society Man / Honor Marie, Sierra Leone",
+  "power_rankings": [
+    {
+      "tier": "Top contenders",
+      "horses": [
+        { "name": "Sierra Leone", "note": "absolute freight train closing races. Has to hit the board" },
+        { "name": "Fierceness", "note": "speed figures top the field" },
+        { "name": "Catching Freedom", "note": "improved every race; closing-style; LA Derby winner" }
+      ]
+    },
+    {
+      "tier": "Live longer shots",
+      "horses": [
+        { "name": "Honor Marie", "note": "ran practically the same race as Catching Freedom in LA. Should be in exotics" },
+        { "name": "Just a Touch", "note": "lost Blue Grass to Sierra Leone after leading; live shot if he handles distance" },
+        { "name": "Endlessly", "note": "long-shot underneath piece for trifectas/superfectas" }
+      ]
+    },
+    {
+      "tier": "Pass",
+      "horses": [
+        { "name": "Catalytic", "note": "looked three classes below Fierceness in Florida Derby" },
+        { "name": "Just Steel", "note": "no takeover mentality, classic 11th-place finish" },
+        { "name": "Mystik Dan", "note": "may be worth a flier only if the track is wet" },
+        { "name": "Dornoch", "note": "first post + uninspiring 2024 = pass" }
+      ]
+    }
+  ]
+}
