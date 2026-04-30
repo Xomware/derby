@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Countdown } from '@/components/Countdown';
 import { SidePanel, SidePanelItem } from '@/components/SidePanel';
 import { WriteupSection } from '@/components/WriteupSection';
@@ -8,6 +8,7 @@ import { useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
 import type { Pick } from '@/lib/types';
 import { CURRENT_YEAR } from '@/lib/year';
 import { HorseComments } from '@/components/HorseComments';
+import { StatTile } from '@/components/StatTile';
 
 type SortKey = 'post' | 'name' | 'odds';
 
@@ -78,6 +79,17 @@ export function RacePage({
   }, [flatPicks, sortKey]);
 
   const earliestLock = picks?.races.map((r) => r.lock_time).sort()[0];
+
+  // After picks load, jump to the URL hash if present (e.g. ticker click into
+  // /derby#horse-xyz lands before SWR returns; we re-scroll once it does).
+  useEffect(() => {
+    if (!picks) return;
+    if (typeof window === 'undefined') return;
+    const hash = window.location.hash.replace(/^#/, '');
+    if (!hash) return;
+    const el = document.getElementById(hash);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [picks]);
 
   const tocItems: SidePanelItem[] = useMemo(
     () =>
@@ -241,17 +253,12 @@ function HorseCard({
       {stats.length > 0 && (
         <dl className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
           {stats.map((s) => (
-            <div
+            <StatTile
               key={s.label}
-              title={statTip(s.label)}
-              className="rounded-md border border-bourbon/15 bg-cream/40 px-3 py-2 cursor-help"
-            >
-              <dt className="text-[10px] uppercase tracking-wider text-bourbon/60 font-semibold flex items-center gap-1">
-                {s.label}
-                {statTip(s.label) && <span className="text-bourbon/40">?</span>}
-              </dt>
-              <dd className="text-sm text-bourbon font-semibold mt-0.5">{s.value}</dd>
-            </div>
+              label={s.label}
+              value={s.value}
+              description={statTip(s.label)}
+            />
           ))}
         </dl>
       )}

@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
 import {
   useGrantPicks,
   usePicks,
@@ -11,8 +12,6 @@ import {
 import type { Pick, RaceFinisher } from '@/lib/types';
 import { CURRENT_YEAR } from '@/lib/year';
 
-const ROTATION_MS = 30_000;
-
 const SLOT_BADGE: Record<'win' | 'place' | 'show' | 'long_shot', string> = {
   win: 'Grant: Win',
   place: 'Grant: Place',
@@ -22,6 +21,8 @@ const SLOT_BADGE: Record<'win' | 'place' | 'show' | 'long_shot', string> = {
 
 interface TickerItem {
   key: string;
+  kind: RaceKind;
+  horseId: string;
   postLabel: string;
   name: string;
   odds: string | null;
@@ -30,6 +31,7 @@ interface TickerItem {
 }
 
 function buildItems(
+  kind: RaceKind,
   horses: Pick[],
   finishers: RaceFinisher[],
   grant: GrantPicks | undefined
@@ -60,7 +62,9 @@ function buildItems(
   return sorted.map((h) => {
     const pos = positions.get(norm(h.horse_name)) ?? null;
     return {
-      key: h.id,
+      key: `${kind}-${h.id}`,
+      kind,
+      horseId: h.id,
       postLabel: pos ? `#${pos}` : `Post ${h.post_position ?? '?'}`,
       name: h.horse_name,
       odds: h.odds_at_pick,
@@ -78,17 +82,7 @@ export function Ticker() {
   const { grantPicks: oaksGrant } = useGrantPicks('oaks');
   const { results } = useResults(year);
   const isCurrent = year === CURRENT_YEAR;
-
-  const [activeKind, setActiveKind] = useState<RaceKind>('derby');
   const [paused, setPaused] = useState(false);
-
-  // Cycle Derby → Oaks → Derby every ROTATION_MS
-  useEffect(() => {
-    const id = setInterval(() => {
-      setActiveKind((k) => (k === 'derby' ? 'oaks' : 'derby'));
-    }, ROTATION_MS);
-    return () => clearInterval(id);
-  }, []);
 
   const derbyHorses = useMemo<Pick[]>(
     () => (derby?.races ?? []).flatMap((r) => r.picks),
@@ -108,17 +102,14 @@ export function Ticker() {
   };
 
   const items = useMemo<TickerItem[]>(() => {
-    if (activeKind === 'derby') {
-      return buildItems(derbyHorses, finishersFor('derby'), derbyGrant);
-    }
-    return buildItems(oaksHorses, finishersFor('oaks'), oaksGrant);
+    return [
+      ...buildItems('derby', derbyHorses, finishersFor('derby'), derbyGrant),
+      ...buildItems('oaks', oaksHorses, finishersFor('oaks'), oaksGrant),
+    ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeKind, derbyHorses, oaksHorses, results, derbyGrant, oaksGrant]);
+  }, [derbyHorses, oaksHorses, results, derbyGrant, oaksGrant]);
 
   if (!isCurrent || items.length === 0) return null;
-
-  const eventLabel = activeKind === 'derby' ? 'Derby' : 'Oaks';
-  const eventColor = activeKind === 'derby' ? 'bg-rose-red' : 'bg-mint-julep';
 
   // Duplicate for seamless infinite scroll.
   const doubled = [...items, ...items];
@@ -129,21 +120,24 @@ export function Ticker() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div
-        className={`flex items-center gap-1 px-3 h-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-cream ${eventColor}`}
-      >
-        {eventLabel}
-      </div>
       <div className="flex-1 overflow-hidden ticker-mask">
         <div
           className={`ticker-track ${paused ? 'paused' : ''}`}
-          aria-label={`${eventLabel} ticker`}
+          aria-label="Derby + Oaks ticker"
         >
           {doubled.map((it, i) => (
-            <span
+            <Link
               key={`${it.key}-${i}`}
-              className="inline-flex items-center gap-2 px-3 py-1 mx-1 rounded-full border border-bourbon/15 bg-white text-xs whitespace-nowrap shrink-0"
+              href={`/${it.kind}/?event=${it.kind}#horse-${it.horseId}`}
+              className="inline-flex items-center gap-2 px-3 py-1 mx-1 rounded-full border border-bourbon/15 bg-white text-xs whitespace-nowrap shrink-0 hover:bg-rose-red/5 hover:border-rose-red/30 transition"
             >
+              <span
+                className={`px-1.5 rounded text-[9px] uppercase font-bold tracking-wider text-cream ${
+                  it.kind === 'derby' ? 'bg-rose-red' : 'bg-mint-julep'
+                }`}
+              >
+                {it.kind}
+              </span>
               <span className="font-mono text-bourbon/60">{it.postLabel}</span>
               <span className="font-semibold text-rose-dark">{it.name}</span>
               {it.odds && <span className="text-bourbon/70">{it.odds}</span>}
@@ -157,7 +151,7 @@ export function Ticker() {
                   {it.grantBadge}
                 </span>
               )}
-            </span>
+            </Link>
           ))}
         </div>
       </div>

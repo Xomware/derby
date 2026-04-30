@@ -20,8 +20,19 @@ export function oaksEventId(year: number): string {
   return `${year}-kentucky-oaks`;
 }
 
+function _yearFromUrl(): DerbyYear | null {
+  if (typeof window === 'undefined') return null;
+  const raw = new URLSearchParams(window.location.search).get('year');
+  if (!raw) return null;
+  const n = Number(raw);
+  return isValidYear(n) ? n : null;
+}
+
 export function readYear(): DerbyYear {
   if (typeof window === 'undefined') return CURRENT_YEAR;
+  // URL ?year= overrides localStorage so shared links land on the right year.
+  const fromUrl = _yearFromUrl();
+  if (fromUrl !== null) return fromUrl;
   const raw = window.localStorage.getItem(KEY);
   const parsed = raw ? Number(raw) : CURRENT_YEAR;
   return isValidYear(parsed) ? parsed : CURRENT_YEAR;
@@ -30,6 +41,14 @@ export function readYear(): DerbyYear {
 export function setYear(y: DerbyYear): void {
   if (typeof window === 'undefined') return;
   window.localStorage.setItem(KEY, String(y));
+  // Mirror to URL so refresh / share keeps the year.
+  const url = new URL(window.location.href);
+  if (y === CURRENT_YEAR) {
+    url.searchParams.delete('year');
+  } else {
+    url.searchParams.set('year', String(y));
+  }
+  window.history.replaceState(null, '', url.toString());
   window.dispatchEvent(new Event('derby-year-changed'));
 }
 

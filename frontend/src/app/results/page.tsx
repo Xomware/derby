@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Countdown } from '@/components/Countdown';
-import { SidePanel, SidePanelItem } from '@/components/SidePanel';
 import { usePicks, useResults, type RaceKind } from '@/lib/hooks';
 import type { Pick, RaceFinisher } from '@/lib/types';
 import { CURRENT_YEAR } from '@/lib/year';
@@ -73,28 +72,9 @@ export default function ResultsPage() {
   const lockTime = picks?.races[0]?.lock_time;
   const official = finishers.length > 0;
 
-  const tocItems: SidePanelItem[] = useMemo(
-    () =>
-      sorted.map((p) => {
-        const pos = positionOf(p, finishers);
-        const label =
-          pos && pos <= 3
-            ? `${POSITION_LABEL[pos]} — ${p.horse_name}`
-            : pos
-            ? `#${pos} — ${p.horse_name}`
-            : p.horse_name;
-        return {
-          id: `result-horse-${p.id}`,
-          label,
-          meta: p.odds_at_pick ?? undefined,
-        };
-      }),
-    [sorted, finishers]
-  );
-
   return (
-    <div className="pt-8 lg:grid lg:grid-cols-[1fr_240px] lg:gap-6">
-      <section className="space-y-6 min-w-0 max-w-3xl">
+    <div className="pt-8 max-w-3xl mx-auto">
+      <section className="space-y-6 min-w-0">
         <header>
           <h1 className="font-display text-3xl text-rose-dark">
             {isArchive ? `${year} Results` : 'Live Results'}
@@ -165,8 +145,6 @@ export default function ResultsPage() {
           ))}
         </ol>
       </section>
-
-      <SidePanel title="Jump to" items={tocItems} />
     </div>
   );
 }

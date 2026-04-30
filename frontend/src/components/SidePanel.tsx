@@ -58,6 +58,10 @@ export function SidePanel({
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+    // Mirror to URL hash so refresh / share lands at the same anchor.
+    const url = new URL(window.location.href);
+    url.hash = id;
+    window.history.replaceState(null, '', url.toString());
     setDrawerOpen(false);
   }
 
