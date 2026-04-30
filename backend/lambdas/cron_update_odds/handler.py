@@ -48,14 +48,18 @@ USER_AGENT = (
 # Pages we'll try, in order. First page that produces matches wins for that event.
 SOURCES: dict[str, list[str]] = {
     "derby": [
-        "https://www.kentuckyderby.com/wager/odds",
-        "https://www.kentuckyderby.com/horses",
+        "https://www.kentuckyderby.com/derby-horses/",
+        "https://www.kentuckyderby.com/wager/live-odds/",
     ],
     "oaks": [
-        "https://www.kentuckyoaks.com/wager/odds",
-        "https://www.kentuckyoaks.com/horses",
+        "https://www.kentuckyderby.com/oaks-horses/",
     ],
 }
+
+# Window we scan after each horse name for the next odds-shaped token. The
+# kentuckyderby.com leaderboard puts the trainer/jockey/odds in a column that
+# can sit ~1.2 KB downstream of the name in the rendered HTML.
+LOOKAHEAD_CHARS = 1800
 
 ODDS_RE = re.compile(r"\b(\d{1,3})\s*[-/]\s*(\d{1,3})\b")
 
@@ -118,7 +122,7 @@ def _scrape_page(url: str, field: list[str]) -> dict[str, str]:
         idx = text_lower.find(target)
         if idx == -1:
             continue
-        window = text[idx + len(target) : idx + len(target) + 240]
+        window = text[idx + len(target) : idx + len(target) + LOOKAHEAD_CHARS]
         for m in ODDS_RE.finditer(window):
             n, d = int(m.group(1)), int(m.group(2))
             if _looks_like_odds(n, d):
