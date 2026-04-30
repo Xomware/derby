@@ -29,6 +29,7 @@ export interface Pick {
   result: ResultValue;
   display_order: number;
   locked: boolean;
+  scratched: boolean;
 }
 
 export interface RaceGroup {

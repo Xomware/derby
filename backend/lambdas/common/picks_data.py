@@ -110,6 +110,7 @@ def serialize_pick(pick: dict, votes: list[dict], usernames_by_user_id: dict[str
         "result": pick.get("result", "pending"),
         "display_order": _to_int(pick.get("display_order", 0)),
         "locked": is_locked(rpt),
+        "scratched": bool(pick.get("scratched", False)),
         "counts": counts,
         "voters": voters,
         "my_vote": my_vote,

@@ -66,8 +66,14 @@ export function PickForm({
   const allHorses = useMemo(
     () =>
       [...horses]
+        .filter((h) => !h.scratched)
         .sort((a, b) => a.horse_name.localeCompare(b.horse_name))
         .map((h) => ({ name: h.horse_name, odds: h.odds_at_pick })),
+    [horses]
+  );
+
+  const scratchedNames = useMemo(
+    () => new Set(horses.filter((h) => h.scratched).map((h) => h.horse_name)),
     [horses]
   );
 
@@ -75,6 +81,13 @@ export function PickForm({
     () => allHorses.filter((h) => isLongShotEligible(h.odds)),
     [allHorses]
   );
+
+  const myScratchedSlots = useMemo(() => {
+    if (!existing) return [] as ('win' | 'place' | 'show' | 'long_shot')[];
+    return (['win', 'place', 'show', 'long_shot'] as const).filter((s) =>
+      scratchedNames.has(existing[s] ?? '')
+    );
+  }, [existing, scratchedNames]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -126,22 +139,49 @@ export function PickForm({
           {FIELDS.map((f) => {
             const value = (existing as Prediction)[f.key];
             const stamp = computeStamp(value, f.key, finishers);
+            const scratched = scratchedNames.has(value);
             return (
               <div
                 key={f.key}
-                className="rounded-md border border-bourbon/15 bg-cream/40 px-3 py-2"
+                className={`rounded-md border px-3 py-2 ${
+                  scratched
+                    ? 'border-rose-red/40 bg-rose-red/5'
+                    : 'border-bourbon/15 bg-cream/40'
+                }`}
               >
                 <dt className="text-[10px] uppercase tracking-wider text-bourbon/70 font-semibold flex items-center justify-between gap-1">
                   <span>{f.label.replace(/\s*\([^)]*\)/, '')}</span>
                   {stamp && <StampBadge stamp={stamp} />}
                 </dt>
-                <dd className="text-sm font-semibold text-bourbon mt-0.5">
+                <dd
+                  className={`text-sm font-semibold mt-0.5 ${
+                    scratched ? 'text-rose-dark line-through decoration-rose-red/70' : 'text-bourbon'
+                  }`}
+                  title={scratched ? 'Scratched — update your pick' : undefined}
+                >
                   {value}
+                  {scratched && (
+                    <span className="ml-1 text-[10px] uppercase tracking-wider font-bold text-rose-red no-underline">
+                      ⚠ scratched
+                    </span>
+                  )}
                 </dd>
               </div>
             );
           })}
         </dl>
+      )}
+
+      {myScratchedSlots.length > 0 && !locked && (
+        <div className="mb-3 rounded-md border-l-4 border-rose-red bg-rose-red/5 px-3 py-2 text-xs text-rose-dark">
+          Heads up — you picked a scratched horse for{' '}
+          <strong>
+            {myScratchedSlots
+              .map((s) => FIELDS.find((f) => f.key === s)?.label.replace(/\s*\([^)]*\)/, ''))
+              .join(', ')}
+          </strong>
+          . Pick a different one before lock or you&apos;ll score zero on that slot.
+        </div>
       )}
 
       {locked ? (

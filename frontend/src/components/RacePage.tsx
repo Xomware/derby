@@ -35,6 +35,7 @@ interface DisplayHorse {
   style: string | null;
   final_take: string | null;
   writeup: string | null;
+  scratched: boolean;
 }
 
 const SORTS: { id: SortKey; label: string }[] = [
@@ -132,6 +133,7 @@ export function RacePage({
         style: p.style,
         final_take: p.final_take,
         writeup: p.writeup,
+        scratched: p.scratched,
       }));
     }
     if (isArchive && grantPicks?.horses?.length) {
@@ -150,6 +152,7 @@ export function RacePage({
         style: h.style ?? null,
         final_take: h.final_take ?? null,
         writeup: h.writeup ?? null,
+        scratched: false,
       }));
     }
     return [];
@@ -347,6 +350,17 @@ function statTip(label: string): string | undefined {
   return STAT_DESCRIPTIONS[label];
 }
 
+function ScratchedStamp() {
+  return (
+    <span
+      aria-label="Scratched"
+      className="absolute top-3 right-3 -rotate-12 px-3 py-1 rounded border-2 border-rose-red bg-rose-red/10 text-rose-red font-bold tracking-[0.2em] text-xs uppercase shadow-sm select-none pointer-events-none"
+    >
+      Scratched
+    </span>
+  );
+}
+
 function HorseCard({ pick: p }: { pick: DisplayHorse }) {
   const stats: { label: string; value: string }[] = [];
   if (p.odds_at_pick) stats.push({ label: 'Odds', value: p.odds_at_pick });
@@ -366,8 +380,11 @@ function HorseCard({ pick: p }: { pick: DisplayHorse }) {
   return (
     <article
       id={`horse-${p.id}`}
-      className="scroll-mt-24 rounded-xl border border-bourbon/15 bg-white p-5 shadow-sm"
+      className={`relative scroll-mt-24 rounded-xl border bg-white p-5 shadow-sm ${
+        p.scratched ? 'border-rose-red/40 opacity-70 line-through decoration-rose-red/60 decoration-2' : 'border-bourbon/15'
+      }`}
     >
+      {p.scratched && <ScratchedStamp />}
       <header>
         <div className="text-[11px] uppercase tracking-wider text-bourbon/60">
           {p.post_position != null && <>Post {p.post_position}</>}

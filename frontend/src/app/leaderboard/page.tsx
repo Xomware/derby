@@ -56,6 +56,18 @@ export default function LeaderboardPage() {
     return m;
   }, [picks]);
 
+  const scratchedHorses = useMemo(() => {
+    const s = new Set<string>();
+    for (const r of picks?.races ?? []) {
+      for (const p of r.picks) {
+        if (p.scratched && p.horse_name) {
+          s.add(p.horse_name.trim().toLowerCase());
+        }
+      }
+    }
+    return s;
+  }, [picks]);
+
   const rowsWithGrant = useMemo(() => {
     const userRows = leaderboard?.rows ?? [];
     const isGrantAlias = (u: string) =>
@@ -126,6 +138,7 @@ export default function LeaderboardPage() {
           hidePicks={false}
           showScores={showScores}
           oddsByHorse={oddsByHorse}
+          scratchedHorses={scratchedHorses}
         />
       )}
     </section>

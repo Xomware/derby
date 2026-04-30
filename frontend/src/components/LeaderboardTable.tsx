@@ -11,6 +11,24 @@ interface Props {
   showScores: boolean;
   /** horse_name (lowercase) → odds string. */
   oddsByHorse?: Map<string, string>;
+  /** Set of normalized horse_names that have been scratched. */
+  scratchedHorses?: Set<string>;
+}
+
+function isScratched(name: string | null, scratched?: Set<string>): boolean {
+  if (!name || !scratched) return false;
+  return scratched.has(name.trim().toLowerCase());
+}
+
+function ScratchedTag() {
+  return (
+    <span
+      title="Scratched — pick won't score"
+      className="ml-1 inline-flex items-center px-1 rounded bg-rose-red/15 text-rose-red text-[9px] uppercase tracking-wider font-bold align-middle"
+    >
+      ⚠ scratched
+    </span>
+  );
 }
 
 const SLOTS: { key: 'win' | 'place' | 'show' | 'long_shot'; label: string; short: string }[] = [
@@ -47,6 +65,7 @@ export function LeaderboardTable({
   hidePicks,
   showScores,
   oddsByHorse,
+  scratchedHorses,
 }: Props) {
   if (rows.length === 0) {
     return (
@@ -97,15 +116,25 @@ export function LeaderboardTable({
                   const odds = lookupOdds(pick, oddsByHorse);
                   const visible = me || isGrant || !hidePicks;
                   const d = pickDisplay(pick, visible);
+                  const scr = visible && isScratched(pick, scratchedHorses);
                   return (
                     <div
                       key={s.key}
-                      className="rounded-md bg-cream/50 border border-bourbon/10 px-2 py-1.5"
+                      className={`rounded-md px-2 py-1.5 border ${
+                        scr ? 'border-rose-red/30 bg-rose-red/5' : 'border-bourbon/10 bg-cream/50'
+                      }`}
                     >
                       <dt className="text-[9px] uppercase tracking-wider text-bourbon/60 font-semibold">
                         {s.label}
                       </dt>
-                      <dd className="text-bourbon font-medium truncate">{d.primary}</dd>
+                      <dd
+                        className={`font-medium truncate ${
+                          scr ? 'text-rose-dark line-through decoration-rose-red/70' : 'text-bourbon'
+                        }`}
+                      >
+                        {d.primary}
+                        {scr && <ScratchedTag />}
+                      </dd>
                       <div className="flex items-center justify-between text-[10px] mt-0.5">
                         {odds && d.visible ? (
                           <span className="text-bourbon/60 tabular-nums">{odds}</span>
@@ -165,11 +194,24 @@ export function LeaderboardTable({
                     const score = (r[scoreKey(s.key)] as number | null) ?? 0;
                     const odds = lookupOdds(pick, oddsByHorse);
                     const visible = me || isGrant || !hidePicks;
+                    const scr = visible && isScratched(pick, scratchedHorses);
                     return (
-                      <td key={s.key} className="py-2 px-2 whitespace-nowrap">
+                      <td
+                        key={s.key}
+                        className={`py-2 px-2 whitespace-nowrap ${scr ? 'bg-rose-red/5' : ''}`}
+                      >
                         {visible ? (
                           <>
-                            <div className="text-bourbon">{pick ?? '—'}</div>
+                            <div
+                              className={
+                                scr
+                                  ? 'text-rose-dark line-through decoration-rose-red/70'
+                                  : 'text-bourbon'
+                              }
+                            >
+                              {pick ?? '—'}
+                              {scr && <ScratchedTag />}
+                            </div>
                             {odds && (
                               <div className="text-[10px] text-bourbon/60 tabular-nums">{odds}</div>
                             )}

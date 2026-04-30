@@ -159,6 +159,10 @@ def _update_picks(picks: list[dict], odds_map: dict[str, str]) -> int:
     updated = 0
     now = iso_now()
     for p in picks:
+        # Don't refresh odds for scratched horses — their odds line should
+        # stay frozen at whatever it was when they got pulled.
+        if p.get("scratched"):
+            continue
         new_odds = odds_map.get(p.get("horse_name", ""))
         if not new_odds:
             continue
