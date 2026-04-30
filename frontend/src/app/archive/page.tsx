@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import useSWR from 'swr';
 import { GrantPinned } from '@/components/GrantPinned';
-import { PowerRankings } from '@/components/PowerRankings';
+import { GrantsPlays } from '@/components/GrantsPlays';
 import { WriteupSection } from '@/components/WriteupSection';
 import { useGrantPicks, useResults, type GrantArchiveHorse, type RaceKind } from '@/lib/hooks';
 import { AVAILABLE_YEARS, type DerbyYear } from '@/lib/year';
@@ -103,6 +104,8 @@ export default function ArchivePage() {
         </nav>
       </div>
 
+      <OriginalDocViewer year={year} />
+
       {!grantPicks && (
         <p className="text-bourbon/70 text-sm">No archived writeup for this event.</p>
       )}
@@ -132,18 +135,68 @@ export default function ArchivePage() {
             </section>
           )}
 
-          {grantPicks.power_rankings && grantPicks.power_rankings.length > 0 && (
-            <PowerRankings tiers={grantPicks.power_rankings} />
-          )}
-
-          {grantPicks.betting_plays && (
-            <WriteupSection
-              title="Betting plays"
-              body={grantPicks.betting_plays}
-              tone="rose"
+          {(grantPicks.power_rankings?.length || grantPicks.betting_plays) && (
+            <GrantsPlays
+              powerRankings={grantPicks.power_rankings ?? null}
+              bettingPlays={grantPicks.betting_plays ?? null}
             />
           )}
         </article>
+      )}
+    </section>
+  );
+}
+
+function OriginalDocViewer({ year }: { year: DerbyYear }) {
+  const { data: text, error } = useSWR<string>(
+    ['archive-doc', year],
+    async () => {
+      const res = await fetch(`/archive-docs/derby-${year}.txt`);
+      if (!res.ok) throw new Error('Not found');
+      return res.text();
+    }
+  );
+
+  const [open, setOpen] = useState(false);
+
+  if (error) return null;
+  if (!text) return null;
+
+  return (
+    <section className="rounded-xl border border-bourbon/15 bg-white p-4">
+      <header className="flex flex-wrap items-baseline gap-3 mb-2">
+        <h2 className="font-display text-xl text-bourbon">Original document</h2>
+        <span className="text-xs text-bourbon/60">
+          Grant&apos;s {year} writeup, exactly as he wrote it.
+        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <a
+            href={`/archive-docs/derby-${year}.docx`}
+            download
+            className="text-xs px-2.5 py-1 rounded border border-bourbon/30 text-bourbon hover:bg-bourbon/10 transition"
+          >
+            Download .docx
+          </a>
+          <a
+            href={`/archive-docs/derby-${year}.txt`}
+            download
+            className="text-xs px-2.5 py-1 rounded border border-bourbon/30 text-bourbon hover:bg-bourbon/10 transition"
+          >
+            Download .txt
+          </a>
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="text-xs px-2.5 py-1 rounded bg-rose-red text-cream hover:bg-rose-dark transition"
+          >
+            {open ? 'Hide' : 'Read inline'}
+          </button>
+        </div>
+      </header>
+      {open && (
+        <pre className="mt-3 max-h-[28rem] overflow-y-auto rounded-md border border-bourbon/15 bg-cream/40 p-3 text-[12px] leading-snug text-ink/90 whitespace-pre-wrap font-body">
+          {text}
+        </pre>
       )}
     </section>
   );

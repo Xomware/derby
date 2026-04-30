@@ -7,7 +7,7 @@ import { WriteupSection } from '@/components/WriteupSection';
 import { useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
 import { CURRENT_YEAR } from '@/lib/year';
 import { GrantPinned } from '@/components/GrantPinned';
-import { PowerRankings } from '@/components/PowerRankings';
+import { GrantsPlays } from '@/components/GrantsPlays';
 import { StatTile } from '@/components/StatTile';
 import { useResults } from '@/lib/hooks';
 
@@ -161,8 +161,9 @@ export function RacePage({
   const tocItems: SidePanelItem[] = useMemo(() => {
     const items: SidePanelItem[] = [];
     if (grantPicks?.analysis) items.push({ id: 'race-outlook', label: 'Race outlook' });
-    if (grantPicks?.power_rankings?.length) items.push({ id: 'power-rankings', label: 'Power rankings' });
-    if (grantPicks?.betting_plays) items.push({ id: 'betting-plays', label: 'Betting plays' });
+    if (grantPicks?.power_rankings?.length || grantPicks?.betting_plays) {
+      items.push({ id: 'grants-plays', label: "Grant's plays" });
+    }
     items.push(
       ...sortedPicks.map((p) => ({
         id: `horse-${p.id}`,
@@ -267,18 +268,11 @@ export function RacePage({
           ))}
         </div>
 
-        {grantPicks?.power_rankings && grantPicks.power_rankings.length > 0 && (
-          <div id="power-rankings" className="scroll-mt-24">
-            <PowerRankings tiers={grantPicks.power_rankings} />
-          </div>
-        )}
-
-        {grantPicks?.betting_plays && (
-          <div id="betting-plays" className="scroll-mt-24">
-            <WriteupSection
-              title={`Grant's betting plays`}
-              body={grantPicks.betting_plays}
-              tone="rose"
+        {(grantPicks?.power_rankings?.length || grantPicks?.betting_plays) && (
+          <div id="grants-plays" className="scroll-mt-24">
+            <GrantsPlays
+              powerRankings={grantPicks?.power_rankings ?? null}
+              bettingPlays={grantPicks?.betting_plays ?? null}
             />
           </div>
         )}

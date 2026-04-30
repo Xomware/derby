@@ -20,9 +20,11 @@ export function WriteupSection({
 
   return (
     <section className={`rounded-xl border p-4 ${toneClasses}`}>
-      <header className="mb-2">
-        <h2 className="font-display text-xl text-rose-dark">{title}</h2>
-      </header>
+      {title && (
+        <header className="mb-2">
+          <h2 className="font-display text-xl text-rose-dark">{title}</h2>
+        </header>
+      )}
       <div className="text-sm text-ink/90 leading-relaxed whitespace-pre-wrap">
         {body}
       </div>
