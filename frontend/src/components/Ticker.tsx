@@ -13,10 +13,10 @@ import type { Pick, RaceFinisher } from '@/lib/types';
 import { CURRENT_YEAR } from '@/lib/year';
 
 const SLOT_BADGE: Record<'win' | 'place' | 'show' | 'long_shot', string> = {
-  win: 'WIN',
-  place: 'PLC',
-  show: 'SHO',
-  long_shot: 'LS',
+  win: 'Grant: Win',
+  place: 'Grant: Place',
+  show: 'Grant: Show',
+  long_shot: 'Grant: Long shot',
 };
 
 interface TickerItem {
@@ -109,8 +109,8 @@ function TickerItemCard({ it }: { it: TickerItem }) {
         </span>
       )}
       {it.grantBadge && (
-        <span className="px-1 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px]">
-          G:{it.grantBadge}
+        <span className="px-1.5 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px] tracking-wide">
+          {it.grantBadge}
         </span>
       )}
     </Link>
