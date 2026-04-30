@@ -38,6 +38,10 @@ def handler(event, context):
             f"Comment is too long (max {MAX_BODY_LEN} chars)", field="body"
         )
 
+    horse_id = str(body.get("horse_id") or "").strip() or None
+    if horse_id and len(horse_id) > 64:
+        raise ValidationError("horse_id too long", field="horse_id")
+
     item = {
         "event_id": event_id,
         "id": make_comment_id(),
@@ -45,5 +49,7 @@ def handler(event, context):
         "body": text,
         "created_at": iso_now(),
     }
+    if horse_id:
+        item["horse_id"] = horse_id
     comments_table.put_item(Item=item)
     return success_response(serialize_comment(item), status=201)

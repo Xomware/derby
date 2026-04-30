@@ -62,11 +62,14 @@ def handler(event, context):
     except ValueError:
         year = DEFAULT_YEAR
 
-    derby_event_id = f"{year}-kentucky-derby"
-    oaks_event_id = f"{year}-kentucky-oaks"
-
-    derby_finishers = _finishers_for(derby_event_id, 12)
-    oaks_finishers = _finishers_for(oaks_event_id, 11)
+    event_filter = (qp.get("event") or "all").lower()
+    sources: list[tuple[str, list[dict]]] = []
+    if event_filter in ("all", "derby"):
+        ev_id = f"{year}-kentucky-derby"
+        sources.append((ev_id, _finishers_for(ev_id, 12)))
+    if event_filter in ("all", "oaks"):
+        ev_id = f"{year}-kentucky-oaks"
+        sources.append((ev_id, _finishers_for(ev_id, 11)))
 
     by_user: dict[str, dict] = defaultdict(lambda: {
         "username": "",
@@ -74,10 +77,7 @@ def handler(event, context):
         "picks_made": 0,
     })
 
-    for ev_id, finishers in [
-        (derby_event_id, derby_finishers),
-        (oaks_event_id, oaks_finishers),
-    ]:
+    for ev_id, finishers in sources:
         for p in _predictions_for(ev_id):
             username = p.get("username") or "?"
             rec = by_user[username]
@@ -92,6 +92,7 @@ def handler(event, context):
 
     return success_response({
         "year": year,
+        "event": event_filter,
         "rows": [
             {
                 "rank": i + 1,

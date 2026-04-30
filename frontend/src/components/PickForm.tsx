@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api, ApiError, type Prediction } from '@/lib/api';
 import { computeStamp, type Slot } from '@/lib/stamps';
 import type { Pick, RaceFinisher } from '@/lib/types';
@@ -10,8 +10,10 @@ const FIELDS: { key: Slot; label: string; help: string }[] = [
   { key: 'win', label: 'Win (1st)', help: 'Your call to take it all.' },
   { key: 'place', label: 'Place (2nd)', help: 'Different horse than Win.' },
   { key: 'show', label: 'Show (3rd)', help: 'Different from Win + Place.' },
-  { key: 'long_shot', label: 'Long shot / dark horse', help: 'A flier — can repeat one of the above.' },
+  { key: 'long_shot', label: 'Long shot / dark horse', help: 'Odds 8-1 or longer.' },
 ];
+
+const LONG_SHOT_THRESHOLD = 8;
 
 interface Props {
   horses: Pick[];
@@ -21,6 +23,20 @@ interface Props {
   username: string | null;
   finishers: RaceFinisher[];
   onSaved: () => void;
+}
+
+function oddsRatio(odds: string | null): number | null {
+  if (!odds) return null;
+  const m = odds.match(/^(\d+)[-/](\d+)$/);
+  if (!m) return null;
+  const n = Number(m[1]);
+  const d = Number(m[2]);
+  return d === 0 ? null : n / d;
+}
+
+function isLongShotEligible(odds: string | null): boolean {
+  const r = oddsRatio(odds);
+  return r === null ? false : r >= LONG_SHOT_THRESHOLD;
 }
 
 export function PickForm({
@@ -47,10 +63,18 @@ export function PickForm({
     setLongShot(existing?.long_shot ?? '');
   }, [existing]);
 
-  const horseNames = horses
-    .map((h) => h.horse_name)
-    .filter(Boolean)
-    .sort();
+  const allHorses = useMemo(
+    () =>
+      [...horses]
+        .sort((a, b) => a.horse_name.localeCompare(b.horse_name))
+        .map((h) => ({ name: h.horse_name, odds: h.odds_at_pick })),
+    [horses]
+  );
+
+  const longShotEligible = useMemo(
+    () => allHorses.filter((h) => isLongShotEligible(h.odds)),
+    [allHorses]
+  );
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -78,17 +102,22 @@ export function PickForm({
 
   if (!username) return null;
 
-  const top3 = [win, place, show].filter(Boolean);
-  const dupTop3 = top3.length === 3 && new Set(top3).size !== 3;
+  const all4 = [win, place, show, longShot].filter(Boolean);
+  const dupAny = all4.length === 4 && new Set(all4.map((s) => s.toLowerCase())).size !== 4;
+  const longShotInvalid =
+    !!longShot &&
+    !isLongShotEligible(allHorses.find((h) => h.name === longShot)?.odds ?? null);
   const showStamps = existing && finishers.length > 0;
 
   return (
-    <section className="rounded-xl border border-bourbon/20 bg-white p-4">
+    <section className="rounded-xl border border-bourbon/20 bg-white p-4" id="your-picks">
       <header className="mb-3">
         <h2 className="font-display text-xl text-bourbon">Your picks</h2>
         <p className="text-xs text-bourbon/70 mt-0.5">
           Submitting as <span className="font-semibold">@{username}</span>.
-          {existing ? ' Saved — edit anytime until lock.' : ' Lock in your top 3 + a long shot.'}
+          {existing
+            ? ' Saved — edit anytime until lock.'
+            : ' Lock in your top 3 + a long shot. All 4 must be different.'}
         </p>
       </header>
 
@@ -130,6 +159,7 @@ export function PickForm({
                 : f.key === 'show'
                 ? ([show, setShow] as const)
                 : ([longShot, setLongShot] as const);
+            const options = f.key === 'long_shot' ? longShotEligible : allHorses;
             return (
               <label key={f.key} className="block text-sm">
                 <span className="text-[11px] uppercase tracking-wider text-bourbon/70 font-semibold">
@@ -142,9 +172,10 @@ export function PickForm({
                   className="mt-1 w-full rounded border border-bourbon/30 bg-cream px-2 py-1.5 text-bourbon focus:outline-none focus:ring-2 focus:ring-rose-red/50"
                 >
                   <option value="">— choose —</option>
-                  {horseNames.map((n) => (
-                    <option key={n} value={n}>
-                      {n}
+                  {options.map((h) => (
+                    <option key={h.name} value={h.name}>
+                      {h.name}
+                      {h.odds ? ` — ${h.odds}` : ''}
                     </option>
                   ))}
                 </select>
@@ -152,9 +183,14 @@ export function PickForm({
               </label>
             );
           })}
-          {dupTop3 && (
+          {dupAny && (
             <p className="sm:col-span-2 text-xs text-rose-dark">
-              Win / Place / Show must be three different horses.
+              All 4 picks must be different horses.
+            </p>
+          )}
+          {longShotInvalid && (
+            <p className="sm:col-span-2 text-xs text-rose-dark">
+              Long shot must be 8-1 or longer.
             </p>
           )}
           {error && (
@@ -163,7 +199,15 @@ export function PickForm({
           <div className="sm:col-span-2 flex items-center gap-3">
             <button
               type="submit"
-              disabled={saving || dupTop3 || !win || !place || !show || !longShot}
+              disabled={
+                saving ||
+                dupAny ||
+                longShotInvalid ||
+                !win ||
+                !place ||
+                !show ||
+                !longShot
+              }
               className="rounded bg-rose-red px-4 py-1.5 text-sm font-semibold text-white hover:bg-rose-dark disabled:opacity-50 transition"
             >
               {saving ? 'Saving…' : existing ? 'Update picks' : 'Submit picks'}

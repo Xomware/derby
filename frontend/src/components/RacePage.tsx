@@ -7,6 +7,7 @@ import { WriteupSection } from '@/components/WriteupSection';
 import { useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
 import type { Pick } from '@/lib/types';
 import { CURRENT_YEAR } from '@/lib/year';
+import { HorseComments } from '@/components/HorseComments';
 
 type SortKey = 'post' | 'name' | 'odds';
 
@@ -165,7 +166,12 @@ export function RacePage({
 
         <div className="space-y-5">
           {sortedPicks.map((p) => (
-            <HorseCard key={p.id} pick={p} />
+            <HorseCard
+              key={p.id}
+              pick={p}
+              kind={kind}
+              showComments={!isArchive}
+            />
           ))}
         </div>
 
@@ -187,7 +193,15 @@ function statTip(label: string): string | undefined {
   return STAT_DESCRIPTIONS[label];
 }
 
-function HorseCard({ pick: p }: { pick: Pick }) {
+function HorseCard({
+  pick: p,
+  kind,
+  showComments,
+}: {
+  pick: Pick;
+  kind: RaceKind;
+  showComments: boolean;
+}) {
   const stats: { label: string; value: string }[] = [];
   if (p.record) stats.push({ label: 'Record', value: p.record });
   if (p.beyer) stats.push({ label: 'Beyer', value: p.beyer });
@@ -261,9 +275,7 @@ function HorseCard({ pick: p }: { pick: Pick }) {
         </div>
       )}
 
-      <div className="mt-4 pt-3 border-t border-bourbon/10 text-xs text-bourbon/60 italic">
-        Comments coming soon.
-      </div>
+      {showComments && <HorseComments kind={kind} horseId={p.id} />}
     </article>
   );
 }

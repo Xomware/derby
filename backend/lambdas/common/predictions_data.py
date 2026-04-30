@@ -62,10 +62,10 @@ def validate_pick_fields(body: dict) -> dict[str, str]:
         if not 1 <= len(cleaned) <= 80:
             raise ValidationError(f"`{f}` must be 1–80 chars", field=f)
         out[f] = cleaned
-    # Disallow duplicates between win/place/show — long_shot can repeat (it's a flier).
-    top3 = [out["win"], out["place"], out["show"]]
-    if len(set(top3)) != 3:
-        raise ValidationError("Win / Place / Show must be three different horses")
+    # All four picks must be different horses — case-insensitive comparison.
+    norm = [v.lower() for v in (out["win"], out["place"], out["show"], out["long_shot"])]
+    if len(set(norm)) != 4:
+        raise ValidationError("Win / Place / Show / Long shot must all be different horses")
     return out
 
 

@@ -71,7 +71,7 @@ export function SidePanel({
         onClick={() => setDrawerOpen((v) => !v)}
         aria-label="Jump to a horse"
         aria-expanded={drawerOpen}
-        className="lg:hidden fixed bottom-4 right-4 z-30 rounded-full bg-rose-red text-cream shadow-lg px-4 py-2 text-sm font-semibold hover:bg-rose-dark transition"
+        className="lg:hidden fixed bottom-16 sm:bottom-20 right-4 z-30 rounded-full bg-rose-red text-cream shadow-lg px-4 py-2 text-sm font-semibold hover:bg-rose-dark transition"
       >
         {drawerOpen ? 'Close' : 'Jump to →'}
       </button>

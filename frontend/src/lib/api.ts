@@ -43,8 +43,8 @@ export const api = {
     request<PicksGrouped>(`/picks/list?event_id=${encodeURIComponent(eventId)}`),
   pick: (id: string) => request<Pick>(`/picks/${encodeURIComponent(id)}`),
 
-  leaderboard: (year: number) =>
-    request<Leaderboard>(`/leaderboard/rank?year=${year}`),
+  leaderboard: (year: number, event: 'derby' | 'oaks' | 'all' = 'all') =>
+    request<Leaderboard>(`/leaderboard/rank?year=${year}&event=${event}`),
 
   results: (year: number) =>
     request<RaceResultsList>(`/results/list?year=${year}`),
@@ -63,12 +63,19 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
-  commentsList: (eventId: string) =>
-    request<CommentsListResponse>(
-      `/comments/list?event_id=${encodeURIComponent(eventId)}`
-    ),
+  commentsList: (eventId: string, horseId?: string | null) => {
+    const h = horseId ? `&horse_id=${encodeURIComponent(horseId)}` : '';
+    return request<CommentsListResponse>(
+      `/comments/list?event_id=${encodeURIComponent(eventId)}${h}`
+    );
+  },
   commentsPost: (body: CommentPostInput) =>
     request<Comment>('/comments/post', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  commentsDelete: (body: { event_id: string; id: string; username: string }) =>
+    request<void>('/comments/delete', {
       method: 'POST',
       body: JSON.stringify(body),
     }),
@@ -120,10 +127,12 @@ export interface Comment {
   username: string;
   body: string;
   created_at: string;
+  horse_id: string | null;
 }
 
 export interface CommentsListResponse {
   event_id: string;
+  horse_id: string | null;
   comments: Comment[];
 }
 
@@ -131,6 +140,7 @@ export interface CommentPostInput {
   event_id: string;
   username: string;
   body: string;
+  horse_id?: string | null;
 }
 
 export interface AdminRaceResultInput {

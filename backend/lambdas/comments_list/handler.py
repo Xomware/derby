@@ -20,8 +20,11 @@ def handler(event, context):
     if not event_id:
         raise ValidationError("event_id is required", field="event_id")
 
-    items = list_comments_for_event(event_id, limit=MAX_RETURN)
+    horse_id = (qp.get("horse_id") or "").strip() or None
+
+    items = list_comments_for_event(event_id, horse_id=horse_id, limit=MAX_RETURN)
     return success_response({
         "event_id": event_id,
+        "horse_id": horse_id,
         "comments": [serialize_comment(i) for i in items],
     })

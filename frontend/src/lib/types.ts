@@ -53,6 +53,7 @@ export interface LeaderboardRow {
 
 export interface Leaderboard {
   year: number;
+  event: 'derby' | 'oaks' | 'all';
   rows: LeaderboardRow[];
 }
 

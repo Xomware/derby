@@ -1,19 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CommentsBlock } from '@/components/CommentsBlock';
 import { Countdown } from '@/components/Countdown';
 import { GrantPinned } from '@/components/GrantPinned';
 import { PickForm } from '@/components/PickForm';
-import { OthersList } from '@/components/OthersList';
-import {
-  useComments,
-  useGrantPicks,
-  usePicks,
-  usePredictions,
-  useResults,
-  type RaceKind,
-} from '@/lib/hooks';
+import { SidePanel, SidePanelItem } from '@/components/SidePanel';
+import { useGrantPicks, usePicks, usePredictions, useResults, type RaceKind } from '@/lib/hooks';
 import { useUsername } from '@/lib/identity';
 import { CURRENT_YEAR } from '@/lib/year';
 import type { Pick } from '@/lib/types';
@@ -27,7 +19,6 @@ export default function PicksPage() {
   const { username } = useUsername();
   const [kind, setKind] = useState<RaceKind>('derby');
 
-  // URL ?event=oaks deep-link.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const e = params.get('event');
@@ -37,7 +28,6 @@ export default function PicksPage() {
   const { picks, year } = usePicks(kind);
   const { grantPicks } = useGrantPicks(kind);
   const { data: predictions, refresh } = usePredictions(kind, username);
-  const { comments, refresh: refreshComments, eventId: commentsEventId } = useComments(kind);
   const { results } = useResults(year);
   const isArchive = year !== CURRENT_YEAR;
 
@@ -54,97 +44,101 @@ export default function PicksPage() {
     [picks]
   );
 
+  const tocItems: SidePanelItem[] = useMemo(() => {
+    const items: SidePanelItem[] = [];
+    if (grantPicks) items.push({ id: 'grants-picks', label: 'Grant’s picks' });
+    if (horses.length > 0)
+      items.push({ id: 'race-summary', label: 'Race summary', meta: `${horses.length} horses` });
+    if (!isArchive) items.push({ id: 'your-picks', label: 'Your picks' });
+    return items;
+  }, [grantPicks, horses.length, isArchive]);
+
   return (
-    <section className="pt-8 max-w-3xl mx-auto space-y-8">
-      <header>
-        <h1 className="font-display text-3xl text-rose-dark">Picks</h1>
-        <p className="text-bourbon/80 text-sm mt-1">
-          Grant&apos;s pinned plays, the field, your picks, and what everyone else
-          picked once the race goes off.
-        </p>
-      </header>
+    <div className="pt-8 lg:grid lg:grid-cols-[1fr_220px] lg:gap-6">
+      <section className="space-y-6 min-w-0 max-w-3xl">
+        <header>
+          <h1 className="font-display text-3xl text-rose-dark">Picks</h1>
+          <p className="text-bourbon/80 text-sm mt-1">
+            Grant&apos;s pinned plays, the field at a glance, and your top 3 + long shot.
+            See everyone else&apos;s picks on the leaderboard.
+          </p>
+        </header>
 
-      <nav className="flex gap-1 border-b border-bourbon/20" aria-label="Event">
-        {TABS.map((t) => {
-          const active = kind === t.id;
-          return (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => {
-                setKind(t.id);
-                const url = new URL(window.location.href);
-                url.searchParams.set('event', t.id);
-                window.history.replaceState(null, '', url.toString());
-              }}
-              className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition ${
-                active
-                  ? 'border-rose-red text-rose-dark'
-                  : 'border-transparent text-bourbon/70 hover:text-rose-red'
-              }`}
-              aria-pressed={active}
-            >
-              {t.label}
-            </button>
-          );
-        })}
-      </nav>
+        <nav className="flex gap-1 border-b border-bourbon/20" aria-label="Event">
+          {TABS.map((t) => {
+            const active = kind === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => {
+                  setKind(t.id);
+                  const url = new URL(window.location.href);
+                  url.searchParams.set('event', t.id);
+                  window.history.replaceState(null, '', url.toString());
+                }}
+                className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition ${
+                  active
+                    ? 'border-rose-red text-rose-dark'
+                    : 'border-transparent text-bourbon/70 hover:text-rose-red'
+                }`}
+                aria-pressed={active}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </nav>
 
-      {predictions?.post_time && !isArchive && (
-        <div className="flex flex-wrap items-center gap-3 text-sm text-bourbon/80">
-          {predictions.locked ? (
-            <span className="font-semibold text-rose-dark">Locked — race is off</span>
-          ) : (
-            <>
-              <span>Picks lock at post time:</span>
-              <Countdown target={predictions.post_time} label="Lock" />
-            </>
-          )}
+        {predictions?.post_time && !isArchive && (
+          <div className="flex flex-wrap items-center gap-3 text-sm text-bourbon/80">
+            {predictions.locked ? (
+              <span className="font-semibold text-rose-dark">Locked — race is off</span>
+            ) : (
+              <>
+                <span>Picks lock at post time:</span>
+                <Countdown target={predictions.post_time} label="Lock" />
+              </>
+            )}
+            {predictions.others_count > 0 && (
+              <span className="ml-auto text-xs text-bourbon/60">
+                {predictions.others_count} {predictions.others_count === 1 ? 'pool entry' : 'pool entries'}
+              </span>
+            )}
+          </div>
+        )}
+
+        {grantPicks && (
+          <div id="grants-picks" className="scroll-mt-24">
+            <GrantPinned
+              picks={grantPicks}
+              kind={kind}
+              year={year}
+              isArchive={isArchive}
+              finishers={finishers}
+            />
+          </div>
+        )}
+
+        <div id="race-summary" className="scroll-mt-24">
+          <RaceSummary horses={horses} kind={kind} />
         </div>
-      )}
 
-      {grantPicks && (
-        <GrantPinned
-          picks={grantPicks}
-          kind={kind}
-          year={year}
-          isArchive={isArchive}
-          finishers={finishers}
-        />
-      )}
+        {!isArchive && (
+          <PickForm
+            horses={horses}
+            eventId={predictions?.event_id ?? ''}
+            locked={predictions?.locked ?? false}
+            existing={predictions?.my ?? null}
+            username={username}
+            finishers={finishers}
+            onSaved={() => void refresh()}
+          />
+        )}
+      </section>
 
-      <RaceSummary horses={horses} kind={kind} />
-
-      {!isArchive && (
-        <PickForm
-          horses={horses}
-          eventId={predictions?.event_id ?? ''}
-          locked={predictions?.locked ?? false}
-          existing={predictions?.my ?? null}
-          username={username}
-          finishers={finishers}
-          onSaved={() => void refresh()}
-        />
-      )}
-
-      {!isArchive && (
-        <OthersList
-          others={predictions?.others ?? []}
-          othersCount={predictions?.others_count ?? 0}
-          locked={predictions?.locked ?? false}
-          finishers={finishers}
-        />
-      )}
-
-      {!isArchive && (
-        <CommentsBlock
-          eventId={commentsEventId}
-          comments={comments}
-          username={username}
-          onPosted={() => void refreshComments()}
-        />
-      )}
-    </section>
+      <SidePanel title="Jump to" items={tocItems} />
+    </div>
   );
 }
 

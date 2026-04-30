@@ -28,4 +28,21 @@ h3,
   letter-spacing: -0.01em;
 }
 
+@keyframes derby-ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
 
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: derby-ticker-scroll 60s linear infinite;
+}
+
+.ticker-track.paused {
+  animation-play-state: paused;
+}
+
+.ticker-mask {
+  mask-image: linear-gradient(90deg, transparent, black 4%, black 96%, transparent);
+}

@@ -5,8 +5,9 @@ locals {
   ]
 
   comments_lambdas = [
-    { name = "comments_post", description = "POST /comments/post — anonymous comment", path_part = "post", http_method = "POST", authorization = "NONE" },
-    { name = "comments_list", description = "GET /comments/list — comments for an event", path_part = "list", http_method = "GET", authorization = "NONE" },
+    { name = "comments_post", description = "POST /comments/post — anonymous comment (event-level or per-horse)", path_part = "post", http_method = "POST", authorization = "NONE" },
+    { name = "comments_list", description = "GET /comments/list — comments for an event (or one horse)", path_part = "list", http_method = "GET", authorization = "NONE" },
+    { name = "comments_delete", description = "POST /comments/delete — delete your own comment", path_part = "delete", http_method = "POST", authorization = "NONE" },
   ]
 }
 

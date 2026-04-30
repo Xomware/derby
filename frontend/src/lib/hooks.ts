@@ -22,12 +22,15 @@ export function usePicks(kind: RaceKind, yearOverride?: number) {
   return { picks: data, error, isLoading, refresh: mutate, eventId, year: yearOverride ?? year };
 }
 
-export function useLeaderboard(yearOverride?: number) {
+export function useLeaderboard(
+  yearOverride?: number,
+  event: 'derby' | 'oaks' | 'all' = 'all'
+) {
   const { year } = useYear();
   const effectiveYear = yearOverride ?? year;
   const { data, error, isLoading, mutate } = useSWR<Leaderboard>(
-    ['leaderboard', effectiveYear],
-    () => api.leaderboard(effectiveYear),
+    ['leaderboard', effectiveYear, event],
+    () => api.leaderboard(effectiveYear, event),
     { refreshInterval: 30_000 }
   );
   return { leaderboard: data, error, isLoading, refresh: mutate, year: effectiveYear };
@@ -71,13 +74,18 @@ export interface GrantPicks {
   betting_plays?: string | null;
 }
 
-export function useComments(kind: RaceKind, yearOverride?: number) {
+export function useComments(
+  kind: RaceKind,
+  options: { horseId?: string | null; yearOverride?: number } = {}
+) {
   const { year } = useYear();
-  const eventId = eventIdFor(yearOverride ?? year, kind);
-  const isCurrent = (yearOverride ?? year) === CURRENT_YEAR;
+  const effectiveYear = options.yearOverride ?? year;
+  const eventId = eventIdFor(effectiveYear, kind);
+  const isCurrent = effectiveYear === CURRENT_YEAR;
+  const horseId = options.horseId ?? null;
   const { data, error, isLoading, mutate } = useSWR<CommentsListResponse>(
-    isCurrent ? ['comments', eventId] : null,
-    () => api.commentsList(eventId),
+    isCurrent ? ['comments', eventId, horseId ?? ''] : null,
+    () => api.commentsList(eventId, horseId),
     { refreshInterval: 60_000 }
   );
   return {
