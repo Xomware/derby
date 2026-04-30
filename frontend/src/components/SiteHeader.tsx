@@ -15,6 +15,7 @@ const NAV_ITEMS: { href: string; label: string }[] = [
   { href: '/picks', label: 'Picks' },
   { href: '/results', label: 'Live Results' },
   { href: '/leaderboard', label: 'Leaderboard' },
+  { href: '/archive', label: 'Archive' },
 ];
 
 function isActive(pathname: string, href: string): boolean {

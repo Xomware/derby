@@ -115,30 +115,31 @@ export function SidePanel({
         </div>
       )}
 
-      {/* Desktop sticky sidebar */}
+      {/* Desktop sticky sidebar — compact so a 20+ horse list fits without
+          inner-scroll on a typical screen. */}
       <aside
-        className={`hidden lg:block sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto rounded-xl border border-bourbon/15 bg-white p-3 shadow-sm ${className}`}
+        className={`hidden lg:block sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto rounded-xl border border-bourbon/15 bg-white py-2 shadow-sm text-xs ${className}`}
         aria-label={title}
       >
-        <h3 className="font-display text-sm text-rose-dark px-2 pb-2 mb-1 border-b border-bourbon/15">
+        <h3 className="font-display text-xs uppercase tracking-wider text-rose-dark px-2.5 pb-1.5 mb-0.5 border-b border-bourbon/15">
           {title}
         </h3>
-        <ul className="space-y-0.5">
+        <ul>
           {items.map((it) => (
             <li key={it.id}>
               <button
                 onClick={() => jumpTo(it.id)}
-                className={`w-full text-left px-2 py-1.5 rounded text-sm transition ${
+                className={`w-full text-left px-2.5 py-1 rounded text-[12px] leading-tight transition flex items-center gap-2 ${
                   activeId === it.id
                     ? 'bg-rose-red/10 text-rose-dark font-semibold'
                     : 'text-bourbon hover:bg-bourbon/10'
                 }`}
               >
-                <div className="truncate">{it.label}</div>
+                <span className="truncate flex-1">{it.label}</span>
                 {it.meta && (
-                  <div className="text-[11px] text-bourbon/60 mt-0.5 truncate">
+                  <span className="text-[10px] text-bourbon/60 tabular-nums shrink-0">
                     {it.meta}
-                  </div>
+                  </span>
                 )}
               </button>
             </li>

@@ -37,6 +37,8 @@ const SORTS: { id: SortKey; label: string }[] = [
 ];
 
 const STAT_DESCRIPTIONS: Record<string, string> = {
+  Odds:
+    'Latest odds. "5-1" means a $1 bet returns $5 plus the original stake if the horse wins.',
   Record:
     'Career record: starts: wins-places-shows. "5: 2-2-1" = 5 starts, 2 wins, 2 places (2nd), 1 show (3rd).',
   Beyer:
@@ -156,20 +158,20 @@ export function RacePage({
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [picks]);
 
-  const tocItems: SidePanelItem[] = useMemo(
-    () =>
-      sortedPicks.map((p) => ({
+  const tocItems: SidePanelItem[] = useMemo(() => {
+    const items: SidePanelItem[] = [];
+    if (grantPicks?.analysis) items.push({ id: 'race-outlook', label: 'Race outlook' });
+    if (grantPicks?.power_rankings?.length) items.push({ id: 'power-rankings', label: 'Power rankings' });
+    if (grantPicks?.betting_plays) items.push({ id: 'betting-plays', label: 'Betting plays' });
+    items.push(
+      ...sortedPicks.map((p) => ({
         id: `horse-${p.id}`,
         label: p.horse_name,
-        meta: [
-          p.post_position != null ? `Post ${p.post_position}` : null,
-          p.odds_at_pick,
-        ]
-          .filter(Boolean)
-          .join(' · '),
-      })),
-    [sortedPicks]
-  );
+        meta: p.odds_at_pick ?? undefined,
+      }))
+    );
+    return items;
+  }, [sortedPicks, grantPicks]);
 
   const horsesEmpty = !isLoading && sortedPicks.length === 0;
 
@@ -209,10 +211,12 @@ export function RacePage({
         )}
 
         {grantPicks?.analysis && (
-          <WriteupSection
-            title={`Grant's race outlook`}
-            body={grantPicks.analysis}
-          />
+          <div id="race-outlook" className="scroll-mt-24">
+            <WriteupSection
+              title={`Grant's race outlook`}
+              body={grantPicks.analysis}
+            />
+          </div>
         )}
 
         {sortedPicks.length > 0 && (
@@ -264,15 +268,19 @@ export function RacePage({
         </div>
 
         {grantPicks?.power_rankings && grantPicks.power_rankings.length > 0 && (
-          <PowerRankings tiers={grantPicks.power_rankings} />
+          <div id="power-rankings" className="scroll-mt-24">
+            <PowerRankings tiers={grantPicks.power_rankings} />
+          </div>
         )}
 
         {grantPicks?.betting_plays && (
-          <WriteupSection
-            title={`Grant's betting plays`}
-            body={grantPicks.betting_plays}
-            tone="rose"
-          />
+          <div id="betting-plays" className="scroll-mt-24">
+            <WriteupSection
+              title={`Grant's betting plays`}
+              body={grantPicks.betting_plays}
+              tone="rose"
+            />
+          </div>
         )}
       </section>
 
@@ -287,6 +295,7 @@ function statTip(label: string): string | undefined {
 
 function HorseCard({ pick: p }: { pick: DisplayHorse }) {
   const stats: { label: string; value: string }[] = [];
+  if (p.odds_at_pick) stats.push({ label: 'Odds', value: p.odds_at_pick });
   if (p.record) stats.push({ label: 'Record', value: p.record });
   if (p.beyer) stats.push({ label: 'Beyer', value: p.beyer });
   if (p.brisnet) stats.push({ label: 'Brisnet', value: p.brisnet });
@@ -308,7 +317,6 @@ function HorseCard({ pick: p }: { pick: DisplayHorse }) {
       <header>
         <div className="text-[11px] uppercase tracking-wider text-bourbon/60">
           {p.post_position != null && <>Post {p.post_position}</>}
-          {p.odds_at_pick && <> · {p.odds_at_pick}</>}
         </div>
         <h3 className="font-display text-2xl text-rose-dark leading-tight">
           {p.horse_name}
