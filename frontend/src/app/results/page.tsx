@@ -3,6 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Countdown } from '@/components/Countdown';
 import {
+  PickDistribution,
+  type DistributionData,
+  type SlotEntry,
+} from '@/components/PickDistribution';
+import {
   useGrantPicks,
   usePicks,
   usePredictions,
@@ -58,14 +63,19 @@ function emptySlot(): SlotTally {
   return { count: 0, voters: [] };
 }
 
+type View = 'horses' | 'distribution';
+
 export default function ResultsPage() {
   const { username } = useUsername();
   const [kind, setKind] = useState<RaceKind>('derby');
+  const [view, setView] = useState<View>('horses');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const e = params.get('event');
     if (e === 'oaks' || e === 'derby') setKind(e);
+    const v = params.get('view');
+    if (v === 'distribution' || v === 'horses') setView(v);
   }, []);
 
   const { picks, isLoading, year } = usePicks(kind);
@@ -185,6 +195,38 @@ export default function ResultsPage() {
     return m;
   }, [finishers]);
 
+  // Distribution view = same data as the per-horse tally, pivoted to
+  // slot → horse → voter list, with totals.
+  const distribution = useMemo<DistributionData>(() => {
+    const empty = (): SlotEntry => ({ voters: {}, total: 0 });
+    const out: DistributionData = {
+      win: empty(),
+      place: empty(),
+      show: empty(),
+      long_shot: empty(),
+    };
+    for (const horseName of Object.keys(tally)) {
+      // Recover the canonical horse name (we used normalize() as the key).
+      const display = horses.find((h) => normalize(h.name) === horseName)?.name ?? horseName;
+      const slots = tally[horseName];
+      for (const s of SLOTS) {
+        const voters = slots[s.key].voters;
+        if (voters.length === 0) continue;
+        out[s.key].voters[display] = voters;
+        out[s.key].total += voters.length;
+      }
+    }
+    return out;
+  }, [tally, horses]);
+
+  function pushUrl(nextKind: RaceKind, nextView: View) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('event', nextKind);
+    if (nextView === 'horses') url.searchParams.delete('view');
+    else url.searchParams.set('view', nextView);
+    window.history.replaceState(null, '', url.toString());
+  }
+
   return (
     <section className="pt-8 max-w-4xl mx-auto space-y-6">
       <header>
@@ -211,9 +253,7 @@ export default function ResultsPage() {
               type="button"
               onClick={() => {
                 setKind(t.id);
-                const url = new URL(window.location.href);
-                url.searchParams.set('event', t.id);
-                window.history.replaceState(null, '', url.toString());
+                pushUrl(t.id, view);
               }}
               className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition ${
                 active
@@ -227,6 +267,30 @@ export default function ResultsPage() {
           );
         })}
       </nav>
+
+      <div className="flex flex-wrap gap-2">
+        {(['horses', 'distribution'] as const).map((v) => {
+          const active = view === v;
+          return (
+            <button
+              key={v}
+              type="button"
+              onClick={() => {
+                setView(v);
+                pushUrl(kind, v);
+              }}
+              className={`px-3 py-1.5 rounded text-xs font-semibold border transition ${
+                active
+                  ? 'bg-rose-red text-cream border-rose-red'
+                  : 'border-bourbon/30 text-bourbon hover:border-rose-red'
+              }`}
+              aria-pressed={active}
+            >
+              {v === 'horses' ? 'By horse' : 'Pool distribution'}
+            </button>
+          );
+        })}
+      </div>
 
       {lockTime && !official && !locked && !isArchive && (
         <div className="rounded-md border border-rose-red/30 bg-rose-red/5 px-3 py-2 flex flex-wrap items-center gap-3 text-sm">
@@ -247,14 +311,14 @@ export default function ResultsPage() {
         </div>
       )}
 
-      {sorted.length > 0 && (
+      {view === 'horses' && sorted.length > 0 && (
         <div className="rounded-xl border border-bourbon/15 bg-white overflow-hidden">
-          <div className="hidden sm:grid grid-cols-[11rem_1fr_1fr_1fr_1fr] gap-2 bg-bourbon/5 border-b border-bourbon/15 px-3 sm:px-4 py-2 text-[10px] uppercase tracking-wider font-semibold text-bourbon/70">
+          <div className="hidden sm:grid grid-cols-[11rem_1fr_1fr_1fr_1fr] gap-2 bg-bourbon/5 border-b border-bourbon/15 px-4 py-2 text-[10px] uppercase tracking-wider font-semibold text-bourbon/70">
             <div>Horse</div>
-            <div>Win picks</div>
-            <div>Place picks</div>
-            <div>Show picks</div>
-            <div>Long shot picks</div>
+            <div>Win</div>
+            <div>Place</div>
+            <div>Show</div>
+            <div>Long shot</div>
           </div>
           <ol className="divide-y divide-bourbon/10">
             {sorted.map((h) => (
@@ -271,6 +335,8 @@ export default function ResultsPage() {
           </ol>
         </div>
       )}
+
+      {view === 'distribution' && <PickDistribution data={distribution} />}
     </section>
   );
 }
@@ -348,11 +414,11 @@ function HorseTallyRow({
   }
 
   return (
-    <li className={`p-3 sm:p-4 ${tone}`}>
-      <div className="grid sm:grid-cols-[11rem_1fr_1fr_1fr_1fr] gap-2 sm:gap-2 items-start">
-        <div className="flex items-center gap-2 min-w-0">
+    <li className={`px-3 sm:px-4 py-3 ${tone}`}>
+      <div className="sm:grid sm:grid-cols-[11rem_1fr_1fr_1fr_1fr] sm:gap-2 sm:items-start">
+        <div className="flex items-center gap-2 min-w-0 mb-2 sm:mb-0">
           {badge}
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="font-semibold text-bourbon truncate">{horse.name}</div>
             {horse.odds && (
               <div className="text-[11px] text-bourbon/60 tabular-nums">{horse.odds}</div>
@@ -360,46 +426,78 @@ function HorseTallyRow({
           </div>
         </div>
 
-        {SLOTS.map((s) => {
-          const slot = tally?.[s.key];
-          const count = showCounts ? slot?.count ?? 0 : null;
-          const expanded = expandedSlot === s.key;
-          const canExpand = showVoters && (slot?.voters?.length ?? 0) > 0;
-          return (
-            <div
-              key={s.key}
-              className="rounded-md border border-bourbon/15 bg-cream/40 px-2 py-1.5"
-            >
-              <div className="sm:hidden text-[10px] uppercase tracking-wider text-bourbon/60 font-semibold">
-                {s.label}
-              </div>
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-sm font-bold text-bourbon tabular-nums">
-                  {count === null ? '?' : count}
-                </span>
-                {canExpand && (
-                  <button
-                    type="button"
-                    onClick={() => setExpandedSlot(expanded ? null : s.key)}
-                    aria-label={`${expanded ? 'Hide' : 'Show'} voters for ${s.label}`}
-                    title={expanded ? 'Hide voters' : 'Show voters'}
-                    className="grid place-items-center w-5 h-5 rounded-full text-rose-red hover:bg-rose-red/10 transition"
-                  >
-                    <VoterIcon open={expanded} />
-                  </button>
-                )}
-              </div>
-              {expanded && slot && slot.voters.length > 0 && (
-                <ul className="mt-1.5 text-[11px] text-bourbon/80 space-y-0.5">
+        <div className="contents">
+          {/* Mobile: 4 chips inline. Desktop: 4 grid cells. */}
+          <div className="grid grid-cols-4 gap-1.5 sm:contents">
+            {SLOTS.map((s) => {
+              const slot = tally?.[s.key];
+              const count = showCounts ? slot?.count ?? 0 : null;
+              const expanded = expandedSlot === s.key;
+              const canExpand = showVoters && (slot?.voters?.length ?? 0) > 0;
+              return (
+                <div
+                  key={s.key}
+                  className="rounded-md border border-bourbon/15 bg-cream/40 px-2 py-1 sm:py-1.5"
+                >
+                  <div className="text-[9px] sm:hidden uppercase tracking-wider text-bourbon/60 font-semibold leading-none">
+                    {s.label === 'Long shot' ? 'LS' : s.label.slice(0, 3)}
+                  </div>
+                  <div className="flex items-center justify-between gap-1 mt-0.5 sm:mt-0">
+                    <span className="text-sm font-bold text-bourbon tabular-nums">
+                      {count === null ? '?' : count}
+                    </span>
+                    {canExpand && (
+                      <button
+                        type="button"
+                        onClick={() => setExpandedSlot(expanded ? null : s.key)}
+                        aria-label={`${expanded ? 'Hide' : 'Show'} voters for ${s.label}`}
+                        title={expanded ? 'Hide voters' : 'Show voters'}
+                        className="grid place-items-center w-5 h-5 rounded-full text-rose-red hover:bg-rose-red/10 transition"
+                      >
+                        <VoterIcon open={expanded} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Voter list — full width on mobile, inside the chip on desktop. */}
+          {expandedSlot && (() => {
+            const slot = tally?.[expandedSlot];
+            if (!slot || slot.voters.length === 0) return null;
+            return (
+              <div className="sm:hidden mt-2 rounded-md bg-bourbon/5 px-2 py-1.5 text-[11px] text-bourbon/80">
+                <div className="text-[9px] uppercase tracking-wider font-semibold mb-0.5">
+                  {SLOTS.find((s) => s.key === expandedSlot)?.label} picks
+                </div>
+                <ul className="space-y-0.5">
                   {slot.voters.map((v) => (
                     <li key={v} className="truncate">{v}</li>
                   ))}
                 </ul>
-              )}
-            </div>
-          );
-        })}
+              </div>
+            );
+          })()}
+        </div>
       </div>
+
+      {/* Desktop voter list inside its chip cell — render as floating */}
+      {expandedSlot && (() => {
+        const slot = tally?.[expandedSlot];
+        if (!slot || slot.voters.length === 0) return null;
+        return (
+          <ul className="hidden sm:block mt-2 ml-44 text-[11px] text-bourbon/80 space-y-0.5 rounded-md bg-bourbon/5 px-3 py-1.5">
+            <li className="text-[9px] uppercase tracking-wider font-semibold mb-0.5 text-bourbon/60">
+              {SLOTS.find((s) => s.key === expandedSlot)?.label} picks
+            </li>
+            {slot.voters.map((v) => (
+              <li key={v} className="truncate">{v}</li>
+            ))}
+          </ul>
+        );
+      })()}
     </li>
   );
 }
