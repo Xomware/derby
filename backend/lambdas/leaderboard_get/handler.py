@@ -1,64 +1,104 @@
-"""GET /leaderboard — public leaderboard ranked by score then tiebreakers."""
+"""GET /leaderboard/rank?year=YYYY — predictions × race-results scoring.
+
+Aggregates each user's points across both events of the year (Derby + Oaks).
+Returns rows ordered by total score, ties broken by name.
+"""
 
 from __future__ import annotations
 
 from collections import defaultdict
+from decimal import Decimal
 
-from lambdas.common.dynamo_helpers import picks_table, scan_all, users_table, votes_table
+from boto3.dynamodb.conditions import Key
+
+from lambdas.common.dynamo_helpers import (
+    predictions_table,
+    query_all,
+    race_results_table,
+)
 from lambdas.common.errors import handle_errors
-from lambdas.common.scoring import is_correct_fade, is_correct_tail, vote_points
-from lambdas.common.utility_helpers import success_response
+from lambdas.common.scoring import score_prediction
+from lambdas.common.utility_helpers import get_query_params, success_response
 
 HANDLER = "leaderboard_get"
+
+DEFAULT_YEAR = 2026
+
+
+def _norm_finishers(raw: list | None) -> list[dict]:
+    out: list[dict] = []
+    for f in raw or []:
+        item = dict(f)
+        pos = item.get("position")
+        if isinstance(pos, Decimal):
+            item["position"] = int(pos)
+        out.append(item)
+    return out
+
+
+def _finishers_for(event_id: str, race_number: int) -> list[dict]:
+    items = query_all(
+        race_results_table,
+        KeyConditionExpression=Key("event_id").eq(event_id) & Key("race_number").eq(race_number),
+    )
+    if not items:
+        return []
+    return _norm_finishers(items[0].get("finishers"))
+
+
+def _predictions_for(event_id: str) -> list[dict]:
+    return query_all(
+        predictions_table,
+        KeyConditionExpression=Key("event_id").eq(event_id),
+    )
 
 
 @handle_errors(HANDLER)
 def handler(event, context):
-    votes = scan_all(votes_table)
-    if not votes:
-        return success_response({"rows": []})
+    qp = get_query_params(event)
+    year_str = qp.get("year") or str(DEFAULT_YEAR)
+    try:
+        year = int(year_str)
+    except ValueError:
+        year = DEFAULT_YEAR
 
-    pick_ids = {v["pick_id"] for v in votes}
-    user_ids = {v["user_id"] for v in votes}
+    derby_event_id = f"{year}-kentucky-derby"
+    oaks_event_id = f"{year}-kentucky-oaks"
 
-    pick_rows = scan_all(picks_table)
-    pick_results = {p["id"]: p.get("result", "pending") for p in pick_rows if p["id"] in pick_ids}
-
-    user_rows = scan_all(users_table)
-    usernames = {u["id"]: u["username"] for u in user_rows if u["id"] in user_ids}
+    derby_finishers = _finishers_for(derby_event_id, 12)
+    oaks_finishers = _finishers_for(oaks_event_id, 11)
 
     by_user: dict[str, dict] = defaultdict(lambda: {
         "username": "",
         "score": 0,
-        "correct_tails": 0,
-        "correct_fades": 0,
-        "picks_voted": 0,
+        "picks_made": 0,
     })
-    seen: set[tuple[str, str]] = set()
 
-    for v in votes:
-        username = usernames.get(v["user_id"], "?")
-        rec = by_user[v["user_id"]]
-        rec["username"] = username
-        key = (v["user_id"], v["pick_id"])
-        if key not in seen:
-            rec["picks_voted"] += 1
-            seen.add(key)
-        result = pick_results.get(v["pick_id"], "pending")
-        rec["score"] += vote_points(v["vote"], result)
-        if v["vote"] == "tail" and is_correct_tail(result):
-            rec["correct_tails"] += 1
-        elif v["vote"] == "fade" and is_correct_fade(result):
-            rec["correct_fades"] += 1
+    for ev_id, finishers in [
+        (derby_event_id, derby_finishers),
+        (oaks_event_id, oaks_finishers),
+    ]:
+        for p in _predictions_for(ev_id):
+            username = p.get("username") or "?"
+            rec = by_user[username]
+            rec["username"] = username
+            rec["picks_made"] += 1
+            rec["score"] += score_prediction(p, finishers)
 
-    sorted_rows = sorted(
+    rows = sorted(
         by_user.values(),
-        key=lambda r: (-r["score"], -r["correct_tails"], -r["correct_fades"], (r["username"] or "").lower()),
+        key=lambda r: (-r["score"], r["username"].lower()),
     )
 
     return success_response({
+        "year": year,
         "rows": [
-            {"rank": i + 1, **{k: r[k] for k in ("username", "score", "correct_tails", "correct_fades", "picks_voted")}}
-            for i, r in enumerate(sorted_rows)
-        ]
+            {
+                "rank": i + 1,
+                "username": r["username"],
+                "score": r["score"],
+                "picks_made": r["picks_made"],
+            }
+            for i, r in enumerate(rows)
+        ],
     })
