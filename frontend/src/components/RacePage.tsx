@@ -317,7 +317,7 @@ export function RacePage({
 
             <div className="space-y-5">
               {sortedPicks.map((p) => (
-                <HorseCard key={p.id} pick={p} />
+                <HorseCard key={p.id} pick={p} kind={kind} />
               ))}
             </div>
           </>
@@ -361,10 +361,10 @@ function ScratchedStamp() {
   );
 }
 
-function HorseCard({ pick: p }: { pick: DisplayHorse }) {
-  // Always render all 7 stat tiles — keeps cron-added horses visually
-  // consistent with Grant's writeups even when his stats columns are blank.
-  const stats: { label: string; value: string }[] = [
+function HorseCard({ pick: p, kind }: { pick: DisplayHorse; kind: RaceKind }) {
+  // Per-kind stat tiles. Derby drops Equibase; Oaks drops Beyer + Brisnet —
+  // Grant doesn't track those for those races, so they were always blank.
+  const allStats: { label: string; value: string }[] = [
     { label: 'Odds', value: p.odds_at_pick ?? 'unknown' },
     { label: 'Record', value: p.record ?? 'unknown' },
     { label: 'Beyer', value: p.beyer ?? 'unknown' },
@@ -373,6 +373,10 @@ function HorseCard({ pick: p }: { pick: DisplayHorse }) {
     { label: 'Style', value: p.style ?? 'unknown' },
     { label: 'Last race', value: p.last_race ?? 'unknown' },
   ];
+  const hidden = kind === 'derby'
+    ? new Set(['Equibase'])
+    : new Set(['Beyer', 'Brisnet']);
+  const stats = allStats.filter((s) => !hidden.has(s.label));
 
   // Split writeup into bullets — Grant's lines exactly as he wrote them.
   const bullets = (p.writeup ?? '')

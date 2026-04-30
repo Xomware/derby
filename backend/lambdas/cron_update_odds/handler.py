@@ -64,11 +64,12 @@ USER_AGENT = (
 
 ENTRY_FEED_URL = "https://tscom-content.netlify.app/race-entry/{config_id}.json"
 
-# TwinSpires widget config IDs for the 2026 races. If these change year over
-# year, override via env or update inline.
+# TwinSpires widget config IDs for the 2026 races. The "Saturday/Friday"
+# race-day feeds (672/732) carry the latest scratches and match what
+# kentuckyderby.com displays; the older "Advance" feeds (650/651) lag.
 TWINSPIRES_CONFIG_IDS: dict[str, int] = {
-    "derby": int(os.environ.get("ODDS_DERBY_CONFIG_ID", "650")),
-    "oaks": int(os.environ.get("ODDS_OAKS_CONFIG_ID", "651")),
+    "derby": int(os.environ.get("ODDS_DERBY_CONFIG_ID", "672")),
+    "oaks": int(os.environ.get("ODDS_OAKS_CONFIG_ID", "732")),
 }
 
 ODDS_FRACTION_RE = re.compile(r"^(\d{1,3})\s*[-/]\s*(\d{1,3})$")
