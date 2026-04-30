@@ -28,3 +28,51 @@ h3,
   letter-spacing: -0.01em;
 }
 
+/* Galloping horses sprite + recolor.
+   Sprite is a 1678×95 alpha PNG (12 frames × ~140 wide). We use it as a
+   mask so each .horse element's background-color tints the silhouette. */
+.horse {
+  position: absolute;
+  bottom: var(--bottom, 0);
+  width: 140px;
+  height: 95px;
+  background-color: var(--color, #5d4037);
+  -webkit-mask-image: url('/horse-sprite.png');
+  mask-image: url('/horse-sprite.png');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 1680px 95px;
+  mask-size: 1680px 95px;
+  -webkit-mask-position-x: 0;
+  mask-position-x: 0;
+  will-change: transform, mask-position;
+  transform-origin: bottom left;
+  animation:
+    horse-gallop var(--gallop, 0.7s) steps(12) infinite,
+    horse-run var(--duration, 16s) linear infinite;
+  animation-delay: 0s, var(--delay, 0s);
+}
+
+@keyframes horse-gallop {
+  to {
+    -webkit-mask-position-x: -1680px;
+    mask-position-x: -1680px;
+  }
+}
+
+@keyframes horse-run {
+  from {
+    transform: translateX(-180px) scale(var(--scale, 0.7));
+  }
+  to {
+    transform: translateX(calc(100vw + 180px)) scale(var(--scale, 0.7));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .horse {
+    animation: none;
+    display: none;
+  }
+}
+
