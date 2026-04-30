@@ -6,6 +6,7 @@ import { SidePanel, SidePanelItem } from '@/components/SidePanel';
 import { WriteupSection } from '@/components/WriteupSection';
 import { useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
 import { CURRENT_YEAR } from '@/lib/year';
+import { BettingPlays } from '@/components/BettingPlays';
 import { GrantPinned } from '@/components/GrantPinned';
 import { PowerRankings } from '@/components/PowerRankings';
 import { StatTile } from '@/components/StatTile';
@@ -321,7 +322,7 @@ export function RacePage({
 
         {tab === 'plays' && (
           grantPicks?.betting_plays ? (
-            <WriteupSection title="" body={grantPicks.betting_plays} />
+            <BettingPlays body={grantPicks.betting_plays} />
           ) : (
             <p className="text-bourbon/70 text-sm">No betting plays for this event.</p>
           )
