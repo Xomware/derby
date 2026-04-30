@@ -77,6 +77,14 @@ export function PickForm({
     [horses]
   );
 
+  const oddsByHorse = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const h of horses) {
+      if (h.horse_name && h.odds_at_pick) m.set(h.horse_name, h.odds_at_pick);
+    }
+    return m;
+  }, [horses]);
+
   const longShotEligible = useMemo(
     () => allHorses.filter((h) => isLongShotEligible(h.odds)),
     [allHorses]
@@ -88,6 +96,12 @@ export function PickForm({
       scratchedNames.has(existing[s] ?? '')
     );
   }, [existing, scratchedNames]);
+
+  const myLongShotShortened =
+    !!existing &&
+    !!existing.long_shot &&
+    !scratchedNames.has(existing.long_shot) &&
+    !isLongShotEligible(oddsByHorse.get(existing.long_shot) ?? null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -140,12 +154,15 @@ export function PickForm({
             const value = (existing as Prediction)[f.key];
             const stamp = computeStamp(value, f.key, finishers);
             const scratched = scratchedNames.has(value);
+            const longShotTooShort = f.key === 'long_shot' && myLongShotShortened;
             return (
               <div
                 key={f.key}
                 className={`rounded-md border px-3 py-2 ${
                   scratched
                     ? 'border-rose-red/40 bg-rose-red/5'
+                    : longShotTooShort
+                    ? 'border-amber-500/40 bg-amber-50'
                     : 'border-bourbon/15 bg-cream/40'
                 }`}
               >
@@ -165,6 +182,14 @@ export function PickForm({
                       ⚠ scratched
                     </span>
                   )}
+                  {longShotTooShort && (
+                    <span
+                      className="ml-1 text-[10px] uppercase tracking-wider font-bold text-amber-700"
+                      title="Odds dropped — no longer a long shot"
+                    >
+                      ⚠ now {oddsByHorse.get(value) ?? '—'}
+                    </span>
+                  )}
                 </dd>
               </div>
             );
@@ -181,6 +206,16 @@ export function PickForm({
               .join(', ')}
           </strong>
           . Pick a different one before lock or you&apos;ll score zero on that slot.
+        </div>
+      )}
+
+      {myLongShotShortened && !locked && (
+        <div className="mb-3 rounded-md border-l-4 border-amber-500 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          Heads up — your long shot{' '}
+          <strong>{existing?.long_shot}</strong> has firmed to{' '}
+          <strong>{oddsByHorse.get(existing?.long_shot ?? '') ?? '—'}</strong> and is below the
+          long-shot rule (odds 8-1 or longer). Update your pick before lock if you want it to
+          satisfy the rule.
         </div>
       )}
 

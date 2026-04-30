@@ -13,11 +13,32 @@ interface Props {
   oddsByHorse?: Map<string, string>;
   /** Set of normalized horse_names that have been scratched. */
   scratchedHorses?: Set<string>;
+  /** Threshold (n/d) below which a long-shot pick is too short. */
+  longShotThreshold?: number;
 }
 
 function isScratched(name: string | null, scratched?: Set<string>): boolean {
   if (!name || !scratched) return false;
   return scratched.has(name.trim().toLowerCase());
+}
+
+function oddsRatio(odds: string | null | undefined): number | null {
+  if (!odds) return null;
+  const m = odds.replace(/\//g, '-').match(/^(\d+)-(\d+)$/);
+  if (!m) return null;
+  const n = Number(m[1]);
+  const d = Number(m[2]);
+  return d > 0 ? n / d : null;
+}
+
+function isLongShotTooShort(
+  name: string | null,
+  odds?: Map<string, string>,
+  threshold?: number
+): boolean {
+  if (!name || !odds || !threshold) return false;
+  const r = oddsRatio(odds.get(name.trim().toLowerCase()));
+  return r !== null && r < threshold;
 }
 
 function ScratchedTag() {
@@ -27,6 +48,17 @@ function ScratchedTag() {
       className="ml-1 inline-flex items-center px-1 rounded bg-rose-red/15 text-rose-red text-[9px] uppercase tracking-wider font-bold align-middle"
     >
       ⚠ scratched
+    </span>
+  );
+}
+
+function LongShotShortTag({ odds }: { odds: string | null }) {
+  return (
+    <span
+      title="Long shot has firmed below the 8-1 rule — update before lock"
+      className="ml-1 inline-flex items-center px-1 rounded bg-amber-100 text-amber-800 text-[9px] uppercase tracking-wider font-bold align-middle"
+    >
+      ⚠ now {odds ?? '—'}
     </span>
   );
 }
@@ -66,6 +98,7 @@ export function LeaderboardTable({
   showScores,
   oddsByHorse,
   scratchedHorses,
+  longShotThreshold,
 }: Props) {
   if (rows.length === 0) {
     return (
@@ -117,11 +150,20 @@ export function LeaderboardTable({
                   const visible = me || isGrant || !hidePicks;
                   const d = pickDisplay(pick, visible);
                   const scr = visible && isScratched(pick, scratchedHorses);
+                  const ls =
+                    visible &&
+                    s.key === 'long_shot' &&
+                    !scr &&
+                    isLongShotTooShort(pick, oddsByHorse, longShotThreshold);
                   return (
                     <div
                       key={s.key}
                       className={`rounded-md px-2 py-1.5 border ${
-                        scr ? 'border-rose-red/30 bg-rose-red/5' : 'border-bourbon/10 bg-cream/50'
+                        scr
+                          ? 'border-rose-red/30 bg-rose-red/5'
+                          : ls
+                          ? 'border-amber-500/40 bg-amber-50'
+                          : 'border-bourbon/10 bg-cream/50'
                       }`}
                     >
                       <dt className="text-[9px] uppercase tracking-wider text-bourbon/60 font-semibold">
@@ -134,6 +176,7 @@ export function LeaderboardTable({
                       >
                         {d.primary}
                         {scr && <ScratchedTag />}
+                        {ls && <LongShotShortTag odds={odds} />}
                       </dd>
                       <div className="flex items-center justify-between text-[10px] mt-0.5">
                         {odds && d.visible ? (
@@ -195,10 +238,17 @@ export function LeaderboardTable({
                     const odds = lookupOdds(pick, oddsByHorse);
                     const visible = me || isGrant || !hidePicks;
                     const scr = visible && isScratched(pick, scratchedHorses);
+                    const ls =
+                      visible &&
+                      s.key === 'long_shot' &&
+                      !scr &&
+                      isLongShotTooShort(pick, oddsByHorse, longShotThreshold);
                     return (
                       <td
                         key={s.key}
-                        className={`py-2 px-2 whitespace-nowrap ${scr ? 'bg-rose-red/5' : ''}`}
+                        className={`py-2 px-2 whitespace-nowrap ${
+                          scr ? 'bg-rose-red/5' : ls ? 'bg-amber-50' : ''
+                        }`}
                       >
                         {visible ? (
                           <>
@@ -211,6 +261,7 @@ export function LeaderboardTable({
                             >
                               {pick ?? '—'}
                               {scr && <ScratchedTag />}
+                              {ls && <LongShotShortTag odds={odds} />}
                             </div>
                             {odds && (
                               <div className="text-[10px] text-bourbon/60 tabular-nums">{odds}</div>

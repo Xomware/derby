@@ -139,6 +139,7 @@ export default function LeaderboardPage() {
           showScores={showScores}
           oddsByHorse={oddsByHorse}
           scratchedHorses={scratchedHorses}
+          longShotThreshold={8}
         />
       )}
     </section>
