@@ -314,7 +314,7 @@ export function LeaderboardTable({
           <thead>
             <tr className="text-xs uppercase tracking-wider text-bourbon/70 border-b border-bourbon/20">
               <th className="py-2 px-2 w-10">#</th>
-              <th className="py-2 px-2">User</th>
+              <th className="py-2 px-2 text-left">User</th>
               <th className="py-2 px-2">Score</th>
               {SLOTS.map((s) => (
                 <th key={s.key} className="py-2 px-2">
@@ -326,7 +326,7 @@ export function LeaderboardTable({
           <tbody>
             {missingPick && (
               <tr className="border-b border-bourbon/10 bg-rose-red/5">
-                <td className="py-3 px-2 font-mono text-bourbon/60">?</td>
+                <td className="py-3 px-2 font-mono text-bourbon/60 text-center">?</td>
                 <td className="py-3 px-2 whitespace-nowrap text-left">
                   <span className="font-semibold">@{missingPick.username}</span>
                   <span className="ml-1 text-xs text-mint-julep">(you)</span>
@@ -358,31 +358,31 @@ export function LeaderboardTable({
                 >
                   <td className="py-2 px-2 font-mono">{r.rank}</td>
                   <td className="py-2 px-2 whitespace-nowrap text-left">
-                    {isGrant ? (
-                      <span className="font-semibold text-rose-dark">Grant</span>
-                    ) : (
-                      <>@{r.username}</>
-                    )}
-                    {me && <span className="ml-1 text-xs text-mint-julep">(you)</span>}
-                    {showEditBtn && (
-                      <button
-                        type="button"
-                        onClick={() => setEditing(true)}
-                        className="ml-2 text-[11px] font-semibold text-rose-dark border border-rose-red/40 bg-white rounded px-2 py-0.5 hover:bg-rose-red/10 transition"
-                      >
-                        Edit
-                      </button>
-                    )}
-                    {me && showLockedChip && <LockedChip />}
-                    {me && shareConfig && !editing && (
-                      <span className="ml-2 inline-flex">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {isGrant ? (
+                        <span className="font-semibold text-rose-dark">Grant</span>
+                      ) : (
+                        <span>@{r.username}</span>
+                      )}
+                      {me && <span className="text-xs text-mint-julep">(you)</span>}
+                      {showEditBtn && (
+                        <button
+                          type="button"
+                          onClick={() => setEditing(true)}
+                          className="text-[11px] font-semibold text-rose-dark border border-rose-red/40 bg-white rounded px-2 py-0.5 hover:bg-rose-red/10 transition"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      {me && showLockedChip && <LockedChip />}
+                      {me && shareConfig && !editing && (
                         <SharePicksButton
                           prediction={shareConfig.prediction}
                           kind={kind}
                           year={shareConfig.year}
                         />
-                      </span>
-                    )}
+                      )}
+                    </div>
                   </td>
                   <td className="py-2 px-2 font-semibold">{r.score}</td>
                   {SLOTS.map((s) => {
