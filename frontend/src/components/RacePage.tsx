@@ -6,6 +6,7 @@ import { PostTime } from '@/components/PostTime';
 import { SidePanel, SidePanelItem } from '@/components/SidePanel';
 import { WriteupSection } from '@/components/WriteupSection';
 import { CommentsBlock } from '@/components/CommentsBlock';
+import { OddsSparkline } from '@/components/OddsSparkline';
 import {
   useComments,
   useGrantPicks,
@@ -47,6 +48,7 @@ interface DisplayHorse {
   final_take: string | null;
   writeup: string | null;
   scratched: boolean;
+  odds_history?: { ts: string; odds: string }[];
 }
 
 const SORTS_BY_KIND: Record<RaceKind, { id: SortKey; label: string }[]> = {
@@ -163,6 +165,7 @@ export function RacePage({
         final_take: p.final_take,
         writeup: p.writeup,
         scratched: p.scratched,
+        odds_history: p.odds_history,
       }));
     }
     if (isArchive && grantPicks?.horses?.length) {
@@ -563,6 +566,12 @@ function HorseCard({
 
       {poolTotal > 0 && poolForHorse && (
         <PoolChips total={poolTotal} counts={poolForHorse} />
+      )}
+
+      {p.odds_history && p.odds_history.length > 0 && (
+        <div className="mt-2">
+          <OddsSparkline history={p.odds_history} current={p.odds_at_pick} />
+        </div>
       )}
 
       <dl className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">

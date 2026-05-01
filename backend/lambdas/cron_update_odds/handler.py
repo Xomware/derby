@@ -270,12 +270,15 @@ def _update_picks(picks: list[dict], status_map: dict[str, dict]) -> dict[str, i
                 picks_table.update_item(
                     Key={"id": p["id"]},
                     UpdateExpression=(
-                        "SET odds_at_pick = :o, odds_updated_at = :n, odds_source = :s"
+                        "SET odds_at_pick = :o, odds_updated_at = :n, odds_source = :s, "
+                        "odds_history = list_append(if_not_exists(odds_history, :empty), :h)"
                     ),
                     ExpressionAttributeValues={
                         ":o": new_odds,
                         ":n": now,
                         ":s": "cron",
+                        ":empty": [],
+                        ":h": [{"ts": now, "odds": new_odds}],
                     },
                     ConditionExpression="attribute_exists(id)",
                 )

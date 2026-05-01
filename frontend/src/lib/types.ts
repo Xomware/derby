@@ -30,6 +30,7 @@ export interface Pick {
   display_order: number;
   locked: boolean;
   scratched: boolean;
+  odds_history?: { ts: string; odds: string }[];
 }
 
 export interface RaceGroup {

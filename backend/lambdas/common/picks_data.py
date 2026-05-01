@@ -111,10 +111,25 @@ def serialize_pick(pick: dict, votes: list[dict], usernames_by_user_id: dict[str
         "display_order": _to_int(pick.get("display_order", 0)),
         "locked": is_locked(rpt),
         "scratched": bool(pick.get("scratched", False)),
+        "odds_history": _serialize_odds_history(pick.get("odds_history")),
         "counts": counts,
         "voters": voters,
         "my_vote": my_vote,
     }
+
+
+def _serialize_odds_history(raw) -> list[dict]:
+    if not raw or not isinstance(raw, list):
+        return []
+    out = []
+    for entry in raw:
+        if not isinstance(entry, dict):
+            continue
+        ts = entry.get("ts")
+        odds = entry.get("odds")
+        if ts and odds:
+            out.append({"ts": str(ts), "odds": str(odds)})
+    return out
 
 
 def picks_grouped_by_race(picks: list[dict], votes: list[dict], usernames_by_user_id: dict[str, str], current_user_id: str | None) -> dict:
