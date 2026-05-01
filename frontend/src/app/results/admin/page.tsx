@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { AdminCronRuns } from '@/components/AdminCronRuns';
 import { AdminGate } from '@/components/AdminGate';
 import { AdminOddsForm } from '@/components/AdminOddsForm';
+import { AdminPicksStatsForm } from '@/components/AdminPicksStatsForm';
 import { AdminResultsForm } from '@/components/AdminResultsForm';
 import { AdminVisits } from '@/components/AdminVisits';
 import { useAdminToken } from '@/lib/admin';
@@ -14,11 +15,12 @@ const TABS: { id: RaceKind; label: string }[] = [
   { id: 'oaks', label: 'Oaks' },
 ];
 
-type Section = 'results' | 'odds' | 'cron' | 'visits';
+type Section = 'results' | 'odds' | 'stats' | 'cron' | 'visits';
 
 const SECTIONS: { id: Section; label: string }[] = [
   { id: 'results', label: 'Set results' },
   { id: 'odds', label: 'Update odds' },
+  { id: 'stats', label: 'Edit stats' },
   { id: 'cron', label: 'Cron history' },
   { id: 'visits', label: 'Page views' },
 ];
@@ -33,7 +35,13 @@ export default function AdminResultsPage() {
     const e = params.get('event');
     if (e === 'oaks' || e === 'derby') setKind(e);
     const s = params.get('section');
-    if (s === 'odds' || s === 'results' || s === 'cron' || s === 'visits') {
+    if (
+      s === 'odds' ||
+      s === 'results' ||
+      s === 'stats' ||
+      s === 'cron' ||
+      s === 'visits'
+    ) {
       setSection(s);
     }
   }, []);
@@ -62,6 +70,8 @@ export default function AdminResultsPage() {
             ? 'Enter race finishers manually. Saving publishes immediately and stamps user picks across the site.'
             : section === 'odds'
             ? 'Edit per-horse odds. Predictions saved earlier are scored against the odds at the time of the race.'
+            : section === 'stats'
+            ? "Edit per-horse record / Beyer / Brisnet / Equibase / style / last race. Blank field clears the value (UI shows N/A)."
             : section === 'cron'
             ? 'Hourly odds-scraper history. Each row is one cron run.'
             : 'Page-view analytics for everyone with a username.'}
@@ -92,7 +102,7 @@ export default function AdminResultsPage() {
         })}
       </div>
 
-      {(section === 'results' || section === 'odds') && (
+      {(section === 'results' || section === 'odds' || section === 'stats') && (
         <nav className="flex gap-1 border-b border-bourbon/20" aria-label="Event">
           {TABS.map((t) => {
             const active = kind === t.id;
@@ -120,6 +130,7 @@ export default function AdminResultsPage() {
 
       {section === 'results' && <AdminResultsForm kind={kind} adminToken={token} />}
       {section === 'odds' && <AdminOddsForm kind={kind} adminToken={token} />}
+      {section === 'stats' && <AdminPicksStatsForm kind={kind} adminToken={token} />}
       {section === 'cron' && <AdminCronRuns adminToken={token} />}
       {section === 'visits' && <AdminVisits adminToken={token} />}
     </section>

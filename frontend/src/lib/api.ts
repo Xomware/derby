@@ -97,6 +97,23 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  adminUpdatePickStats: (body: {
+    admin_token: string;
+    picks: {
+      pick_id: string;
+      record?: string | null;
+      beyer?: string | null;
+      brisnet?: string | null;
+      equibase_rating?: string | null;
+      style?: string | null;
+      last_race?: string | null;
+    }[];
+  }) =>
+    request<{ updated: number }>('/admin-results/picks-stats', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
   adminCronRuns: (body: { admin_token: string; type?: string; limit?: number }) =>
     request<AdminCronRunsResponse>('/admin-results/cron-runs', {
       method: 'POST',
