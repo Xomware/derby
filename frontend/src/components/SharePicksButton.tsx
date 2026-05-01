@@ -13,9 +13,7 @@ interface Props {
 
 function buildText(p: Prediction, kind: RaceKind, year: number): string {
   const eventLabel = kind === 'derby' ? 'Derby' : 'Oaks';
-  const flag = kind === 'derby' ? '🌹' : '🌷';
   const lines = [
-    `🐎 SUN GOD DERBY ${flag}`,
     `${year} Kentucky ${eventLabel} — @${p.username}'s picks`,
     '',
     `🥇 Win        ${p.win}`,

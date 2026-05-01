@@ -21,11 +21,9 @@ function buildText(
   limit: number
 ): string {
   const eventLabel = kind === 'derby' ? 'Derby' : 'Oaks';
-  const flag = kind === 'derby' ? '🌹' : '🌷';
   const top = rows.slice(0, limit);
   const status = finished ? 'Final' : 'Live';
   const lines: string[] = [
-    `🐎 SUN GOD DERBY ${flag}`,
     `${year} ${eventLabel} — ${status} leaderboard`,
     '',
   ];
