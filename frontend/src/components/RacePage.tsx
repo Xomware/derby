@@ -5,7 +5,9 @@ import { Countdown } from '@/components/Countdown';
 import { PostTime } from '@/components/PostTime';
 import { SidePanel, SidePanelItem } from '@/components/SidePanel';
 import { WriteupSection } from '@/components/WriteupSection';
-import { useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
+import { CommentsBlock } from '@/components/CommentsBlock';
+import { useComments, useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
+import { useUsername } from '@/lib/identity';
 import { CURRENT_YEAR } from '@/lib/year';
 import { BettingPlays } from '@/components/BettingPlays';
 import { GrantPinned } from '@/components/GrantPinned';
@@ -15,10 +17,12 @@ import { useResults } from '@/lib/hooks';
 
 type SortKey = 'post' | 'name' | 'odds' | 'beyer' | 'brisnet' | 'equibase';
 
-const SUB_TABS: { id: 'overview' | 'plays' | 'rankings'; label: string }[] = [
+type SubTab = 'overview' | 'plays' | 'rankings' | 'talk';
+const SUB_TABS: { id: SubTab; label: string }[] = [
   { id: 'overview', label: 'Race & horses' },
   { id: 'plays', label: 'Betting plays' },
   { id: 'rankings', label: 'Power rankings' },
+  { id: 'talk', label: 'Talk' },
 ];
 
 interface DisplayHorse {
@@ -100,21 +104,21 @@ export function RacePage({
   title: string;
   eyebrow: string;
 }) {
-  const { picks, isLoading, year } = usePicks(kind);
+  const { picks, isLoading, year, eventId: picksEventId } = usePicks(kind);
   const { grantPicks } = useGrantPicks(kind);
   const { results } = useResults(year);
   const [sortKey, setSortKey] = useState<SortKey>('post');
-  const [tab, setTab] = useState<'overview' | 'plays' | 'rankings'>('overview');
+  const [tab, setTab] = useState<SubTab>('overview');
   const isArchive = year !== CURRENT_YEAR;
 
-  // ?tab=plays|rankings deep-link.
+  // ?tab=plays|rankings|talk deep-link.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get('tab');
-    if (t === 'plays' || t === 'rankings' || t === 'overview') setTab(t);
+    if (t === 'plays' || t === 'rankings' || t === 'overview' || t === 'talk') setTab(t);
   }, []);
 
-  function pushTab(next: 'overview' | 'plays' | 'rankings') {
+  function pushTab(next: SubTab) {
     setTab(next);
     const url = new URL(window.location.href);
     if (next === 'overview') url.searchParams.delete('tab');
@@ -263,7 +267,8 @@ export function RacePage({
             const enabled =
               t.id === 'overview' ||
               (t.id === 'plays' && !!grantPicks?.betting_plays) ||
-              (t.id === 'rankings' && !!grantPicks?.power_rankings?.length);
+              (t.id === 'rankings' && !!grantPicks?.power_rankings?.length) ||
+              (t.id === 'talk' && !isArchive);
             return (
               <button
                 key={t.id}
@@ -378,6 +383,8 @@ export function RacePage({
           )
         )}
 
+        {tab === 'talk' && !isArchive && <RaceTalk kind={kind} eventId={picksEventId} />}
+
       </section>
 
       {tab === 'overview' && <SidePanel title="Jump to" items={tocItems} />}
@@ -387,6 +394,24 @@ export function RacePage({
 
 function statTip(label: string): string | undefined {
   return STAT_DESCRIPTIONS[label];
+}
+
+function RaceTalk({ kind, eventId }: { kind: RaceKind; eventId: string }) {
+  const { username } = useUsername();
+  const { comments, refresh } = useComments(kind, { horseId: null });
+  if (!eventId) {
+    return <p className="text-bourbon/70 text-sm">Loading…</p>;
+  }
+  return (
+    <CommentsBlock
+      eventId={eventId}
+      horseId={null}
+      comments={comments}
+      username={username}
+      onPosted={refresh}
+      onDeleted={refresh}
+    />
+  );
 }
 
 function ScratchedStamp() {

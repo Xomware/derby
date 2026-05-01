@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { LeaderboardTable } from '@/components/LeaderboardTable';
 import { PostTime } from '@/components/PostTime';
+import { ResultsRecapModal } from '@/components/ResultsRecapModal';
 import {
   PickDistribution,
   type DistributionData,
@@ -257,6 +258,15 @@ export default function LeaderboardPage() {
       )}
 
       {!isArchive && <PickDistribution data={distribution} />}
+
+      {!isArchive && (
+        <ResultsRecapModal
+          leaderboard={leaderboard}
+          username={username}
+          kind={kind}
+          year={year}
+        />
+      )}
     </section>
   );
 }
