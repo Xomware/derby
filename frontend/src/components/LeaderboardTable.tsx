@@ -1,10 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import { HorseLink } from './HorseLink';
+import type { RaceKind } from '@/lib/hooks';
 import type { LeaderboardRow } from '@/lib/types';
 
 interface Props {
   rows: LeaderboardRow[];
+  /** Required to open the horse modal when a pick name is tapped. */
+  kind: RaceKind;
   highlightUsername?: string | null;
   /** Show '?' instead of horse names when picks are still hidden. */
   hidePicks: boolean;
@@ -96,6 +100,7 @@ function pickDisplay(
 
 export function LeaderboardTable({
   rows,
+  kind,
   highlightUsername,
   hidePicks,
   showScores,
@@ -199,7 +204,19 @@ export function LeaderboardTable({
                           scr ? 'text-rose-dark line-through decoration-rose-red/70' : 'text-bourbon'
                         }`}
                       >
-                        {d.primary}
+                        {visible && pick ? (
+                          <HorseLink
+                            name={pick}
+                            kind={kind}
+                            className={`underline underline-offset-2 decoration-bourbon/20 hover:decoration-rose-red hover:text-rose-red transition-colors text-left ${
+                              scr ? 'text-rose-dark' : ''
+                            }`}
+                          >
+                            {d.primary}
+                          </HorseLink>
+                        ) : (
+                          d.primary
+                        )}
                         {scr && <ScratchedTag />}
                         {ls && <LongShotShortTag odds={odds} />}
                       </dd>
@@ -305,7 +322,17 @@ export function LeaderboardTable({
                                   : 'text-bourbon'
                               }
                             >
-                              {pick ?? '—'}
+                              {pick ? (
+                                <HorseLink
+                                  name={pick}
+                                  kind={kind}
+                                  className={`underline underline-offset-2 decoration-bourbon/20 hover:decoration-rose-red hover:text-rose-red transition-colors ${
+                                    scr ? 'text-rose-dark' : ''
+                                  }`}
+                                />
+                              ) : (
+                                '—'
+                              )}
                               {scr && <ScratchedTag />}
                               {ls && <LongShotShortTag odds={odds} />}
                             </div>

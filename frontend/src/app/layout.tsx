@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Suspense } from 'react';
+import { HorseModalProvider } from '@/components/HorseModalProvider';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Ticker } from '@/components/Ticker';
@@ -27,15 +28,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col antialiased pb-12 sm:pb-14">
-        <SiteHeader />
-        <main className="flex-1 max-w-5xl mx-auto w-full px-4 pb-16">
-          <UsernameGate>{children}</UsernameGate>
-        </main>
-        <SiteFooter />
-        <Ticker />
-        <Suspense fallback={null}>
-          <VisitTracker />
-        </Suspense>
+        <HorseModalProvider>
+          <SiteHeader />
+          <main className="flex-1 max-w-5xl mx-auto w-full px-4 pb-16">
+            <UsernameGate>{children}</UsernameGate>
+          </main>
+          <SiteFooter />
+          <Ticker />
+          <Suspense fallback={null}>
+            <VisitTracker />
+          </Suspense>
+        </HorseModalProvider>
       </body>
     </html>
   );

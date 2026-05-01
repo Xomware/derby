@@ -1,5 +1,9 @@
 'use client';
 
+import { Fragment, useMemo } from 'react';
+import { HorseLink } from './HorseLink';
+import type { RaceKind } from '@/lib/hooks';
+
 interface Section {
   heading: string | null;
   lines: string[];
@@ -37,7 +41,59 @@ function StakeBadge({ count }: { count: number }) {
   );
 }
 
-function Line({ text }: { text: string }) {
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Walk the text and wrap any horse-name occurrence in a HorseLink. Names
+ * are matched case-insensitively against word boundaries. Longer names
+ * win over shorter ones (e.g., "Corona De Oro" before "Corona").
+ */
+function linkifyHorses(
+  text: string,
+  horseNames: string[],
+  kind: RaceKind
+): React.ReactNode {
+  if (horseNames.length === 0) return text;
+  const sorted = [...horseNames].sort((a, b) => b.length - a.length);
+  const pattern = new RegExp(
+    `\\b(${sorted.map(escapeRegex).join('|')})\\b`,
+    'gi'
+  );
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = pattern.exec(text)) !== null) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    const matched = m[0];
+    const canonical =
+      sorted.find((n) => n.toLowerCase() === matched.toLowerCase()) ?? matched;
+    out.push(
+      <HorseLink
+        key={`${m.index}-${matched}`}
+        name={canonical}
+        kind={kind}
+        className="underline underline-offset-2 decoration-bourbon/30 hover:decoration-rose-red hover:text-rose-red transition-colors text-left font-semibold"
+      >
+        {matched}
+      </HorseLink>
+    );
+    last = m.index + matched.length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out.map((node, i) => <Fragment key={i}>{node}</Fragment>);
+}
+
+function Line({
+  text,
+  horseNames,
+  kind,
+}: {
+  text: string;
+  horseNames: string[];
+  kind: RaceKind;
+}) {
   // Strip + count trailing $ markers (e.g., "Renegade to Win $$$").
   const m = text.match(/^(.*?)(\s*\$+)\s*$/);
   if (m) {
@@ -45,16 +101,24 @@ function Line({ text }: { text: string }) {
     const count = m[2].trim().length;
     return (
       <span>
-        <span>{lead}</span>
+        <span>{linkifyHorses(lead, horseNames, kind)}</span>
         <StakeBadge count={count} />
       </span>
     );
   }
-  return <span>{text}</span>;
+  return <span>{linkifyHorses(text, horseNames, kind)}</span>;
 }
 
-export function BettingPlays({ body }: { body: string }) {
-  const sections = parseSections(body);
+export function BettingPlays({
+  body,
+  horseNames = [],
+  kind,
+}: {
+  body: string;
+  horseNames?: string[];
+  kind: RaceKind;
+}) {
+  const sections = useMemo(() => parseSections(body), [body]);
 
   return (
     <div className="space-y-5">
@@ -76,7 +140,7 @@ export function BettingPlays({ body }: { body: string }) {
                   key={i}
                   className="pl-4 relative before:content-['•'] before:absolute before:left-0 before:text-rose-red"
                 >
-                  <Line text={l} />
+                  <Line text={l} horseNames={horseNames} kind={kind} />
                 </li>
               ))}
             </ul>

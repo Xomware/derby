@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { Fragment, useMemo, useState } from 'react';
+import { useHorseModal } from './HorseModalProvider';
 import {
   useGrantPicks,
   usePicks,
@@ -86,9 +86,11 @@ function Divider({ label }: { label: string }) {
 }
 
 function TickerItemCard({ it }: { it: TickerItem }) {
+  const { open } = useHorseModal();
   return (
-    <Link
-      href={`/${it.kind}/?event=${it.kind}#horse-${it.horseId}`}
+    <button
+      type="button"
+      onClick={() => open(it.name, it.kind)}
       className="inline-flex items-center gap-2 px-3 mx-1 h-9 rounded shrink-0 bg-slate-800/70 hover:bg-slate-700 border border-slate-700 hover:border-amber-500/50 transition font-mono text-[11px] text-slate-100"
     >
       <span
@@ -113,7 +115,7 @@ function TickerItemCard({ it }: { it: TickerItem }) {
           {it.grantBadge}
         </span>
       )}
-    </Link>
+    </button>
   );
 }
 

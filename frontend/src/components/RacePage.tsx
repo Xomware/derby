@@ -358,7 +358,11 @@ export function RacePage({
 
         {tab === 'plays' && (
           grantPicks?.betting_plays ? (
-            <BettingPlays body={grantPicks.betting_plays} />
+            <BettingPlays
+              body={grantPicks.betting_plays}
+              kind={kind}
+              horseNames={displayHorses.map((h) => h.horse_name)}
+            />
           ) : (
             <p className="text-bourbon/70 text-sm">No betting plays for this event.</p>
           )
@@ -366,7 +370,7 @@ export function RacePage({
 
         {tab === 'rankings' && (
           grantPicks?.power_rankings?.length ? (
-            <PowerRankings tiers={grantPicks.power_rankings} />
+            <PowerRankings tiers={grantPicks.power_rankings} kind={kind} />
           ) : (
             <p className="text-bourbon/70 text-sm">No power rankings for this event.</p>
           )

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Countdown } from '@/components/Countdown';
+import { HorseLink } from '@/components/HorseLink';
 import {
   useGrantPicks,
   usePicks,
@@ -268,6 +269,7 @@ export default function ResultsPage() {
               <HorseTallyRow
                 key={h.key}
                 horse={h}
+                kind={kind}
                 tally={tally[normalize(h.name)]}
                 position={positionMap.get(normalize(h.name)) ?? null}
                 showCounts={locked}
@@ -308,6 +310,7 @@ function VoterIcon({ open }: { open: boolean }) {
 
 function HorseTallyRow({
   horse,
+  kind,
   tally,
   position,
   showCounts,
@@ -315,6 +318,7 @@ function HorseTallyRow({
   official,
 }: {
   horse: DisplayHorse;
+  kind: RaceKind;
   tally: Record<'win' | 'place' | 'show' | 'long_shot', SlotTally> | undefined;
   position: number | null;
   showCounts: boolean;
@@ -381,7 +385,11 @@ function HorseTallyRow({
                 horse.scratched ? 'line-through decoration-rose-red/70' : ''
               }`}
             >
-              {horse.name}
+              <HorseLink
+                name={horse.name}
+                kind={kind}
+                className="underline underline-offset-2 decoration-bourbon/30 hover:decoration-rose-red hover:text-rose-red transition-colors text-left"
+              />
             </div>
             {horse.odds && (
               <div className="text-[11px] text-bourbon/60 tabular-nums">{horse.odds}</div>

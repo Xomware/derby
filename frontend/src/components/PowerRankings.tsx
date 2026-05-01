@@ -1,6 +1,7 @@
 'use client';
 
-import type { PowerRankingTier } from '@/lib/hooks';
+import { HorseLink } from './HorseLink';
+import type { PowerRankingTier, RaceKind } from '@/lib/hooks';
 
 const TIER_TONE = [
   'border-rose-red/40 bg-rose-red/5',
@@ -10,7 +11,13 @@ const TIER_TONE = [
   'border-bourbon/10 bg-cream/40',
 ];
 
-export function PowerRankings({ tiers }: { tiers: PowerRankingTier[] }) {
+export function PowerRankings({
+  tiers,
+  kind,
+}: {
+  tiers: PowerRankingTier[];
+  kind: RaceKind;
+}) {
   if (!tiers || tiers.length === 0) return null;
   return (
     <section className="rounded-xl border border-bourbon/15 bg-white p-4 space-y-3">
@@ -27,7 +34,11 @@ export function PowerRankings({ tiers }: { tiers: PowerRankingTier[] }) {
             <ul className="space-y-1 text-sm">
               {t.horses.map((h) => (
                 <li key={h.name}>
-                  <span className="font-semibold text-bourbon">{h.name}</span>
+                  <HorseLink
+                    name={h.name}
+                    kind={kind}
+                    className="font-semibold text-bourbon underline underline-offset-2 decoration-bourbon/30 hover:decoration-rose-red hover:text-rose-red transition-colors"
+                  />
                   {h.note && <span className="text-bourbon/70"> — {h.note}</span>}
                 </li>
               ))}

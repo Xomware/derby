@@ -188,6 +188,7 @@ export default function LeaderboardPage() {
       {leaderboard && (
         <LeaderboardTable
           rows={rowsWithGrant}
+          kind={kind}
           highlightUsername={username}
           hidePicks={false}
           showScores={showScores}
