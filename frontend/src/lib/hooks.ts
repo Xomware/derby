@@ -2,8 +2,11 @@
 
 import useSWR from 'swr';
 import { api, type CommentsListResponse, type PredictionsListResponse } from './api';
+import { useIsRaceWindowActive } from './raceWindow';
 import type { Leaderboard, PicksGrouped, RaceResultsList } from './types';
 import { CURRENT_YEAR, derbyEventId, oaksEventId, useYear } from './year';
+
+const FAST_REFRESH_MS = 5_000;
 
 export type RaceKind = 'derby' | 'oaks';
 
@@ -14,10 +17,11 @@ export function eventIdFor(year: number, kind: RaceKind): string {
 export function usePicks(kind: RaceKind, yearOverride?: number) {
   const { year } = useYear();
   const eventId = eventIdFor(yearOverride ?? year, kind);
+  const live = useIsRaceWindowActive();
   const { data, error, isLoading, mutate } = useSWR<PicksGrouped>(
     ['picks', eventId],
     () => api.picks(eventId),
-    { refreshInterval: 30_000 }
+    { refreshInterval: live ? FAST_REFRESH_MS : 30_000 }
   );
   return { picks: data, error, isLoading, refresh: mutate, eventId, year: yearOverride ?? year };
 }
@@ -28,10 +32,11 @@ export function useLeaderboard(
 ) {
   const { year } = useYear();
   const effectiveYear = yearOverride ?? year;
+  const live = useIsRaceWindowActive();
   const { data, error, isLoading, mutate } = useSWR<Leaderboard>(
     ['leaderboard', effectiveYear, event],
     () => api.leaderboard(effectiveYear, event),
-    { refreshInterval: 30_000 }
+    { refreshInterval: live ? FAST_REFRESH_MS : 30_000 }
   );
   return { leaderboard: data, error, isLoading, refresh: mutate, year: effectiveYear };
 }
@@ -39,10 +44,11 @@ export function useLeaderboard(
 export function useResults(yearOverride?: number) {
   const { year } = useYear();
   const effectiveYear = yearOverride ?? year;
+  const live = useIsRaceWindowActive();
   const { data, error, isLoading, mutate } = useSWR<RaceResultsList>(
     ['results', effectiveYear],
     () => api.results(effectiveYear),
-    { refreshInterval: 60_000 }
+    { refreshInterval: live ? FAST_REFRESH_MS : 60_000 }
   );
   return { results: data, error, isLoading, refresh: mutate, year: effectiveYear };
 }

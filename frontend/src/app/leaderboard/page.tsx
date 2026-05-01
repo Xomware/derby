@@ -146,12 +146,23 @@ export default function LeaderboardPage() {
     [picks]
   );
 
+  // Client-side lock check so the UI flips instantly at lock time even
+  // if SWR hasn't re-fetched yet. Lock is post_time - 5 min (matches
+  // backend LOCK_BUFFER_SECONDS).
+  const clientLocked = useMemo(() => {
+    if (!predictions?.post_time) return false;
+    const lockMs = new Date(predictions.post_time).getTime() - 5 * 60 * 1000;
+    return Date.now() >= lockMs;
+  }, [predictions?.post_time]);
+
+  const isLocked = !!predictions?.locked || clientLocked;
+
   const canEditPicks =
     !isArchive &&
     !!username &&
     userOnLeaderboard &&
     !!predictions &&
-    !predictions.locked &&
+    !isLocked &&
     !leaderboard?.finished;
 
   const editConfig = canEditPicks
@@ -239,6 +250,9 @@ export default function LeaderboardPage() {
               : null
           }
           editConfig={editConfig}
+          showLockedChip={
+            !isArchive && userOnLeaderboard && isLocked && !leaderboard?.finished
+          }
         />
       )}
 

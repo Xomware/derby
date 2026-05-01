@@ -36,6 +36,19 @@ interface Props {
   missingPick?: { username: string; href: string } | null;
   /** When set + user has a row, render an inline Edit affordance pre-lock. */
   editConfig?: EditConfig | null;
+  /** Replace the Edit button on the user's row with a 🔒 Locked chip. */
+  showLockedChip?: boolean;
+}
+
+function LockedChip() {
+  return (
+    <span
+      title="Picks locked — race is off"
+      className="ml-2 inline-flex items-center gap-1 text-[11px] font-semibold text-rose-dark border border-rose-red/30 bg-rose-red/5 rounded px-2 py-0.5"
+    >
+      <span aria-hidden>🔒</span> Locked
+    </span>
+  );
 }
 
 function isScratched(name: string | null, scratched?: Set<string>): boolean {
@@ -123,6 +136,7 @@ export function LeaderboardTable({
   longShotThreshold,
   missingPick,
   editConfig,
+  showLockedChip,
 }: Props) {
   const [editing, setEditing] = useState(false);
   if (rows.length === 0 && !missingPick) {
@@ -200,6 +214,7 @@ export function LeaderboardTable({
                       Edit picks
                     </button>
                   )}
+                  {me && showLockedChip && <LockedChip />}
                   <span className="font-display text-xl text-rose-dark tabular-nums">
                     {r.score}
                   </span>
@@ -347,6 +362,7 @@ export function LeaderboardTable({
                         Edit
                       </button>
                     )}
+                    {me && showLockedChip && <LockedChip />}
                   </td>
                   <td className="py-2 px-2 font-semibold">{r.score}</td>
                   {SLOTS.map((s) => {
