@@ -37,33 +37,15 @@ export function SharePicksButton({ prediction, kind, year, className }: Props) {
     if (!prediction) return;
     const text = buildText(prediction, kind, year);
     const eventLabel = kind === 'derby' ? 'Derby' : 'Oaks';
-    const baseShare: ShareData = {
+    // No `files` — let the platform unfurl the link via og:image so the
+    // banner shows up as a rich link preview instead of a flat attachment.
+    const shareData: ShareData = {
       title: `My ${year} ${eventLabel} picks`,
       text,
     };
-
-    // Try to attach the brand banner so the share sheet renders a preview.
-    // canShare with files isn't supported everywhere — fall back gracefully.
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
-        const res = await fetch('/banner.png');
-        if (res.ok) {
-          const blob = await res.blob();
-          const file = new File([blob], 'sun-god-derby.png', { type: blob.type });
-          const withFile: ShareData = { ...baseShare, files: [file] };
-          if (
-            typeof navigator.canShare === 'function' &&
-            navigator.canShare(withFile)
-          ) {
-            await navigator.share(withFile);
-            return;
-          }
-        }
-      } catch {
-        // Drop banner and fall through to text-only share.
-      }
-      try {
-        await navigator.share(baseShare);
+        await navigator.share(shareData);
         return;
       } catch {
         // User cancelled or share failed; fall through to clipboard.

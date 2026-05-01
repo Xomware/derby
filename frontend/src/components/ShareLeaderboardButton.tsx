@@ -52,31 +52,15 @@ export function ShareLeaderboardButton({
   async function share() {
     const text = buildText(rows, kind, year, finished, limit);
     const eventLabel = kind === 'derby' ? 'Derby' : 'Oaks';
-    const baseShare: ShareData = {
+    // No `files` — let the platform unfurl the link via og:image so the
+    // banner shows up as a rich link preview instead of a flat attachment.
+    const shareData: ShareData = {
       title: `${year} ${eventLabel} leaderboard`,
       text,
     };
-
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
-        const res = await fetch('/banner.png');
-        if (res.ok) {
-          const blob = await res.blob();
-          const file = new File([blob], 'sun-god-derby.png', { type: blob.type });
-          const withFile: ShareData = { ...baseShare, files: [file] };
-          if (
-            typeof navigator.canShare === 'function' &&
-            navigator.canShare(withFile)
-          ) {
-            await navigator.share(withFile);
-            return;
-          }
-        }
-      } catch {
-        // Fall through.
-      }
-      try {
-        await navigator.share(baseShare);
+        await navigator.share(shareData);
         return;
       } catch {
         // User cancelled or share failed; fall through to clipboard.
