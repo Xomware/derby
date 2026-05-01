@@ -1,13 +1,20 @@
 'use client';
 
+import { linkifyHorses } from '@/lib/linkifyHorses';
+import type { RaceKind } from '@/lib/hooks';
+
 export function WriteupSection({
   title,
   body,
   tone = 'neutral',
+  horseNames,
+  kind,
 }: {
   title: string;
   body: string;
   tone?: 'neutral' | 'rose' | 'mint';
+  horseNames?: string[];
+  kind?: RaceKind;
 }) {
   if (!body) return null;
 
@@ -18,6 +25,11 @@ export function WriteupSection({
       ? 'border-mint-julep/30 bg-mint-julep/5'
       : 'border-bourbon/15 bg-white';
 
+  const content =
+    horseNames && horseNames.length > 0 && kind
+      ? linkifyHorses(body, horseNames, kind)
+      : body;
+
   return (
     <section className={`rounded-xl border p-4 ${toneClasses}`}>
       {title && (
@@ -26,7 +38,7 @@ export function WriteupSection({
         </header>
       )}
       <div className="text-sm text-ink/90 leading-relaxed whitespace-pre-wrap">
-        {body}
+        {content}
       </div>
     </section>
   );

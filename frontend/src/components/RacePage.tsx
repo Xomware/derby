@@ -302,6 +302,8 @@ export function RacePage({
                 <WriteupSection
                   title={`Grant's race outlook`}
                   body={grantPicks.analysis}
+                  kind={kind}
+                  horseNames={displayHorses.map((h) => h.horse_name)}
                 />
               </div>
             )}

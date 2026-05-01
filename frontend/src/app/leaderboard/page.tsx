@@ -40,11 +40,16 @@ export default function LeaderboardPage() {
     if (e === 'oaks' || e === 'derby') setKind(e);
   }, []);
 
-  const { leaderboard, isLoading, year } = useLeaderboard(undefined, kind);
+  const { leaderboard, isLoading, year, refresh: refreshLeaderboard } =
+    useLeaderboard(undefined, kind);
   const { picks } = usePicks(kind);
   const { results } = useResults(year);
   const { grantPicks } = useGrantPicks(kind);
-  const { data: predictions } = usePredictions(kind, username);
+  const {
+    data: predictions,
+    refresh: refreshPredictions,
+    eventId,
+  } = usePredictions(kind, username);
   const isArchive = year !== CURRENT_YEAR;
   const showScores = !!leaderboard?.finished;
 
@@ -129,6 +134,39 @@ export default function LeaderboardPage() {
   const showMissingPickCta =
     !!username && !isArchive && !!leaderboard && !leaderboard.finished && !userOnLeaderboard;
 
+  const editorHorses = useMemo(
+    () =>
+      (picks?.races ?? [])
+        .flatMap((r) => r.picks)
+        .map((p) => ({
+          name: p.horse_name,
+          scratched: p.scratched,
+          odds: p.odds_at_pick,
+        })),
+    [picks]
+  );
+
+  const canEditPicks =
+    !isArchive &&
+    !!username &&
+    userOnLeaderboard &&
+    !!predictions &&
+    !predictions.locked &&
+    !leaderboard?.finished;
+
+  const editConfig = canEditPicks
+    ? {
+        eventId,
+        existing: predictions?.my ?? null,
+        horses: editorHorses,
+        canEdit: true,
+        onSaved: () => {
+          refreshPredictions();
+          refreshLeaderboard();
+        },
+      }
+    : null;
+
   return (
     <section className="pt-8 max-w-4xl mx-auto space-y-6">
       <header>
@@ -200,6 +238,7 @@ export default function LeaderboardPage() {
               ? { username, href: `/picks?event=${kind}#your-picks` }
               : null
           }
+          editConfig={editConfig}
         />
       )}
 

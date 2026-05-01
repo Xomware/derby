@@ -1,9 +1,21 @@
 'use client';
 
 import Link from 'next/link';
+import { Fragment, useState } from 'react';
 import { HorseLink } from './HorseLink';
+import { LeaderboardInlineEditor } from './LeaderboardInlineEditor';
 import type { RaceKind } from '@/lib/hooks';
 import type { LeaderboardRow } from '@/lib/types';
+import type { Prediction } from '@/lib/api';
+
+interface EditConfig {
+  eventId: string;
+  existing: Prediction | null;
+  horses: { name: string; scratched: boolean; odds: string | null }[];
+  onSaved: () => void;
+  /** When false, the Edit button is hidden (race locked or already finished). */
+  canEdit: boolean;
+}
 
 interface Props {
   rows: LeaderboardRow[];
@@ -22,6 +34,8 @@ interface Props {
   longShotThreshold?: number;
   /** When set, render an inline "no picks yet" CTA row only the user sees. */
   missingPick?: { username: string; href: string } | null;
+  /** When set + user has a row, render an inline Edit affordance pre-lock. */
+  editConfig?: EditConfig | null;
 }
 
 function isScratched(name: string | null, scratched?: Set<string>): boolean {
@@ -108,7 +122,9 @@ export function LeaderboardTable({
   scratchedHorses,
   longShotThreshold,
   missingPick,
+  editConfig,
 }: Props) {
+  const [editing, setEditing] = useState(false);
   if (rows.length === 0 && !missingPick) {
     return (
       <p className="text-sm text-bourbon/70">
@@ -117,6 +133,12 @@ export function LeaderboardTable({
     );
   }
   const slotColCount = SLOTS.length;
+  const totalCols = 3 + slotColCount; // # · user · score · slots
+  const canShowEdit = !!editConfig?.canEdit && !!highlightUsername;
+  const handleSaved = () => {
+    editConfig?.onSaved();
+    setEditing(false);
+  };
 
   return (
     <>
@@ -168,10 +190,31 @@ export function LeaderboardTable({
                   </span>
                   {me && <span className="text-[10px] text-mint-julep">(you)</span>}
                 </div>
-                <span className="font-display text-xl text-rose-dark tabular-nums">
-                  {r.score}
-                </span>
+                <div className="flex items-center gap-2">
+                  {me && canShowEdit && !editing && (
+                    <button
+                      type="button"
+                      onClick={() => setEditing(true)}
+                      className="text-[11px] font-semibold text-rose-dark border border-rose-red/40 bg-white rounded px-2 py-0.5 hover:bg-rose-red/10 transition"
+                    >
+                      Edit picks
+                    </button>
+                  )}
+                  <span className="font-display text-xl text-rose-dark tabular-nums">
+                    {r.score}
+                  </span>
+                </div>
               </div>
+              {me && editing && editConfig ? (
+                <LeaderboardInlineEditor
+                  eventId={editConfig.eventId}
+                  username={r.username}
+                  existing={editConfig.existing}
+                  horses={editConfig.horses}
+                  onSaved={handleSaved}
+                  onCancel={() => setEditing(false)}
+                />
+              ) : (
               <dl className="grid grid-cols-2 gap-1.5 text-xs">
                 {SLOTS.map((s) => {
                   const pick = r[pickKey(s.key)] as string | null;
@@ -234,6 +277,7 @@ export function LeaderboardTable({
                   );
                 })}
               </dl>
+              )}
             </li>
           );
         })}
@@ -278,21 +322,31 @@ export function LeaderboardTable({
             {rows.map((r) => {
               const me = highlightUsername && r.username === highlightUsername;
               const isGrant = r.username === 'GRANT';
+              const showEditBtn = me && canShowEdit && !editing;
               return (
+                <Fragment key={`${r.rank}-${r.username}`}>
                 <tr
-                  key={`${r.rank}-${r.username}`}
                   className={`border-b border-bourbon/10 align-top ${
                     me ? 'bg-mint-julep/15' : isGrant ? 'bg-rose-red/5' : ''
                   }`}
                 >
                   <td className="py-2 px-2 font-mono">{r.rank}</td>
-                  <td className="py-2 px-2 whitespace-nowrap">
+                  <td className="py-2 px-2 whitespace-nowrap text-left">
                     {isGrant ? (
                       <span className="font-semibold text-rose-dark">Grant</span>
                     ) : (
                       <>@{r.username}</>
                     )}
                     {me && <span className="ml-1 text-xs text-mint-julep">(you)</span>}
+                    {showEditBtn && (
+                      <button
+                        type="button"
+                        onClick={() => setEditing(true)}
+                        className="ml-2 text-[11px] font-semibold text-rose-dark border border-rose-red/40 bg-white rounded px-2 py-0.5 hover:bg-rose-red/10 transition"
+                      >
+                        Edit
+                      </button>
+                    )}
                   </td>
                   <td className="py-2 px-2 font-semibold">{r.score}</td>
                   {SLOTS.map((s) => {
@@ -350,6 +404,21 @@ export function LeaderboardTable({
                     );
                   })}
                 </tr>
+                {me && editing && editConfig && (
+                  <tr className="bg-mint-julep/10 border-b border-bourbon/10">
+                    <td colSpan={totalCols} className="py-3 px-3">
+                      <LeaderboardInlineEditor
+                        eventId={editConfig.eventId}
+                        username={r.username}
+                        existing={editConfig.existing}
+                        horses={editConfig.horses}
+                        onSaved={handleSaved}
+                        onCancel={() => setEditing(false)}
+                      />
+                    </td>
+                  </tr>
+                )}
+                </Fragment>
               );
             })}
           </tbody>
