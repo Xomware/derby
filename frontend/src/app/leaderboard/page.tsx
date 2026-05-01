@@ -35,11 +35,11 @@ const TABS: { id: RaceKind; label: string }[] = [
   { id: 'oaks', label: 'Oaks' },
 ];
 
-type View = 'board' | 'comments' | 'pool';
+type View = 'board' | 'pool' | 'comments';
 const VIEWS: { id: View; label: string }[] = [
   { id: 'board', label: 'Leaderboard' },
-  { id: 'comments', label: 'Comments' },
   { id: 'pool', label: 'Pool' },
+  { id: 'comments', label: 'Comments' },
 ];
 
 export default function LeaderboardPage() {
