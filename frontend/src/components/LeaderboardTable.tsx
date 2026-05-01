@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Fragment, useState } from 'react';
 import { HorseLink } from './HorseLink';
 import { LeaderboardInlineEditor } from './LeaderboardInlineEditor';
+import { SharePicksButton } from './SharePicksButton';
 import type { RaceKind } from '@/lib/hooks';
 import type { LeaderboardRow } from '@/lib/types';
 import type { Prediction } from '@/lib/api';
@@ -38,6 +39,8 @@ interface Props {
   editConfig?: EditConfig | null;
   /** Replace the Edit button on the user's row with a 🔒 Locked chip. */
   showLockedChip?: boolean;
+  /** When set + user has a row, render an inline Share button on it. */
+  shareConfig?: { prediction: Prediction; year: number } | null;
 }
 
 function LockedChip() {
@@ -137,6 +140,7 @@ export function LeaderboardTable({
   missingPick,
   editConfig,
   showLockedChip,
+  shareConfig,
 }: Props) {
   const [editing, setEditing] = useState(false);
   if (rows.length === 0 && !missingPick) {
@@ -204,7 +208,7 @@ export function LeaderboardTable({
                   </span>
                   {me && <span className="text-[10px] text-mint-julep">(you)</span>}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap justify-end">
                   {me && canShowEdit && !editing && (
                     <button
                       type="button"
@@ -215,6 +219,13 @@ export function LeaderboardTable({
                     </button>
                   )}
                   {me && showLockedChip && <LockedChip />}
+                  {me && shareConfig && !editing && (
+                    <SharePicksButton
+                      prediction={shareConfig.prediction}
+                      kind={kind}
+                      year={shareConfig.year}
+                    />
+                  )}
                   <span className="font-display text-xl text-rose-dark tabular-nums">
                     {r.score}
                   </span>
@@ -363,6 +374,15 @@ export function LeaderboardTable({
                       </button>
                     )}
                     {me && showLockedChip && <LockedChip />}
+                    {me && shareConfig && !editing && (
+                      <span className="ml-2 inline-flex">
+                        <SharePicksButton
+                          prediction={shareConfig.prediction}
+                          kind={kind}
+                          year={shareConfig.year}
+                        />
+                      </span>
+                    )}
                   </td>
                   <td className="py-2 px-2 font-semibold">{r.score}</td>
                   {SLOTS.map((s) => {

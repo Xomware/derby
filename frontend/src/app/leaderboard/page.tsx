@@ -6,7 +6,6 @@ import { LeaderboardTable } from '@/components/LeaderboardTable';
 import { PostTime } from '@/components/PostTime';
 import { ResultsRecapModal } from '@/components/ResultsRecapModal';
 import { ShareLeaderboardButton } from '@/components/ShareLeaderboardButton';
-import { SharePicksButton } from '@/components/SharePicksButton';
 import {
   PickDistribution,
   type DistributionData,
@@ -218,13 +217,6 @@ export default function LeaderboardPage() {
 
         {!isArchive && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            {predictions?.my && (
-              <SharePicksButton
-                prediction={predictions.my}
-                kind={kind}
-                year={year}
-              />
-            )}
             <ShareLeaderboardButton
               rows={rowsWithGrant}
               kind={kind}
@@ -326,6 +318,11 @@ export default function LeaderboardPage() {
               editConfig={editConfig}
               showLockedChip={
                 !isArchive && userOnLeaderboard && isLocked && !leaderboard?.finished
+              }
+              shareConfig={
+                !isArchive && userOnLeaderboard && predictions?.my
+                  ? { prediction: predictions.my, year }
+                  : null
               }
             />
           )}
