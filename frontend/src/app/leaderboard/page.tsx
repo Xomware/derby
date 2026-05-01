@@ -245,9 +245,10 @@ export default function LeaderboardPage() {
           </summary>
           <ul className="mt-2 text-xs text-bourbon/70 space-y-0.5 pl-4 list-disc">
             <li><strong>Win:</strong> if pick wins → <strong>odds</strong> in points (5-1 → 5)</li>
-            <li><strong>Place:</strong> if pick finishes 1st or 2nd → <strong>odds ÷ 2</strong></li>
-            <li><strong>Show:</strong> if pick finishes top 3 → <strong>odds ÷ 3</strong></li>
-            <li><strong>Long shot:</strong> 1 pt if your long shot finishes top 4</li>
+            <li><strong>Place:</strong> if pick finishes 1st or 2nd → <strong>odds ÷ 2</strong> (5-1 → 2.5)</li>
+            <li><strong>Show:</strong> if pick finishes top 3 → <strong>odds ÷ 3</strong> (5-1 → 1.7)</li>
+            <li><strong>Long shot:</strong> if your long shot finishes top 4 → <strong>odds ÷ 4</strong> (8-1 → 2)</li>
+            <li className="text-bourbon/50 list-none pt-0.5">All scores rounded to 1 decimal.</li>
           </ul>
         </details>
       </header>

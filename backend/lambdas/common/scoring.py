@@ -1,14 +1,14 @@
 """Scoring rules for prediction-vs-result leaderboards.
 
 Grant's formula (2026):
-  Win:       finished 1st         → round(odds)
-  Place:     finished 1st or 2nd  → round(odds / 2)
-  Show:      finished 1st-3rd     → round(odds / 3)
-  Long shot: finished 1st-4th     → 1
+  Win:       finished 1st         → odds
+  Place:     finished 1st or 2nd  → odds / 2
+  Show:      finished 1st-3rd     → odds / 3
+  Long shot: finished 1st-4th     → odds / 4
 
-`odds` is the integer ratio from the morning-line / current odds at the time
-the prediction was made (e.g. "5-1" → 5.0, "9/2" → 4.5). All payouts round to
-the nearest integer (half rounds up via banker-of-1, math.floor + 0.5).
+`odds` is the ratio from the morning-line / current odds at the time
+the prediction was made (e.g. "5-1" → 5.0, "9/2" → 4.5). Scores are
+returned with one-decimal precision so 5-1 Place = 2.5 (not 3).
 """
 
 from __future__ import annotations
@@ -22,7 +22,12 @@ SLOT_TARGET_RANGE: dict[str, range] = {
     "long_shot": range(1, 5), # top 4
 }
 
-LONG_SHOT_FLAT_POINTS = 1
+SLOT_DIVISOR: dict[str, int] = {
+    "win": 1,
+    "place": 2,
+    "show": 3,
+    "long_shot": 4,
+}
 
 
 def _normalize(name: str | None) -> str:
@@ -63,9 +68,9 @@ def odds_to_ratio(odds: str | None) -> float | None:
     return n / d
 
 
-def _round_int(x: float) -> int:
-    # Half-up rounding so 2.5 → 3, 4.5 → 5 (matches typical sports scoring).
-    return int(x + 0.5) if x >= 0 else -int(-x + 0.5)
+def _round_tenth(x: float) -> float:
+    # Round to one decimal so JSON stays clean (5/3 → 1.7 not 1.6666…).
+    return round(x + 1e-9, 1)
 
 
 def score_slot(
@@ -73,31 +78,23 @@ def score_slot(
     horse_name: str | None,
     finishers: list[dict],
     odds_by_horse: dict[str, str | None],
-) -> int:
+) -> float:
     if not horse_name or not finishers:
-        return 0
+        return 0.0
     pos = _position_for(horse_name, finishers)
     if pos is None:
-        return 0
+        return 0.0
     target = SLOT_TARGET_RANGE.get(slot)
     if not target or pos not in target:
-        return 0
-
-    if slot == "long_shot":
-        return LONG_SHOT_FLAT_POINTS
+        return 0.0
 
     odds_str = odds_by_horse.get(_normalize(horse_name))
     ratio = odds_to_ratio(odds_str)
     if ratio is None:
-        return 0
+        return 0.0
 
-    if slot == "win":
-        return max(_round_int(ratio), 0)
-    if slot == "place":
-        return max(_round_int(ratio / 2), 0)
-    if slot == "show":
-        return max(_round_int(ratio / 3), 0)
-    return 0
+    divisor = SLOT_DIVISOR.get(slot, 1)
+    return max(_round_tenth(ratio / divisor), 0.0)
 
 
 def score_breakdown(
@@ -105,14 +102,17 @@ def score_breakdown(
     finishers: list[dict],
     odds_by_horse: dict[str, str | None],
 ) -> dict:
-    """Compute per-slot scores plus the total for a single prediction."""
-    out = {}
-    total = 0
+    """Compute per-slot scores plus the total for a single prediction.
+
+    All values are floats with 1-decimal precision.
+    """
+    out: dict[str, float] = {}
+    total = 0.0
     for slot in ("win", "place", "show", "long_shot"):
         pts = score_slot(slot, prediction.get(slot), finishers, odds_by_horse)
         out[slot] = pts
         total += pts
-    out["total"] = total
+    out["total"] = _round_tenth(total)
     return out
 
 
@@ -120,5 +120,5 @@ def score_prediction(
     prediction: dict,
     finishers: list[dict],
     odds_by_horse: dict[str, str | None],
-) -> int:
+) -> float:
     return score_breakdown(prediction, finishers, odds_by_horse)["total"]

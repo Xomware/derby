@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { RaceKind } from '@/lib/hooks';
 import type { Leaderboard, LeaderboardRow } from '@/lib/types';
+import { formatScore } from '@/lib/scoring';
 
 const SLOTS: {
   key: 'win' | 'place' | 'show' | 'long_shot';
@@ -117,7 +118,7 @@ export function ResultsRecapModal({ leaderboard, username, kind, year }: Props) 
               #{myRow.rank}
             </span>
             <span className="font-display text-2xl text-bourbon">
-              {myRow.score} pts
+              {formatScore(myRow.score)} pts
             </span>
           </div>
           <p className="text-sm text-bourbon/80">{winnerText}</p>
@@ -149,7 +150,7 @@ export function ResultsRecapModal({ leaderboard, username, kind, year }: Props) 
                       won ? 'text-mint-julep' : 'text-bourbon/40'
                     }`}
                   >
-                    {won ? `+${score}` : '0'}
+                    {won ? `+${formatScore(score)}` : '0'}
                   </span>
                 </li>
               );
@@ -159,7 +160,7 @@ export function ResultsRecapModal({ leaderboard, username, kind, year }: Props) 
           {ahead && (
             <p className="text-xs text-bourbon/70">
               <span className="font-semibold">@{ahead.username}</span> finished
-              just ahead of you with {ahead.score} pts.
+              just ahead of you with {formatScore(ahead.score)} pts.
             </p>
           )}
 

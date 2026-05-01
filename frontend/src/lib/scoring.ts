@@ -10,7 +10,12 @@ const SLOT_RANGES: Record<'win' | 'place' | 'show' | 'long_shot', [number, numbe
   long_shot: [1, 4],
 };
 
-const LONG_SHOT_FLAT = 1;
+const SLOT_DIVISOR: Record<'win' | 'place' | 'show' | 'long_shot', number> = {
+  win: 1,
+  place: 2,
+  show: 3,
+  long_shot: 4,
+};
 
 function normalizeName(s: string | null | undefined): string {
   if (!s) return '';
@@ -27,8 +32,9 @@ function oddsToRatio(odds: string | null | undefined): number | null {
   return n / d;
 }
 
-function roundHalfUp(x: number): number {
-  return Math.max(0, Math.round(x));
+function roundTenth(x: number): number {
+  // Match backend: 1-decimal precision so 5/3 = 1.7 not 1.6666….
+  return Math.max(0, Math.round((x + 1e-9) * 10) / 10);
 }
 
 function positionOf(name: string | null, finishers: RaceFinisher[]): number | null {
@@ -50,15 +56,19 @@ export function scoreSlot(
   const [lo, hi] = SLOT_RANGES[slot];
   if (pos < lo || pos > hi) return 0;
 
-  if (slot === 'long_shot') return LONG_SHOT_FLAT;
-
   const ratio = oddsToRatio(oddsByHorse.get(normalizeName(horseName)));
   if (ratio === null) return 0;
+  return roundTenth(ratio / SLOT_DIVISOR[slot]);
+}
 
-  if (slot === 'win') return roundHalfUp(ratio);
-  if (slot === 'place') return roundHalfUp(ratio / 2);
-  if (slot === 'show') return roundHalfUp(ratio / 3);
-  return 0;
+/**
+ * Display helper: render a float score without trailing zeros.
+ * 5 → '5', 2.5 → '2.5', 1.7 → '1.7', 0 → '0'.
+ */
+export function formatScore(n: number): string {
+  if (!n) return '0';
+  const r = Math.round(n * 10) / 10;
+  return Number.isInteger(r) ? r.toString() : r.toFixed(1);
 }
 
 export function scoreGrantRow(
@@ -83,6 +93,6 @@ export function scoreGrantRow(
     place_score: slots[1].score,
     show_score: slots[2].score,
     long_shot_score: slots[3].score,
-    score: slots.reduce((acc, s) => acc + s.score, 0),
+    score: roundTenth(slots.reduce((acc, s) => acc + s.score, 0)),
   };
 }

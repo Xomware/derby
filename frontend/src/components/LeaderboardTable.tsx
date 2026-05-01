@@ -8,6 +8,7 @@ import { SharePicksButton } from './SharePicksButton';
 import type { RaceKind } from '@/lib/hooks';
 import type { LeaderboardRow } from '@/lib/types';
 import type { Prediction } from '@/lib/api';
+import { formatScore } from '@/lib/scoring';
 
 interface EditConfig {
   eventId: string;
@@ -227,7 +228,7 @@ export function LeaderboardTable({
                     />
                   )}
                   <span className="font-display text-xl text-rose-dark tabular-nums">
-                    {r.score}
+                    {formatScore(r.score)}
                   </span>
                 </div>
               </div>
@@ -296,7 +297,7 @@ export function LeaderboardTable({
                           <span />
                         )}
                         {showScores && score > 0 && (
-                          <span className="text-mint-julep font-bold">+{score}</span>
+                          <span className="text-mint-julep font-bold">+{formatScore(score)}</span>
                         )}
                       </div>
                     </div>
@@ -384,7 +385,7 @@ export function LeaderboardTable({
                       )}
                     </div>
                   </td>
-                  <td className="py-2 px-2 font-semibold">{r.score}</td>
+                  <td className="py-2 px-2 font-semibold">{formatScore(r.score)}</td>
                   {SLOTS.map((s) => {
                     const pick = r[pickKey(s.key)] as string | null;
                     const score = (r[scoreKey(s.key)] as number | null) ?? 0;
@@ -434,7 +435,7 @@ export function LeaderboardTable({
                           <div className="text-bourbon/40">{pick ? '?' : '—'}</div>
                         )}
                         {showScores && score > 0 && (
-                          <div className="text-[10px] text-mint-julep font-bold">+{score}</div>
+                          <div className="text-[10px] text-mint-julep font-bold">+{formatScore(score)}</div>
                         )}
                       </td>
                     );
