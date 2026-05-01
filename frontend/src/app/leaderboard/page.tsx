@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { LeaderboardTable } from '@/components/LeaderboardTable';
+import { PostTime } from '@/components/PostTime';
 import {
   PickDistribution,
   type DistributionData,
@@ -131,9 +132,14 @@ export default function LeaderboardPage() {
   return (
     <section className="pt-8 max-w-4xl mx-auto space-y-6">
       <header>
-        <h1 className="font-display text-3xl text-rose-dark">
-          {isArchive ? `${year} Leaderboard` : 'Leaderboard'}
-        </h1>
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h1 className="font-display text-3xl text-rose-dark">
+            {isArchive ? `${year} Leaderboard` : 'Leaderboard'}
+          </h1>
+          {!isArchive && predictions?.post_time && (
+            <PostTime iso={predictions.post_time} className="text-sm" />
+          )}
+        </div>
         <p className="text-bourbon/80 text-sm mt-1">
           {showScores
             ? 'Final scoring — picks judged by Grant’s odds rules.'

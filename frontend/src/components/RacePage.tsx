@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Countdown } from '@/components/Countdown';
+import { PostTime } from '@/components/PostTime';
 import { SidePanel, SidePanelItem } from '@/components/SidePanel';
 import { WriteupSection } from '@/components/WriteupSection';
 import { useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
@@ -196,6 +197,9 @@ export function RacePage({
   }, [displayHorses, sortKey]);
 
   const earliestLock = picks?.races.map((r) => r.lock_time).sort()[0];
+  const mainPostTime = picks?.races
+    .find((r) => r.race_number === mainRaceNumber)
+    ?.race_post_time;
 
   // After picks load, jump to the URL hash if present (e.g. ticker click into
   // /derby#horse-xyz lands before SWR returns; we re-scroll once it does).
@@ -236,8 +240,13 @@ export function RacePage({
               {isArchive && <span className="text-bourbon/50 text-xl ml-2">{year}</span>}
             </h1>
             {earliestLock && !isArchive && (
-              <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-full border border-rose-red/20 bg-white">
-                <Countdown target={earliestLock} label="Lock" />
+              <div className="inline-flex flex-col items-end gap-1">
+                <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-full border border-rose-red/20 bg-white">
+                  <Countdown target={earliestLock} label="Lock" />
+                </div>
+                {mainPostTime && (
+                  <PostTime iso={mainPostTime} className="text-xs" />
+                )}
               </div>
             )}
           </div>
