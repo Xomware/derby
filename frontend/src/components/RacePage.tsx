@@ -6,7 +6,13 @@ import { PostTime } from '@/components/PostTime';
 import { SidePanel, SidePanelItem } from '@/components/SidePanel';
 import { WriteupSection } from '@/components/WriteupSection';
 import { CommentsBlock } from '@/components/CommentsBlock';
-import { useComments, useGrantPicks, usePicks, type RaceKind } from '@/lib/hooks';
+import {
+  useComments,
+  useGrantPicks,
+  usePicks,
+  usePredictions,
+  type RaceKind,
+} from '@/lib/hooks';
 import { useUsername } from '@/lib/identity';
 import { CURRENT_YEAR } from '@/lib/year';
 import { BettingPlays } from '@/components/BettingPlays';
@@ -106,6 +112,8 @@ export function RacePage({
 }) {
   const { picks, isLoading, year, eventId: picksEventId } = usePicks(kind);
   const { grantPicks } = useGrantPicks(kind);
+  const { username } = useUsername();
+  const { data: predictions } = usePredictions(kind, username);
   const { results } = useResults(year);
   const [sortKey, setSortKey] = useState<SortKey>('post');
   const [tab, setTab] = useState<SubTab>('overview');
@@ -204,6 +212,37 @@ export function RacePage({
   const mainPostTime = picks?.races
     .find((r) => r.race_number === mainRaceNumber)
     ?.race_post_time;
+
+  // Pool % per-horse per-slot. Counts both my prediction and others.
+  const pool = useMemo(() => {
+    const all = [
+      ...(predictions?.my ? [predictions.my] : []),
+      ...(predictions?.others ?? []),
+    ];
+    const total = all.length;
+    const byHorse = new Map<
+      string,
+      { win: number; place: number; show: number; long_shot: number }
+    >();
+    const norm = (s: string | null) => (s ? s.trim().toLowerCase() : '');
+    const bump = (
+      horse: string | null,
+      slot: 'win' | 'place' | 'show' | 'long_shot'
+    ) => {
+      const k = norm(horse);
+      if (!k) return;
+      const cur = byHorse.get(k) ?? { win: 0, place: 0, show: 0, long_shot: 0 };
+      cur[slot] += 1;
+      byHorse.set(k, cur);
+    };
+    for (const p of all) {
+      bump(p.win, 'win');
+      bump(p.place, 'place');
+      bump(p.show, 'show');
+      bump(p.long_shot, 'long_shot');
+    }
+    return { byHorse, total };
+  }, [predictions]);
 
   // After picks load, jump to the URL hash if present (e.g. ticker click into
   // /derby#horse-xyz lands before SWR returns; we re-scroll once it does).
@@ -357,7 +396,13 @@ export function RacePage({
 
             <div className="space-y-5">
               {sortedPicks.map((p) => (
-                <HorseCard key={p.id} pick={p} kind={kind} />
+                <HorseCard
+                  key={p.id}
+                  pick={p}
+                  kind={kind}
+                  poolTotal={pool.total}
+                  poolForHorse={pool.byHorse.get(p.horse_name.trim().toLowerCase()) ?? null}
+                />
               ))}
             </div>
           </>
@@ -414,6 +459,40 @@ function RaceTalk({ kind, eventId }: { kind: RaceKind; eventId: string }) {
   );
 }
 
+function PoolChips({
+  total,
+  counts,
+}: {
+  total: number;
+  counts: { win: number; place: number; show: number; long_shot: number };
+}) {
+  const slots: { key: keyof typeof counts; label: string }[] = [
+    { key: 'win', label: 'Win' },
+    { key: 'place', label: 'Place' },
+    { key: 'show', label: 'Show' },
+    { key: 'long_shot', label: 'LS' },
+  ];
+  const visible = slots.filter((s) => counts[s.key] > 0);
+  if (visible.length === 0) return null;
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      {visible.map((s) => {
+        const pct = Math.round((counts[s.key] / total) * 100);
+        return (
+          <span
+            key={s.key}
+            title={`${counts[s.key]} of ${total} ${total === 1 ? 'pool entry has' : 'pool entries have'} this horse in ${s.label}`}
+            className="inline-flex items-center gap-1 rounded-full border border-mint-julep/30 bg-mint-julep/5 px-2 py-0.5 text-[10px] text-bourbon"
+          >
+            <span className="font-semibold text-mint-julep">{pct}%</span>
+            <span className="uppercase tracking-wider text-bourbon/60">{s.label}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 function ScratchedStamp() {
   return (
     <span
@@ -425,7 +504,17 @@ function ScratchedStamp() {
   );
 }
 
-function HorseCard({ pick: p, kind }: { pick: DisplayHorse; kind: RaceKind }) {
+function HorseCard({
+  pick: p,
+  kind,
+  poolTotal,
+  poolForHorse,
+}: {
+  pick: DisplayHorse;
+  kind: RaceKind;
+  poolTotal: number;
+  poolForHorse: { win: number; place: number; show: number; long_shot: number } | null;
+}) {
   // Per-kind stat tiles. Derby drops Equibase; Oaks drops Beyer + Brisnet —
   // Grant doesn't track those for those races, so they were always blank.
   const allStats: { label: string; value: string }[] = [
@@ -470,6 +559,10 @@ function HorseCard({ pick: p, kind }: { pick: DisplayHorse; kind: RaceKind }) {
           {p.jockey ?? 'Jockey TBD'}
           {p.trainer && ` · ${p.trainer}`}
         </div>
+      )}
+
+      {poolTotal > 0 && poolForHorse && (
+        <PoolChips total={poolTotal} counts={poolForHorse} />
       )}
 
       <dl className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">

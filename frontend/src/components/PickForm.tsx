@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { api, ApiError, type Prediction } from '@/lib/api';
 import { computeStamp, type Slot } from '@/lib/stamps';
 import type { Pick, RaceFinisher } from '@/lib/types';
+import { SharePicksButton } from './SharePicksButton';
 import { StampBadge } from './StampBadge';
 
 const FIELDS: { key: Slot; label: string; help: string }[] = [
@@ -138,14 +139,23 @@ export function PickForm({
 
   return (
     <section className="rounded-xl border border-bourbon/20 bg-white p-4" id="your-picks">
-      <header className="mb-3">
-        <h2 className="font-display text-xl text-bourbon">Your picks</h2>
-        <p className="text-xs text-bourbon/70 mt-0.5">
-          Submitting as <span className="font-semibold">@{username}</span>.
-          {existing
-            ? ' Saved — edit anytime until lock.'
-            : ' Lock in your top 3 + a long shot. All 4 must be different.'}
-        </p>
+      <header className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <h2 className="font-display text-xl text-bourbon">Your picks</h2>
+          <p className="text-xs text-bourbon/70 mt-0.5">
+            Submitting as <span className="font-semibold">@{username}</span>.
+            {existing
+              ? ' Saved — edit anytime until lock.'
+              : ' Lock in your top 3 + a long shot. All 4 must be different.'}
+          </p>
+        </div>
+        {existing && (
+          <SharePicksButton
+            prediction={existing}
+            kind={eventId.includes('oaks') ? 'oaks' : 'derby'}
+            year={Number(eventId.slice(0, 4))}
+          />
+        )}
       </header>
 
       {showStamps && (
