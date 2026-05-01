@@ -5,6 +5,8 @@ import { CommentsBlock } from '@/components/CommentsBlock';
 import { LeaderboardTable } from '@/components/LeaderboardTable';
 import { PostTime } from '@/components/PostTime';
 import { ResultsRecapModal } from '@/components/ResultsRecapModal';
+import { ShareLeaderboardButton } from '@/components/ShareLeaderboardButton';
+import { SharePicksButton } from '@/components/SharePicksButton';
 import {
   PickDistribution,
   type DistributionData,
@@ -213,6 +215,24 @@ export default function LeaderboardPage() {
             <PostTime iso={predictions.post_time} className="text-sm" />
           )}
         </div>
+
+        {!isArchive && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {predictions?.my && (
+              <SharePicksButton
+                prediction={predictions.my}
+                kind={kind}
+                year={year}
+              />
+            )}
+            <ShareLeaderboardButton
+              rows={rowsWithGrant}
+              kind={kind}
+              year={year}
+              finished={!!leaderboard?.finished}
+            />
+          </div>
+        )}
         <p className="text-bourbon/80 text-sm mt-1">
           {showScores
             ? 'Final scoring — picks judged by Grant’s odds rules.'
