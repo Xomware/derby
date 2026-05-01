@@ -14,7 +14,7 @@ dynamo = boto3.resource("dynamodb")
 PICKS = dynamo.Table("derby-picks")
 
 CORRECTIONS = {
-    "2026-kentucky-oaks": "2026-05-01T17:51:00-04:00",
+    "2026-kentucky-oaks": "2026-05-01T20:40:00-04:00",
     "2026-kentucky-derby": "2026-05-02T18:57:00-04:00",
 }
 

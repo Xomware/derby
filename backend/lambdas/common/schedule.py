@@ -22,7 +22,7 @@ SCHEDULE: list[dict] = [
     {"day": "oaks", "race_number": 8, "post_time": "2026-05-01T14:42:00-04:00", "name": None},
     {"day": "oaks", "race_number": 9, "post_time": "2026-05-01T15:25:00-04:00", "name": None},
     {"day": "oaks", "race_number": 10, "post_time": "2026-05-01T16:11:00-04:00", "name": None},
-    {"day": "oaks", "race_number": 11, "post_time": "2026-05-01T17:51:00-04:00", "name": "Kentucky Oaks"},
+    {"day": "oaks", "race_number": 11, "post_time": "2026-05-01T20:40:00-04:00", "name": "Kentucky Oaks"},
 
     # ---- Derby Day ----  Saturday, May 2, 2026
     {"day": "derby", "race_number": 1, "post_time": "2026-05-02T10:30:00-04:00", "name": None},
