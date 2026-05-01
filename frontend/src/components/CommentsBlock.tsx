@@ -14,6 +14,8 @@ export function CommentsBlock({
   onDeleted,
   compact = false,
   emptyText = 'No comments yet.',
+  title = 'Talk yo shit',
+  placeholder = 'Post a comment…',
 }: {
   eventId: string;
   horseId?: string | null;
@@ -23,6 +25,8 @@ export function CommentsBlock({
   onDeleted: () => void;
   compact?: boolean;
   emptyText?: string;
+  title?: string;
+  placeholder?: string;
 }) {
   const [body, setBody] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +82,7 @@ export function CommentsBlock({
     >
       {!compact && (
         <header className="mb-3">
-          <h2 className="font-display text-xl text-bourbon">Talk yo shit</h2>
+          <h2 className="font-display text-xl text-bourbon">{title}</h2>
           <p className="text-xs text-bourbon/70 mt-0.5">
             {comments.length} {comments.length === 1 ? 'comment' : 'comments'}.
           </p>
@@ -86,7 +90,7 @@ export function CommentsBlock({
       )}
       {compact && (
         <div className="text-[11px] uppercase tracking-wider text-bourbon/60 font-semibold mb-2">
-          Talk yo shit
+          {title}
         </div>
       )}
 
@@ -95,7 +99,7 @@ export function CommentsBlock({
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value.slice(0, MAX_LEN))}
-            placeholder={compact ? 'Leave a take on this horse…' : 'Post a comment…'}
+            placeholder={placeholder}
             rows={compact ? 1 : 2}
             className="w-full rounded border border-bourbon/30 bg-cream px-2 py-1.5 text-sm text-bourbon focus:outline-none focus:ring-2 focus:ring-rose-red/50 resize-y"
           />

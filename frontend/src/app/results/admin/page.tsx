@@ -5,6 +5,7 @@ import { AdminCronRuns } from '@/components/AdminCronRuns';
 import { AdminGate } from '@/components/AdminGate';
 import { AdminOddsForm } from '@/components/AdminOddsForm';
 import { AdminPicksStatsForm } from '@/components/AdminPicksStatsForm';
+import { AdminPostTimeForm } from '@/components/AdminPostTimeForm';
 import { AdminResultsForm } from '@/components/AdminResultsForm';
 import { AdminVisits } from '@/components/AdminVisits';
 import { useAdminToken } from '@/lib/admin';
@@ -15,12 +16,13 @@ const TABS: { id: RaceKind; label: string }[] = [
   { id: 'oaks', label: 'Oaks' },
 ];
 
-type Section = 'results' | 'odds' | 'stats' | 'cron' | 'visits';
+type Section = 'results' | 'odds' | 'stats' | 'time' | 'cron' | 'visits';
 
 const SECTIONS: { id: Section; label: string }[] = [
   { id: 'results', label: 'Set results' },
   { id: 'odds', label: 'Update odds' },
   { id: 'stats', label: 'Edit stats' },
+  { id: 'time', label: 'Post time' },
   { id: 'cron', label: 'Cron history' },
   { id: 'visits', label: 'Page views' },
 ];
@@ -39,6 +41,7 @@ export default function AdminResultsPage() {
       s === 'odds' ||
       s === 'results' ||
       s === 'stats' ||
+      s === 'time' ||
       s === 'cron' ||
       s === 'visits'
     ) {
@@ -72,6 +75,8 @@ export default function AdminResultsPage() {
             ? 'Edit per-horse odds. Predictions saved earlier are scored against the odds at the time of the race.'
             : section === 'stats'
             ? "Edit per-horse record / Beyer / Brisnet / Equibase / style / last race. Blank field clears the value (UI shows N/A)."
+            : section === 'time'
+            ? 'Override the marquee race post time when Churchill delays. Updates lock_time + countdowns site-wide.'
             : section === 'cron'
             ? 'Hourly odds-scraper history. Each row is one cron run.'
             : 'Page-view analytics for everyone with a username.'}
@@ -102,7 +107,7 @@ export default function AdminResultsPage() {
         })}
       </div>
 
-      {(section === 'results' || section === 'odds' || section === 'stats') && (
+      {(section === 'results' || section === 'odds' || section === 'stats' || section === 'time') && (
         <nav className="flex gap-1 border-b border-bourbon/20" aria-label="Event">
           {TABS.map((t) => {
             const active = kind === t.id;
@@ -131,6 +136,7 @@ export default function AdminResultsPage() {
       {section === 'results' && <AdminResultsForm kind={kind} adminToken={token} />}
       {section === 'odds' && <AdminOddsForm kind={kind} adminToken={token} />}
       {section === 'stats' && <AdminPicksStatsForm kind={kind} adminToken={token} />}
+      {section === 'time' && <AdminPostTimeForm kind={kind} adminToken={token} />}
       {section === 'cron' && <AdminCronRuns adminToken={token} />}
       {section === 'visits' && <AdminVisits adminToken={token} />}
     </section>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { CommentsBlock } from '@/components/CommentsBlock';
 import { LeaderboardTable } from '@/components/LeaderboardTable';
 import { PostTime } from '@/components/PostTime';
 import { ResultsRecapModal } from '@/components/ResultsRecapModal';
@@ -10,6 +11,7 @@ import {
   type SlotEntry,
 } from '@/components/PickDistribution';
 import {
+  useComments,
   useGrantPicks,
   useLeaderboard,
   usePicks,
@@ -31,15 +33,33 @@ const TABS: { id: RaceKind; label: string }[] = [
   { id: 'oaks', label: 'Oaks' },
 ];
 
+type View = 'board' | 'comments' | 'pool';
+const VIEWS: { id: View; label: string }[] = [
+  { id: 'board', label: 'Leaderboard' },
+  { id: 'comments', label: 'Comments' },
+  { id: 'pool', label: 'Pool' },
+];
+
 export default function LeaderboardPage() {
   const { username } = useUsername();
   const [kind, setKind] = useState<RaceKind>('derby');
+  const [view, setView] = useState<View>('board');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const e = params.get('event');
     if (e === 'oaks' || e === 'derby') setKind(e);
+    const v = params.get('view');
+    if (v === 'comments' || v === 'pool' || v === 'board') setView(v);
   }, []);
+
+  function pushView(nextView: View, nextKind: RaceKind = kind) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('event', nextKind);
+    if (nextView === 'board') url.searchParams.delete('view');
+    else url.searchParams.set('view', nextView);
+    window.history.replaceState(null, '', url.toString());
+  }
 
   const { leaderboard, isLoading, year, refresh: refreshLeaderboard } =
     useLeaderboard(undefined, kind);
@@ -51,6 +71,9 @@ export default function LeaderboardPage() {
     refresh: refreshPredictions,
     eventId,
   } = usePredictions(kind, username);
+  const { comments, refresh: refreshComments } = useComments(kind, {
+    horseId: null,
+  });
   const isArchive = year !== CURRENT_YEAR;
   const showScores = !!leaderboard?.finished;
 
@@ -217,9 +240,7 @@ export default function LeaderboardPage() {
               type="button"
               onClick={() => {
                 setKind(t.id);
-                const url = new URL(window.location.href);
-                url.searchParams.set('event', t.id);
-                window.history.replaceState(null, '', url.toString());
+                pushView(view, t.id);
               }}
               className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition ${
                 active
@@ -234,30 +255,87 @@ export default function LeaderboardPage() {
         })}
       </nav>
 
-      {isLoading && <p className="text-bourbon/70">Loading…</p>}
-      {leaderboard && (
-        <LeaderboardTable
-          rows={rowsWithGrant}
-          kind={kind}
-          highlightUsername={username}
-          hidePicks={false}
-          showScores={showScores}
-          oddsByHorse={oddsByHorse}
-          scratchedHorses={scratchedHorses}
-          longShotThreshold={8}
-          missingPick={
-            showMissingPickCta && username
-              ? { username, href: `/picks?event=${kind}#your-picks` }
-              : null
-          }
-          editConfig={editConfig}
-          showLockedChip={
-            !isArchive && userOnLeaderboard && isLocked && !leaderboard?.finished
-          }
-        />
+      <div className="flex flex-wrap gap-2">
+        {VIEWS.map((v) => {
+          const active = view === v.id;
+          const count = v.id === 'comments' ? comments.length : 0;
+          return (
+            <button
+              key={v.id}
+              type="button"
+              onClick={() => {
+                setView(v.id);
+                pushView(v.id);
+              }}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                active
+                  ? 'bg-rose-red text-cream border-rose-red'
+                  : 'border-bourbon/30 text-bourbon hover:border-rose-red'
+              }`}
+              aria-pressed={active}
+            >
+              {v.label}
+              {v.id === 'comments' && count > 0 && (
+                <span className={`ml-1 ${active ? 'text-cream/80' : 'text-bourbon/60'}`}>
+                  · {count}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {view === 'board' && (
+        <>
+          {isLoading && <p className="text-bourbon/70">Loading…</p>}
+          {leaderboard && (
+            <LeaderboardTable
+              rows={rowsWithGrant}
+              kind={kind}
+              highlightUsername={username}
+              hidePicks={false}
+              showScores={showScores}
+              oddsByHorse={oddsByHorse}
+              scratchedHorses={scratchedHorses}
+              longShotThreshold={8}
+              missingPick={
+                showMissingPickCta && username
+                  ? { username, href: `/picks?event=${kind}#your-picks` }
+                  : null
+              }
+              editConfig={editConfig}
+              showLockedChip={
+                !isArchive && userOnLeaderboard && isLocked && !leaderboard?.finished
+              }
+            />
+          )}
+        </>
       )}
 
-      {!isArchive && <PickDistribution data={distribution} />}
+      {view === 'comments' && !isArchive && (
+        <CommentsBlock
+          eventId={eventId}
+          horseId={null}
+          comments={comments}
+          username={username}
+          onPosted={refreshComments}
+          onDeleted={refreshComments}
+          title={`${kind === 'derby' ? 'Derby' : 'Oaks'} Comments`}
+          placeholder={`Drop a take on the ${kind === 'derby' ? 'Derby' : 'Oaks'}…`}
+        />
+      )}
+      {view === 'comments' && isArchive && (
+        <p className="text-sm text-bourbon/70">
+          Comments aren&apos;t archived for past years.
+        </p>
+      )}
+
+      {view === 'pool' && !isArchive && <PickDistribution data={distribution} />}
+      {view === 'pool' && isArchive && (
+        <p className="text-sm text-bourbon/70">
+          Pool distribution isn&apos;t archived for past years.
+        </p>
+      )}
 
       {!isArchive && (
         <ResultsRecapModal

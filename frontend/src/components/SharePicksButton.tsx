@@ -13,15 +13,17 @@ interface Props {
 
 function buildText(p: Prediction, kind: RaceKind, year: number): string {
   const eventLabel = kind === 'derby' ? 'Derby' : 'Oaks';
+  const flag = kind === 'derby' ? '🌹' : '🌷';
   const lines = [
-    `@${p.username}'s ${year} ${eventLabel} picks 🏇`,
+    `🐎 SUN GOD DERBY ${flag}`,
+    `${year} Kentucky ${eventLabel} — @${p.username}'s picks`,
     '',
-    `Win: ${p.win}`,
-    `Place: ${p.place}`,
-    `Show: ${p.show}`,
-    `Long shot: ${p.long_shot}`,
+    `🥇 Win        ${p.win}`,
+    `🥈 Place      ${p.place}`,
+    `🥉 Show       ${p.show}`,
+    `🎯 Long shot  ${p.long_shot}`,
     '',
-    `https://derby.xomware.com/picks?event=${kind}`,
+    `Pick yours → https://derby.xomware.com/picks?event=${kind}`,
   ];
   return lines.join('\n');
 }
@@ -35,13 +37,33 @@ export function SharePicksButton({ prediction, kind, year, className }: Props) {
     if (!prediction) return;
     const text = buildText(prediction, kind, year);
     const eventLabel = kind === 'derby' ? 'Derby' : 'Oaks';
-    const shareData: ShareData = {
+    const baseShare: ShareData = {
       title: `My ${year} ${eventLabel} picks`,
       text,
     };
+
+    // Try to attach the brand banner so the share sheet renders a preview.
+    // canShare with files isn't supported everywhere — fall back gracefully.
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
-        await navigator.share(shareData);
+        const res = await fetch('/banner.png');
+        if (res.ok) {
+          const blob = await res.blob();
+          const file = new File([blob], 'sun-god-derby.png', { type: blob.type });
+          const withFile: ShareData = { ...baseShare, files: [file] };
+          if (
+            typeof navigator.canShare === 'function' &&
+            navigator.canShare(withFile)
+          ) {
+            await navigator.share(withFile);
+            return;
+          }
+        }
+      } catch {
+        // Drop banner and fall through to text-only share.
+      }
+      try {
+        await navigator.share(baseShare);
         return;
       } catch {
         // User cancelled or share failed; fall through to clipboard.

@@ -10,6 +10,7 @@ locals {
     { name = "admin_cron_runs", description = "POST /admin-results/cron-runs — recent cron summaries", path_part = "cron-runs", http_method = "POST", authorization = "NONE" },
     { name = "admin_run_cron", description = "POST /admin-results/run-cron — manually invoke odds cron", path_part = "run-cron", http_method = "POST", authorization = "NONE" },
     { name = "admin_picks_stats", description = "POST /admin-results/picks-stats — bulk-edit per-pick stat fields", path_part = "picks-stats", http_method = "POST", authorization = "NONE" },
+    { name = "admin_post_time", description = "POST /admin-results/post-time — bump race_post_time on all picks for an event", path_part = "post-time", http_method = "POST", authorization = "NONE" },
   ]
 }
 

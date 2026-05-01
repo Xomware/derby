@@ -114,6 +114,19 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  adminUpdatePostTime: (body: {
+    admin_token: string;
+    event_id: string;
+    race_post_time: string;
+  }) =>
+    request<{ event_id: string; race_post_time: string; updated: number; total: number }>(
+      '/admin-results/post-time',
+      {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }
+    ),
+
   adminCronRuns: (body: { admin_token: string; type?: string; limit?: number }) =>
     request<AdminCronRunsResponse>('/admin-results/cron-runs', {
       method: 'POST',
