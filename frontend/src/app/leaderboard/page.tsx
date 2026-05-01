@@ -88,6 +88,7 @@ export default function LeaderboardPage() {
 
   const oddsByHorse = useMemo(() => {
     const m = new Map<string, string>();
+    // Live picks from DDB (current year).
     for (const r of picks?.races ?? []) {
       for (const p of r.picks) {
         if (p.horse_name && p.odds_at_pick) {
@@ -95,8 +96,16 @@ export default function LeaderboardPage() {
         }
       }
     }
+    // Fallback to Grant's archive JSON for past years (DDB doesn't carry
+    // historical odds). Only fills entries the live map is missing.
+    for (const h of grantPicks?.horses ?? []) {
+      const key = h.horse_name?.trim().toLowerCase();
+      if (key && h.odds_at_pick && !m.has(key)) {
+        m.set(key, h.odds_at_pick);
+      }
+    }
     return m;
-  }, [picks]);
+  }, [picks, grantPicks]);
 
   const scratchedHorses = useMemo(() => {
     const s = new Set<string>();
