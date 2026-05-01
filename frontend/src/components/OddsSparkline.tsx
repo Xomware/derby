@@ -56,8 +56,17 @@ export function OddsSparkline({
     }
   }
 
-  if (points.length < 2) {
-    return null;
+  if (points.length === 0) return null;
+  if (points.length === 1) {
+    return (
+      <span
+        className="inline-flex items-center gap-1.5 text-[10px] tabular-nums text-bourbon/60"
+        title={`Tracking from ${points[0].odds} (${shortTs(points[0].ts)}). Sparkline appears on next change.`}
+      >
+        <span className="inline-block w-2 h-2 rounded-full bg-bourbon/30" />
+        Tracking from {points[0].odds}
+      </span>
+    );
   }
 
   const ratios = points.map((p) => p.ratio);
