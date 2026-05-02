@@ -63,28 +63,20 @@ export function HorseModal({ horseName, kind, onClose }: Props) {
         onClick={onClose}
         className="absolute inset-0 bg-bourbon/60 backdrop-blur-sm"
       />
-      <div
-        className={`relative w-full sm:w-auto sm:max-w-2xl sm:max-h-[85vh] max-h-[90vh] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden ${
-          horse?.scratched ? 'bg-rose-red/5 ring-2 ring-rose-red/40' : 'bg-cream'
-        }`}
-      >
+      <div className="relative w-full sm:w-auto sm:max-w-2xl sm:max-h-[85vh] max-h-[90vh] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden bg-cream">
         {/* Mobile drag handle */}
-        <div className="sm:hidden pt-2 pb-1 flex justify-center">
+        <div className="sm:hidden pt-2 pb-1 flex justify-center shrink-0">
           <div className="h-1.5 w-10 rounded-full bg-bourbon/30" />
         </div>
 
         {horse?.scratched && (
-          <div className="bg-rose-red text-cream px-5 py-1.5 text-[11px] uppercase tracking-[0.2em] font-bold flex items-center gap-2">
+          <div className="shrink-0 bg-rose-red text-cream px-5 py-1.5 text-[11px] uppercase tracking-[0.2em] font-bold flex items-center gap-2">
             <span aria-hidden>⚠</span>
             <span>Scratched — won&apos;t score</span>
           </div>
         )}
 
-        <header
-          className={`flex items-start justify-between gap-3 px-5 pt-3 sm:pt-5 pb-3 border-b border-bourbon/15 sticky top-0 ${
-            horse?.scratched ? 'bg-rose-red/10' : 'bg-cream'
-          }`}
-        >
+        <header className="shrink-0 flex items-start justify-between gap-3 px-5 pt-3 sm:pt-5 pb-3 border-b border-bourbon/15">
           <div className="min-w-0 flex-1">
             <div className="text-[11px] uppercase tracking-wider text-bourbon/60">
               {horse?.scratched
