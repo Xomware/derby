@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Suspense } from 'react';
 import { HorseModalProvider } from '@/components/HorseModalProvider';
@@ -7,6 +7,13 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { Ticker } from '@/components/Ticker';
 import { UsernameGate } from '@/components/UsernameGate';
 import { VisitTracker } from '@/components/VisitTracker';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://derby.xomware.com'),

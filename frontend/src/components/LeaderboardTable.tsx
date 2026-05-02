@@ -270,24 +270,38 @@ export function LeaderboardTable({
                         {s.label}
                       </dt>
                       <dd
-                        className={`font-medium truncate ${
-                          scr ? 'text-rose-dark line-through decoration-rose-red/70' : 'text-bourbon'
+                        className={`font-medium ${
+                          scr
+                            ? 'text-rose-dark'
+                            : 'text-bourbon truncate'
                         }`}
                       >
-                        {visible && pick ? (
-                          <HorseLink
-                            name={pick}
-                            kind={kind}
-                            className={`underline underline-offset-2 decoration-bourbon/20 hover:decoration-rose-red hover:text-rose-red transition-colors text-left ${
-                              scr ? 'text-rose-dark' : ''
-                            }`}
-                          >
-                            {d.primary}
-                          </HorseLink>
-                        ) : (
-                          d.primary
+                        <span
+                          className={`${
+                            scr
+                              ? 'block truncate line-through decoration-rose-red/70'
+                              : ''
+                          }`}
+                        >
+                          {visible && pick ? (
+                            <HorseLink
+                              name={pick}
+                              kind={kind}
+                              className={`underline underline-offset-2 decoration-bourbon/20 hover:decoration-rose-red hover:text-rose-red transition-colors text-left ${
+                                scr ? 'text-rose-dark' : ''
+                              }`}
+                            >
+                              {d.primary}
+                            </HorseLink>
+                          ) : (
+                            d.primary
+                          )}
+                        </span>
+                        {scr && (
+                          <span className="block mt-0.5">
+                            <ScratchedTag />
+                          </span>
                         )}
-                        {scr && <ScratchedTag />}
                         {ls && <LongShotShortTag odds={odds} />}
                       </dd>
                       <div className="flex items-center justify-between text-[10px] mt-0.5">
