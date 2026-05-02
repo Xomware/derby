@@ -9,6 +9,8 @@ interface Props {
   kind: RaceKind;
   year: number;
   className?: string;
+  /** Show only the icon (e.g. inside a tight leaderboard row). */
+  compact?: boolean;
 }
 
 function buildText(p: Prediction, kind: RaceKind, year: number): string {
@@ -26,7 +28,7 @@ function buildText(p: Prediction, kind: RaceKind, year: number): string {
   return lines.join('\n');
 }
 
-export function SharePicksButton({ prediction, kind, year, className }: Props) {
+export function SharePicksButton({ prediction, kind, year, className, compact }: Props) {
   const [status, setStatus] = useState<string | null>(null);
 
   if (!prediction) return null;
@@ -59,15 +61,18 @@ export function SharePicksButton({ prediction, kind, year, className }: Props) {
     }
   }
 
+  const baseClass = compact
+    ? 'inline-flex items-center justify-center h-6 w-6 rounded-full border border-rose-red/40 bg-white text-rose-dark hover:bg-rose-red/10 transition'
+    : 'inline-flex items-center gap-1.5 rounded-full border border-rose-red/40 bg-white text-rose-dark px-3 py-1 text-xs font-semibold hover:bg-rose-red/10 transition';
+
   return (
     <div className="inline-flex items-center gap-2">
       <button
         type="button"
         onClick={share}
-        className={
-          className ??
-          'inline-flex items-center gap-1.5 rounded-full border border-rose-red/40 bg-white text-rose-dark px-3 py-1 text-xs font-semibold hover:bg-rose-red/10 transition'
-        }
+        aria-label="Share picks"
+        title="Share my picks"
+        className={className ?? baseClass}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -85,7 +90,7 @@ export function SharePicksButton({ prediction, kind, year, className }: Props) {
           <polyline points="16 6 12 2 8 6" />
           <line x1="12" y1="2" x2="12" y2="15" />
         </svg>
-        Share
+        {!compact && 'Share'}
       </button>
       {status && (
         <span className="text-[11px] text-bourbon/70" aria-live="polite">

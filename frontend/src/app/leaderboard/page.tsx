@@ -5,6 +5,7 @@ import { CommentsBlock } from '@/components/CommentsBlock';
 import { LeaderboardTable } from '@/components/LeaderboardTable';
 import { PostTime } from '@/components/PostTime';
 import { ResultsRecapModal } from '@/components/ResultsRecapModal';
+import { ScratchedPicksWarning } from '@/components/ScratchedPicksWarning';
 import { ShareLeaderboardButton } from '@/components/ShareLeaderboardButton';
 import {
   PickDistribution,
@@ -213,7 +214,7 @@ export default function LeaderboardPage() {
     : null;
 
   return (
-    <section className="pt-8 max-w-4xl mx-auto space-y-6">
+    <section className="pt-8 max-w-5xl mx-auto space-y-6">
       <header>
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h1 className="font-display text-3xl text-rose-dark">
@@ -370,6 +371,19 @@ export default function LeaderboardPage() {
           username={username}
           kind={kind}
           year={year}
+        />
+      )}
+
+      {!isArchive && (
+        <ScratchedPicksWarning
+          prediction={predictions?.my ?? null}
+          scratchedHorses={scratchedHorses}
+          kind={kind}
+          year={year}
+          locked={isLocked}
+          onEdit={() => {
+            window.location.href = `/picks?event=${kind}#your-picks`;
+          }}
         />
       )}
     </section>

@@ -15,6 +15,7 @@ import {
   type RaceKind,
 } from '@/lib/hooks';
 import { useUsername } from '@/lib/identity';
+import type { RaceFinisher } from '@/lib/types';
 import { CURRENT_YEAR } from '@/lib/year';
 import { BettingPlays } from '@/components/BettingPlays';
 import { GrantPinned } from '@/components/GrantPinned';
@@ -407,6 +408,7 @@ export function RacePage({
                   kind={kind}
                   poolTotal={pool.total}
                   poolForHorse={pool.byHorse.get(p.horse_name.trim().toLowerCase()) ?? null}
+                  finishers={finishers}
                 />
               ))}
             </div>
@@ -515,17 +517,62 @@ function ScratchedStamp() {
   );
 }
 
+const POSITION_MEDAL: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
+const POSITION_LABEL: Record<number, string> = { 1: '1st', 2: '2nd', 3: '3rd' };
+
+function ordinal(n: number): string {
+  if (POSITION_LABEL[n]) return POSITION_LABEL[n];
+  const lastTwo = n % 100;
+  if (lastTwo >= 11 && lastTwo <= 13) return `${n}th`;
+  switch (n % 10) {
+    case 1:
+      return `${n}st`;
+    case 2:
+      return `${n}nd`;
+    case 3:
+      return `${n}rd`;
+    default:
+      return `${n}th`;
+  }
+}
+
+function FinishStamp({ position }: { position: number }) {
+  const medal = POSITION_MEDAL[position];
+  const isMedal = position >= 1 && position <= 3;
+  return (
+    <span
+      aria-label={`Finished ${ordinal(position)}`}
+      className={`absolute top-3 right-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border-2 shadow-sm select-none pointer-events-none font-bold uppercase tracking-wider text-xs ${
+        isMedal
+          ? 'border-rose-red bg-white text-rose-dark'
+          : 'border-bourbon/40 bg-white text-bourbon'
+      }`}
+    >
+      {medal && (
+        <span className="text-base leading-none" aria-hidden>
+          {medal}
+        </span>
+      )}
+      <span>{ordinal(position)}</span>
+    </span>
+  );
+}
+
 function HorseCard({
   pick: p,
   kind,
   poolTotal,
   poolForHorse,
+  finishers,
 }: {
   pick: DisplayHorse;
   kind: RaceKind;
   poolTotal: number;
   poolForHorse: { win: number; place: number; show: number; long_shot: number } | null;
+  finishers: RaceFinisher[];
 }) {
+  const norm = (s: string) => s.trim().toLowerCase().replace(/[’']/g, "'");
+  const finish = finishers.find((f) => norm(f.horse_name) === norm(p.horse_name)) ?? null;
   // Per-kind stat tiles. Derby drops Equibase; Oaks drops Beyer + Brisnet —
   // Grant doesn't track those for those races, so they were always blank.
   const allStats: { label: string; value: string }[] = [
@@ -548,14 +595,23 @@ function HorseCard({
     .map((s) => s.trim())
     .filter(Boolean);
 
+  const winnerHighlight =
+    finish && finish.position >= 1 && finish.position <= 3
+      ? finish.position === 1
+        ? 'border-rose-red bg-rose-red/5'
+        : 'border-mint-julep/60 bg-mint-julep/5'
+      : '';
   return (
     <article
       id={`horse-${p.id}`}
       className={`relative scroll-mt-24 rounded-xl border bg-white p-5 shadow-sm ${
-        p.scratched ? 'border-rose-red/40 opacity-70 line-through decoration-rose-red/60 decoration-2' : 'border-bourbon/15'
+        p.scratched
+          ? 'border-rose-red/40 opacity-70 line-through decoration-rose-red/60 decoration-2'
+          : winnerHighlight || 'border-bourbon/15'
       }`}
     >
       {p.scratched && <ScratchedStamp />}
+      {!p.scratched && finish && <FinishStamp position={finish.position} />}
       <header>
         <div className="text-[11px] uppercase tracking-wider text-bourbon/60">
           {p.post_position != null && <>Post {p.post_position}</>}

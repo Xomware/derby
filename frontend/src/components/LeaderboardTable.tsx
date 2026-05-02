@@ -381,6 +381,7 @@ export function LeaderboardTable({
                           prediction={shareConfig.prediction}
                           kind={kind}
                           year={shareConfig.year}
+                          compact
                         />
                       )}
                     </div>
