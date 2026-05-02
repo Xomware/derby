@@ -7,6 +7,50 @@ export interface SidePanelItem {
   label: string;
   /** Smaller secondary line, e.g. "5-1 · ★★★★★" */
   meta?: string;
+  /** Render with strikethrough + dim — picked up scratches. */
+  scratched?: boolean;
+  /** Finish position once results post — adds 🥇/🥈/🥉/4th badge. */
+  finishPosition?: number | null;
+}
+
+const POSITION_MEDAL: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
+
+function ordinal(n: number): string {
+  if (POSITION_MEDAL[n]) {
+    return n === 1 ? '1st' : n === 2 ? '2nd' : '3rd';
+  }
+  const lastTwo = n % 100;
+  if (lastTwo >= 11 && lastTwo <= 13) return `${n}th`;
+  switch (n % 10) {
+    case 1:
+      return `${n}st`;
+    case 2:
+      return `${n}nd`;
+    case 3:
+      return `${n}rd`;
+    default:
+      return `${n}th`;
+  }
+}
+
+function FinishBadge({ position, compact }: { position: number; compact?: boolean }) {
+  const medal = POSITION_MEDAL[position];
+  return (
+    <span
+      className={`shrink-0 inline-flex items-center gap-0.5 ${
+        compact ? 'text-[10px]' : 'text-[11px]'
+      }`}
+      title={ordinal(position)}
+    >
+      {medal ? (
+        <span aria-hidden className="text-sm leading-none">
+          {medal}
+        </span>
+      ) : (
+        <span className="font-semibold text-bourbon/70">{ordinal(position)}</span>
+      )}
+    </span>
+  );
 }
 
 /**
@@ -100,10 +144,23 @@ export function SidePanel({
                     className={`w-full text-left px-3 py-2 rounded text-sm transition ${
                       activeId === it.id
                         ? 'bg-rose-red/10 text-rose-dark font-semibold'
+                        : it.scratched
+                        ? 'text-bourbon/40 hover:bg-bourbon/10'
                         : 'text-bourbon hover:bg-bourbon/10'
                     }`}
                   >
-                    <div>{it.label}</div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`flex-1 ${
+                          it.scratched ? 'line-through decoration-rose-red/60' : ''
+                        }`}
+                      >
+                        {it.label}
+                      </span>
+                      {it.finishPosition != null && !it.scratched && (
+                        <FinishBadge position={it.finishPosition} />
+                      )}
+                    </div>
                     {it.meta && (
                       <div className="text-xs text-bourbon/60 mt-0.5">{it.meta}</div>
                     )}
@@ -132,10 +189,21 @@ export function SidePanel({
                 className={`w-full text-left px-2.5 py-1 rounded text-[12px] leading-tight transition flex items-center gap-2 ${
                   activeId === it.id
                     ? 'bg-rose-red/10 text-rose-dark font-semibold'
+                    : it.scratched
+                    ? 'text-bourbon/40 hover:bg-bourbon/10'
                     : 'text-bourbon hover:bg-bourbon/10'
                 }`}
               >
-                <span className="truncate flex-1">{it.label}</span>
+                <span
+                  className={`truncate flex-1 ${
+                    it.scratched ? 'line-through decoration-rose-red/60' : ''
+                  }`}
+                >
+                  {it.label}
+                </span>
+                {it.finishPosition != null && !it.scratched && (
+                  <FinishBadge position={it.finishPosition} compact />
+                )}
                 {it.meta && (
                   <span className="text-[10px] text-bourbon/60 tabular-nums shrink-0">
                     {it.meta}

@@ -272,15 +272,20 @@ export function RacePage({
   const tocItems: SidePanelItem[] = useMemo(() => {
     const items: SidePanelItem[] = [];
     if (grantPicks?.analysis) items.push({ id: 'race-outlook', label: 'Race outlook' });
+    const norm = (s: string) => s.trim().toLowerCase().replace(/[’']/g, "'");
+    const finishByName = new Map<string, number>();
+    for (const f of finishers) finishByName.set(norm(f.horse_name), f.position);
     items.push(
       ...sortedPicks.map((p) => ({
         id: `horse-${p.id}`,
         label: p.horse_name,
         meta: p.odds_at_pick ?? undefined,
+        scratched: p.scratched,
+        finishPosition: finishByName.get(norm(p.horse_name)) ?? null,
       }))
     );
     return items;
-  }, [sortedPicks, grantPicks]);
+  }, [sortedPicks, grantPicks, finishers]);
 
   const horsesEmpty = !isLoading && sortedPicks.length === 0;
 
