@@ -6,6 +6,7 @@ import { PostTime } from '@/components/PostTime';
 import { SidePanel, SidePanelItem } from '@/components/SidePanel';
 import { WriteupSection } from '@/components/WriteupSection';
 import { CommentsBlock } from '@/components/CommentsBlock';
+import { OddsHistoryChart } from '@/components/OddsHistoryChart';
 import { OddsSparkline } from '@/components/OddsSparkline';
 import {
   useComments,
@@ -25,11 +26,12 @@ import { useResults } from '@/lib/hooks';
 
 type SortKey = 'post' | 'name' | 'odds' | 'beyer' | 'brisnet' | 'equibase';
 
-type SubTab = 'overview' | 'plays' | 'rankings' | 'talk';
+type SubTab = 'overview' | 'plays' | 'rankings' | 'odds' | 'talk';
 const SUB_TABS: { id: SubTab; label: string }[] = [
   { id: 'overview', label: 'Race & horses' },
   { id: 'plays', label: 'Betting plays' },
   { id: 'rankings', label: 'Power rankings' },
+  { id: 'odds', label: 'Odds graph' },
   { id: 'talk', label: 'Comments' },
 ];
 
@@ -126,7 +128,13 @@ export function RacePage({
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get('tab');
-    if (t === 'plays' || t === 'rankings' || t === 'overview' || t === 'talk') {
+    if (
+      t === 'plays' ||
+      t === 'rankings' ||
+      t === 'overview' ||
+      t === 'odds' ||
+      t === 'talk'
+    ) {
       setTab(t);
     }
   }, []);
@@ -313,6 +321,7 @@ export function RacePage({
               t.id === 'overview' ||
               (t.id === 'plays' && !!grantPicks?.betting_plays) ||
               (t.id === 'rankings' && !!grantPicks?.power_rankings?.length) ||
+              (t.id === 'odds' && !isArchive && flatPicks.length > 0) ||
               (t.id === 'talk' && !isArchive);
             return (
               <button
@@ -433,6 +442,10 @@ export function RacePage({
           ) : (
             <p className="text-bourbon/70 text-sm">No power rankings for this event.</p>
           )
+        )}
+
+        {tab === 'odds' && !isArchive && (
+          <OddsHistoryChart picks={flatPicks} />
         )}
 
         {tab === 'talk' && !isArchive && (
