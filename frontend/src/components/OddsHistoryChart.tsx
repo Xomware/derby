@@ -71,9 +71,9 @@ function buildSeries(picks: Pick[]): Series[] {
 }
 
 const WIDTH = 720;
-const HEIGHT = 280;
+const HEIGHT = 220;
 const PAD_LEFT = 38;
-const PAD_RIGHT = 12;
+const PAD_RIGHT = 64; // room for horse-name end labels without clipping
 const PAD_TOP = 12;
 const PAD_BOTTOM = 26;
 
@@ -141,11 +141,20 @@ export function OddsHistoryChart({ picks }: Props) {
       .join(' ');
   }
 
+  // Span > 24h → include short date so the labels aren't ambiguous.
+  const multiDay = tMax - tMin > 24 * 60 * 60 * 1000;
   function fmtTime(ms: number): string {
-    return new Date(ms).toLocaleTimeString(undefined, {
+    const d = new Date(ms);
+    const time = d.toLocaleTimeString(undefined, {
       hour: 'numeric',
       minute: '2-digit',
     });
+    if (!multiDay) return time;
+    const date = d.toLocaleDateString(undefined, {
+      month: 'numeric',
+      day: 'numeric',
+    });
+    return `${date} ${time}`;
   }
 
   function fmtRatio(r: number): string {
@@ -222,7 +231,8 @@ export function OddsHistoryChart({ picks }: Props) {
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           width="100%"
-          className="min-w-[640px]"
+          className="min-w-[640px] max-w-3xl mx-auto block"
+          preserveAspectRatio="xMidYMid meet"
           aria-label="Odds movement chart"
         >
           {/* Y-axis grid + labels */}
@@ -281,10 +291,10 @@ export function OddsHistoryChart({ picks }: Props) {
                   <text
                     x={x(s.latest.ts) + 4}
                     y={y(s.latest.ratio) + 3}
-                    className="text-[9px] fill-current font-semibold"
+                    className="text-[8px] font-semibold"
                     style={{ fill: s.color }}
                   >
-                    {s.name}
+                    {s.name.length > 10 ? `${s.name.slice(0, 9)}…` : s.name}
                   </text>
                 </>
               )}
