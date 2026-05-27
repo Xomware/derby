@@ -41,7 +41,7 @@ jobs:
       all_lambdas: ${{ steps.all-lambdas.outputs.all_lambdas }}
       has_lambda_changes: ${{ steps.changes.outputs.has_lambda_changes }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -94,9 +94,9 @@ jobs:
     outputs:
       layer_arn: ${{ steps.publish.outputs.layer_arn }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
@@ -175,9 +175,9 @@ jobs:
         lambda: ${{ fromJson(needs.detect-changes.outputs.changed_lambdas) }}
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
