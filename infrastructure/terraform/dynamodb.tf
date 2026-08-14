@@ -2,9 +2,10 @@
 # users — PK email, GSI by username, GSI by id
 ########################################
 resource "aws_dynamodb_table" "users" {
-  name         = "${var.app_name}-users"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "email"
+  deletion_protection_enabled = true
+  name                        = "${var.app_name}-users"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "email"
 
   attribute {
     name = "email"
@@ -40,9 +41,10 @@ resource "aws_dynamodb_table" "users" {
 # picks — PK id, GSI event_id
 ########################################
 resource "aws_dynamodb_table" "picks" {
-  name         = "${var.app_name}-picks"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "id"
+  deletion_protection_enabled = true
+  name                        = "${var.app_name}-picks"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "id"
 
   attribute {
     name = "id"
@@ -68,10 +70,11 @@ resource "aws_dynamodb_table" "picks" {
 # votes — PK pick_id, SK user_id, GSI by user_id
 ########################################
 resource "aws_dynamodb_table" "votes" {
-  name         = "${var.app_name}-votes"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "pick_id"
-  range_key    = "user_id"
+  deletion_protection_enabled = true
+  name                        = "${var.app_name}-votes"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "pick_id"
+  range_key                   = "user_id"
 
   attribute {
     name = "pick_id"
@@ -98,10 +101,11 @@ resource "aws_dynamodb_table" "votes" {
 # race_results — PK event_id (S), SK race_number (N)
 ########################################
 resource "aws_dynamodb_table" "race_results" {
-  name         = "${var.app_name}-race-results"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "event_id"
-  range_key    = "race_number"
+  deletion_protection_enabled = true
+  name                        = "${var.app_name}-race-results"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "event_id"
+  range_key                   = "race_number"
 
   attribute {
     name = "event_id"
@@ -121,9 +125,10 @@ resource "aws_dynamodb_table" "race_results" {
 # visits — PK visit_id, GSI by user_id+ran_at, GSI by day-bucket
 ########################################
 resource "aws_dynamodb_table" "visits" {
-  name         = "${var.app_name}-visits"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "visit_id"
+  deletion_protection_enabled = true
+  name                        = "${var.app_name}-visits"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "visit_id"
 
   attribute {
     name = "visit_id"
@@ -163,10 +168,11 @@ resource "aws_dynamodb_table" "visits" {
 # predictions — PK event_id, SK username (uppercase canonical)
 ########################################
 resource "aws_dynamodb_table" "predictions" {
-  name         = "${var.app_name}-predictions"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "event_id"
-  range_key    = "username"
+  deletion_protection_enabled = true
+  name                        = "${var.app_name}-predictions"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "event_id"
+  range_key                   = "username"
 
   attribute {
     name = "event_id"
@@ -186,10 +192,11 @@ resource "aws_dynamodb_table" "predictions" {
 # comments — PK event_id, SK created_at#uuid (lexicographic chronological)
 ########################################
 resource "aws_dynamodb_table" "comments" {
-  name         = "${var.app_name}-comments"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "event_id"
-  range_key    = "id"
+  deletion_protection_enabled = true
+  name                        = "${var.app_name}-comments"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "event_id"
+  range_key                   = "id"
 
   attribute {
     name = "event_id"
@@ -209,9 +216,10 @@ resource "aws_dynamodb_table" "comments" {
 # poll_runs — PK id, GSI by type+ran_at (for "latest run" query)
 ########################################
 resource "aws_dynamodb_table" "poll_runs" {
-  name         = "${var.app_name}-poll-runs"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "id"
+  deletion_protection_enabled = true
+  name                        = "${var.app_name}-poll-runs"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "id"
 
   attribute {
     name = "id"
