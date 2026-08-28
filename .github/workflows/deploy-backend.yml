@@ -24,6 +24,7 @@ on:
         type: boolean
         default: true
 
+
 env:
   AWS_REGION: us-east-1
   APP_NAME: derby
@@ -85,6 +86,9 @@ jobs:
           echo "all_lambdas=$ALL" >> $GITHUB_OUTPUT
 
   deploy-layer:
+    permissions:
+      id-token: write # mint the OIDC token traded for the deploy role
+      contents: read
     needs: detect-changes
     if: needs.detect-changes.outputs.common_changed == 'true'
     runs-on: ubuntu-latest
@@ -94,6 +98,12 @@ jobs:
     outputs:
       layer_arn: ${{ steps.publish.outputs.layer_arn }}
     steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
       - uses: actions/checkout@v6
 
       - uses: actions/setup-python@v6
@@ -111,9 +121,6 @@ jobs:
           zip -r ${APP_NAME}-shared-packages.zip python >/dev/null
 
       - id: publish
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           OUT=$(aws lambda publish-layer-version \
             --layer-name ${APP_NAME}-shared-packages \
@@ -125,6 +132,9 @@ jobs:
           echo "Published layer: $ARN"
 
   update-all-lambdas-layer:
+    permissions:
+      id-token: write # mint the OIDC token traded for the deploy role
+      contents: read
     # Run AFTER deploy-changed-lambdas to avoid ResourceConflictException when
     # both jobs try to update the same function in parallel.
     needs: [detect-changes, deploy-layer, deploy-changed-lambdas]
@@ -135,10 +145,13 @@ jobs:
         lambda: ${{ fromJson(needs.detect-changes.outputs.all_lambdas) }}
       fail-fast: false
     steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
       - name: Update layer config (waits for TF-created functions)
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           FN="${APP_NAME}-$(echo "${{ matrix.lambda }}" | tr '_' '-')"
           # Race with Terraform: new lambdas may not exist yet when this runs.
@@ -164,6 +177,9 @@ jobs:
           aws lambda wait function-updated --function-name $FN --region $AWS_REGION
 
   deploy-changed-lambdas:
+    permissions:
+      id-token: write # mint the OIDC token traded for the deploy role
+      contents: read
     needs: [detect-changes, deploy-layer]
     if: always() && needs.detect-changes.outputs.has_lambda_changes == 'true'
     runs-on: ubuntu-latest
@@ -175,6 +191,12 @@ jobs:
         lambda: ${{ fromJson(needs.detect-changes.outputs.changed_lambdas) }}
       fail-fast: false
     steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
       - uses: actions/checkout@v6
 
       - uses: actions/setup-python@v6
@@ -194,9 +216,6 @@ jobs:
 
       - name: Deploy code (waits for TF-created functions)
         if: steps.package.outputs.skip != 'true'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           FN="${APP_NAME}-$(echo "${{ matrix.lambda }}" | tr '_' '-')"
           echo "Deploying $FN"
