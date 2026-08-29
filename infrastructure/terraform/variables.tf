@@ -158,5 +158,5 @@ variable "github_infrastructure_subjects" {
 variable "default_branch" {
   description = "Branch a push to which is allowed to run terraform apply"
   type        = string
-  default     = "master"
+  default     = "main"
 }
