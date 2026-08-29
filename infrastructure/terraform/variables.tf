@@ -148,3 +148,15 @@ variable "cors_allowed_origins" {
   type    = string
   default = "https://derby.xomware.com"
 }
+
+variable "github_infrastructure_subjects" {
+  description = "OIDC subject prefixes for this repository"
+  type        = list(string)
+  default     = ["repo:Xomware/derby"]
+}
+
+variable "default_branch" {
+  description = "Branch a push to which is allowed to run terraform apply"
+  type        = string
+  default     = "master"
+}
