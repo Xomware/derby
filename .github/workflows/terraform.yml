@@ -13,95 +13,14 @@ on:
       - ".github/workflows/terraform.yml"
   workflow_dispatch:
 
-concurrency:
-  group: terraform-derby
-  cancel-in-progress: false
-
 permissions:
   contents: read
   pull-requests: write
-  id-token: write # mint the OIDC token traded for the plan/apply role
-
-env:
-  TF_DIR: infrastructure/terraform
-  AWS_REGION: us-east-1
+  id-token: write
 
 jobs:
   terraform:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.TF_DIR }}
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: hashicorp/setup-terraform@v4
-        with:
-          terraform_version: "1.5.7"
-
-      # Read-only for plans, admin only for an apply on main. Selecting the role
-      # by event means a pull request cannot assume the role that mutates,
-      # regardless of what the workflow later does.
-      - uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && secrets.AWS_TERRAFORM_APPLY_ROLE_ARN || secrets.AWS_TERRAFORM_PLAN_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: Terraform Plan
-        id: plan
-        run: |
-          # A pipeline exits with tee's status, not terraform's, so without this a
-          # failed plan reports success and `Plan status` below never fires.
-          set -o pipefail
-          terraform plan -no-color -input=false -lock=false 2>&1 | tee /tmp/plan-output.txt
-        continue-on-error: true
-
-      - name: Post Plan to PR
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            let plan = fs.readFileSync('/tmp/plan-output.txt', 'utf8');
-            const maxLength = 60000;
-            if (plan.length > maxLength) plan = plan.substring(0, maxLength) + '\n\n... (truncated)';
-            const outcome = '${{ steps.plan.outcome }}';
-            const icon = outcome === 'success' ? '✅' : '❌';
-            const body = `### ${icon} Terraform Plan
-
-            <details><summary>Plan Output</summary>
-
-            \`\`\`
-            ${plan}
-            \`\`\`
-
-            </details>
-
-            *Outcome: \`${outcome}\`*`;
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number,
-            });
-            const botComment = comments.find(c => c.user.type === 'Bot' && c.body.includes('Terraform Plan'));
-            if (botComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner, repo: context.repo.repo, comment_id: botComment.id, body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body,
-              });
-            }
-
-      - name: Plan status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-        run: terraform apply -auto-approve -input=false
+    uses: Xomware/github-actions/.github/workflows/terraform.yml@v1
+    with:
+      app: derby
+      working-directory: infrastructure/terraform
