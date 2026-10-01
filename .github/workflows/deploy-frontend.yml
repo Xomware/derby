@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   deploy:
-    uses: Xomware/github-actions/.github/workflows/deploy-frontend-s3.yml@feature/nextjs-upload
+    uses: Xomware/github-actions/.github/workflows/deploy-frontend-s3.yml@v1
     with:
       app: derby
       role-key: AWS_DEPLOY_ROLE_ARN
